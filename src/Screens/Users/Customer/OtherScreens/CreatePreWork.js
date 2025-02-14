@@ -9,22 +9,28 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {HEIGHT, NotoSans_Light, WIDTH} from '../../../config/AppConst';
-import COLOR from '../../../config/color.json';
-import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
+import {HEIGHT, NotoSans_Light, WIDTH} from '../../../../config/AppConst';
+import COLOR from '../../../../config/color.json';
+import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
-import CustomButton from '../../../Component/CustomButton/CustomButton';
 import {useNavigation} from '@react-navigation/native';
-import ApiManager from '../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
+import RNPickerSelect from 'react-native-picker-select';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import ApiManager from '../../../../API/Api';
 
 const CreatePreWork = () => {
   const navigation = useNavigation();
   const [id, setId] = useState(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [materialSelected, setMaterialSelected] = useState('');
+  const [projectSelected, setProjectSelected] = useState('');
 
-  const [documentFile, setDocumentFile] = useState(null);
-  const [uploadImg, setUploadImg] = useState('');
+  const [uploadImgs, setUploadImgs] = useState([]); // Store multiple images
+  const [documentFiles, setDocumentFiles] = useState([]);
   const [createData, setCreateData] = useState({
     name: '',
     siteAddress: '',
@@ -33,7 +39,6 @@ const CreatePreWork = () => {
     siteArea: '',
     material: '',
     budgetRange: '',
-    dateForBidding: '',
     customBid: '',
     Projects: '',
     description: '',
@@ -58,42 +63,81 @@ const CreatePreWork = () => {
     }));
   };
 
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = date => {
+    setSelectedDate(formatDate(date)); // Format date as needed
+    hideDatePicker();
+  };
+
+  const formatDate = date => {
+    return date.toLocaleDateString('en-GB'); // Formats as DD/MM/YYYY
+  };
+
   const CreatePewWorkAPI = async () => {
     const formData = new FormData();
 
     formData.append('name', createData.name);
     formData.append('address', createData.siteAddress);
-    formData.append('last_date', createData.dateForBidding);
+    formData.append('last_date', selectedDate);
     formData.append('city', createData.city);
     formData.append('pincode', createData.pincode);
     formData.append('site_area', createData.siteArea);
-    formData.append('material', createData.material);
+    formData.append('material', materialSelected);
     formData.append('budget_range', createData.budgetRange);
     formData.append('custombid', createData.customBid);
-    formData.append('projects', createData.Projects);
+    formData.append('projects', projectSelected);
     formData.append('customer_id', id);
     formData.append('description', createData.description);
 
-    if (documentFile && documentFile.length > 0) {
-      formData.append('upload_image', {
-        uri: documentFile[0].uri,
-        type: documentFile[0].type,
-        name: documentFile[0].fileName,
+    if (documentFiles && documentFiles.length > 0) {
+      documentFiles.forEach((file, index) => {
+        formData.append(`upload_image[${index}]`, {
+          uri: file.uri,
+          type: file.type,
+          name: file.fileName,
+        });
       });
-    } else {
-      formData.append('upload_image', undefined);
     }
 
     await ApiManager.createPreWork(formData)
-
       .then(res => {
         if (res?.data?.status == 200) {
-          console.log('cp333', res?.data);
+          console.log('API Response:', res?.data);
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
+
+          // Reset states
+          setCreateData({
+            name: '',
+            siteAddress: '',
+            city: '',
+            pincode: '',
+            siteArea: '',
+            budgetRange: '',
+            customBid: '',
+            description: '',
+          });
+          setSelectedDate(null);
+          setMaterialSelected([]);
+          setProjectSelected([]);
+          setDocumentFiles([]);
+          setUploadImgs([]); // Clear preview images
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          navigation.navigate('customerTabs');
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -105,22 +149,30 @@ const CreatePreWork = () => {
       .catch(err => {
         console.log('API Error:', err.response?.data || err.message);
       });
-    // navigation.navigate('customerTabs');
   };
 
   const handleUpload = async () => {
     try {
-      launchImageLibrary({quality: 0.7}, fileobj => {
-        if (fileobj?.didCancel === true) {
-          setUploadImg('');
-        } else {
-          const img = fileobj?.assets[0]?.uri || '';
-          setUploadImg(img);
-          setDocumentFile(fileobj?.assets);
-        }
-      });
+      launchImageLibrary(
+        {
+          quality: 0.7,
+          selectionLimit: 5, // Allow selecting multiple images
+          mediaType: 'photo',
+        },
+        fileobj => {
+          if (fileobj?.didCancel) {
+            return;
+          }
+          const newImages = fileobj?.assets?.map(asset => asset.uri) || [];
+          setUploadImgs(prevImages => [...prevImages, ...newImages]); // Append new images
+          setDocumentFiles(prevFiles => [
+            ...prevFiles,
+            ...(fileobj?.assets || []),
+          ]);
+        },
+      );
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong while selecting the image.');
+      Alert.alert('Error', 'Something went wrong while selecting images.');
     }
   };
 
@@ -128,7 +180,7 @@ const CreatePreWork = () => {
     <View style={{flex: 1}}>
       <CustomHeader name="Create Pre-works" />
       <ImageBackground
-        source={require('../../../assets/Imgs/Background.png')}
+        source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -137,7 +189,8 @@ const CreatePreWork = () => {
             <TextInput
               style={styles.InputField}
               placeholder="Name"
-              keyboardType="text"
+              placeholderTextColor="gray"
+              keyboardType="default"
               value={createData.name}
               onChangeText={text => onChange('name', text)}
             />
@@ -145,6 +198,8 @@ const CreatePreWork = () => {
             <TextInput
               style={styles.InputField}
               placeholder="Site Address"
+              placeholderTextColor="gray"
+              keyboardType="default"
               value={createData.siteAddress}
               onChangeText={text => onChange('siteAddress', text)}
             />
@@ -153,6 +208,7 @@ const CreatePreWork = () => {
               <TextInput
                 style={[styles.InputField, {width: WIDTH(44)}]}
                 placeholder="City"
+                placeholderTextColor="gray"
                 keyboardType="default"
                 value={createData.city}
                 onChangeText={text => onChange('city', text)}
@@ -160,6 +216,7 @@ const CreatePreWork = () => {
               <TextInput
                 style={[styles.InputField, {width: WIDTH(44)}]}
                 placeholder="Pincode"
+                placeholderTextColor="gray"
                 keyboardType="numeric"
                 value={createData.pincode}
                 onChangeText={text => onChange('pincode', text)}
@@ -169,55 +226,87 @@ const CreatePreWork = () => {
             <TextInput
               style={styles.InputField}
               placeholder="Site Area"
+              placeholderTextColor="gray"
               keyboardType="numeric"
               value={createData.siteArea}
               onChangeText={text => onChange('siteArea', text)}
             />
 
-            <TextInput
-              style={styles.InputField}
-              placeholder="Material"
-              value={createData.material}
-              onChangeText={text => onChange('material', text)}
-            />
+            {/* For Material Select */}
+            <View
+              style={[
+                styles.InputField,
+                {alignItems: 'center', justifyContent: 'center'},
+              ]}>
+              <RNPickerSelect
+                onValueChange={value => setMaterialSelected(value)}
+                items={[
+                  {label: 'With Material', value: 'With Material'},
+                  {label: 'Without Material', value: 'Without Material'},
+                ]}
+                placeholder={{label: 'Material', value: null}}
+                style={styles.picker}
+              />
+            </View>
 
             <TextInput
               style={styles.InputField}
               placeholder="Budget Range"
               keyboardType="numeric"
+              placeholderTextColor="gray"
               value={createData.budgetRange}
               onChangeText={text => onChange('budgetRange', text)}
             />
 
-            <TextInput
-              style={styles.InputField}
-              placeholder="Last date for biding"
-              value={createData.dateForBidding}
-              onChangeText={text => onChange('dateForBidding', text)}
-            />
+            <View>
+              <TouchableOpacity onPress={showDatePicker}>
+                <TextInput
+                  style={styles.InputField}
+                  placeholder="Last date for bidding"
+                  value={selectedDate}
+                  editable={false} // Prevent manual text input
+                />
+              </TouchableOpacity>
+
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+              />
+            </View>
 
             <TextInput
               style={styles.InputField}
               placeholder="Custom Bid"
+              placeholderTextColor="gray"
               keyboardType="numeric"
               value={createData.customBid}
               onChangeText={text => onChange('customBid', text)}
             />
 
-            <TextInput
-              style={styles.InputField}
-              placeholder="Projects"
-              value={createData.Projects}
-              onChangeText={text => onChange('Projects', text)}
-            />
+            {/* For Project Select */}
 
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <View
+              style={[
+                styles.InputField,
+                {alignItems: 'center', justifyContent: 'center'},
+              ]}>
+              <RNPickerSelect
+                onValueChange={value => setProjectSelected(value)}
+                items={[
+                  {label: 'Bungalow', value: 'Bungalow'},
+                  {label: 'House', value: 'House'},
+                  {label: 'Appartment', value: 'Appartment'},
+                ]}
+                style={styles.picker}
+                placeholder={{label: 'Project', value: null}}
+              />
+            </View>
+
+            <View style={styles.btnWrap}>
               <TouchableOpacity
-                style={{
-                  alignItems: 'center',
-                  marginVertical: HEIGHT(1),
-                  backgroundColor: '#fff',
-                }}
+                style={styles.uploadButton}
                 onPress={handleUpload}
                 activeOpacity={0.9}>
                 <View style={styles.uploadView}>
@@ -228,19 +317,21 @@ const CreatePreWork = () => {
                 </View>
               </TouchableOpacity>
 
-              <View>
-                {uploadImg ? (
+              <ScrollView horizontal style={{marginTop: 10}}>
+                {uploadImgs.map((img, index) => (
                   <Image
-                    source={{uri: uploadImg}}
-                    style={{width: 70, height: 70}}
+                    key={index}
+                    source={{uri: img}}
+                    style={{width: 60, height: 60, marginRight: 10}}
                   />
-                ) : null}
-              </View>
+                ))}
+              </ScrollView>
             </View>
 
             <TextInput
               value={createData.description}
               onChangeText={text => onChange('description', text)}
+              placeholderTextColor="gray"
               keyboardType="default"
               multiline={true}
               numberOfLines={10}
@@ -316,6 +407,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
+  btnWrap: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
   uploadView: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -333,11 +430,31 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
+  uploadButton: {
+    alignItems: 'center',
+    marginVertical: HEIGHT(1),
+    backgroundColor: '#fff',
+  },
+
   uploadTxt: {
     fontFamily: NotoSans_Light,
     fontSize: 11,
     color: COLOR.Gray9,
     width: WIDTH(25),
     textAlign: 'center',
+  },
+
+  picker: {
+    inputIOS: {
+      fontSize: 16,
+      padding: 10,
+      color: 'gray',
+    },
+    inputAndroid: {
+      fontSize: 16,
+      padding: 10,
+      paddingLeft: 3,
+      color: 'gray',
+    },
   },
 });

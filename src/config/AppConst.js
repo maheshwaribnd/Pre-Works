@@ -21,9 +21,12 @@ export const NotoSans_Light = 'NotoSans-Light';
 export const NotoSans_Medium = 'NotoSans-Medium';
 export const NotoSans_SemiBold = 'NotoSans_SemiBold';
 
-export const Rochester = 'Rochester-Regular'
+export const Montserrat_bold = 'Montserrat-Bold';
+export const Montserrat_Medium = 'Montserrat-Medium';
+export const Montserrat_Regular = 'Montserrat-Regular';
 
+export const Rochester = 'Rochester-Regular';
 
-//googleMapApiKey 
+//googleMapApiKey
 
-export const googleMapApiKey = "AIzaSyDjFGPFuN3IMaMQU76874r-T1glz8dyupw"
+export const googleMapApiKey = 'AIzaSyDjFGPFuN3IMaMQU76874r-T1glz8dyupw';

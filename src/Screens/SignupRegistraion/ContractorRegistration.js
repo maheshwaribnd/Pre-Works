@@ -73,7 +73,7 @@ const ContractorRegistration = () => {
     formData.append('email', userData.email);
     formData.append('mobile_no', userData.number);
     formData.append('password', userData.password);
-    formData.append('confirm_pass', userData.confirmPw);
+    formData.append('password_confirmation', userData.confirmPw);
     formData.append('address', userData.address);
     formData.append('city', userData.city);
     formData.append('state', userData.state);
@@ -116,7 +116,7 @@ const ContractorRegistration = () => {
             JSON.stringify(simpleData),
           );
           await AsyncStorage.setItem(
-            'userId',
+            'contractoruserId',
             JSON.stringify(res?.data?.user_id),
           );
 
@@ -142,10 +142,8 @@ const ContractorRegistration = () => {
     let newErrors = {...error}; // Preserve existing structure
 
     // Name validation
-    if (!userData.name.trim() || userData.name.length < 3) {
+    if (!/^[A-Za-z\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
-    } else {
-      newErrors.name = '';
     }
 
     // Email validation
@@ -215,6 +213,15 @@ const ContractorRegistration = () => {
       newErrors.experience = '';
     }
 
+    if (!userImage) {
+      Snackbar.show({
+        text: 'Upload Img',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      newErrors.img = 'Upload Img';
+    }
+
     // Update error state
     setError(newErrors);
 
@@ -234,9 +241,21 @@ const ContractorRegistration = () => {
   };
 
   const onChange = (key, value) => {
+    let filteredValue = value;
+
+    if (
+      key === 'name' ||
+      key === 'number' ||
+      key === 'address' ||
+      key === 'city' ||
+      key === 'state'
+    ) {
+      filteredValue = value.replace(/\./g, '');
+    }
+
     setUserData(prev => ({
       ...prev,
-      [key]: value,
+      [key]: filteredValue,
     }));
   };
 
@@ -255,18 +274,17 @@ const ContractorRegistration = () => {
   };
 
   const selectImage = async () => {
-    launchImageLibrary({quality: 0.7, mediaType: 'photo'}, response => {
-      if (response.didCancel) {
+    launchImageLibrary({quality: 0.7}, fileobj => {
+      if (fileobj?.didCancel === true) {
         setuserImage('');
-      } else if (response.errorCode) {
-        console.log('Image Picker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const img = response.assets[0].uri;
+        setUserData(prev => ({...prev, img: ''})); // Update userData
+      } else {
+        const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
-        setProfileDocumentFile(response.assets);
+        setUserData(prev => ({...prev, img})); // Update userData
+        setProfileDocumentFile(fileobj?.assets);
       }
     });
-    
   };
 
   const showPasswordFunction = () => {

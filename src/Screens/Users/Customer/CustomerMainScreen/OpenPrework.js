@@ -16,39 +16,68 @@ import CreateBtn from '../../../../assets/Svg/createBtn.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiManager from '../../../../API/Api';
+import {ActivityIndicator} from 'react-native-paper';
+import CalenderIcon from '../../../../assets/Svg/Calander.svg';
+import LocationIcon from '../../../../assets/Svg/Location.svg';
+import MoneyIcon from '../../../../assets/Svg/Money.svg';
+import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
+import MaterialIcon from '../../../../assets/Svg/Material.svg';
 
 const OpenPrework = () => {
   const navigation = useNavigation();
   const [preworkList, setPreworkList] = useState([]);
-  console.log('preworkList', preworkList);
+  const [preworkImgs, setPreworkImgs] = useState([]);
+  const [loader, setLoader] = useState(false);
+  const [cusId, setCusId] = useState(null);
 
   useEffect(() => {
-    PreworkListAPI();
     getUser();
   }, []);
 
+  useEffect(() => {
+    if (cusId) {
+      PreworkListAPI();
+    }
+  }, [cusId]);
+
   const getUser = async () => {
     const UserID = await AsyncStorage.getItem('userId');
+    setCusId(UserID);
     console.log('UserID', UserID);
   };
 
-  const PreworkListAPI = () => {
-    ApiManager.ListOfPrework()
+  const PreworkListAPI = async () => {
+    // setLoader(true)
+    if (!cusId) return;
+    await ApiManager.ListOfPrework(cusId)
       .then(res => {
-        if (res?.data?.status == 200) {
+        if (res?.data?.status === 200) {
           const response = res?.data?.preworks;
-          setPreworkList(response);
+
+          const imgsResponse = res?.data?.preworkFiles;
+          console.log('responseoOPL', response);
+          console.log('imgsResponse', imgsResponse);
+
+          setPreworkList(response || []);
+          setPreworkImgs(imgsResponse);
+        } else {
+          setPreworkList([]);
         }
       })
       .catch(err => console.log('err', err));
   };
 
   const ProjectCard = item => {
-    console.log('item', item?.item);
+    const openParticularPrework = item => {
+      const PreID = item?.item?.id;
+      navigation.navigate('openpreworkdeatils', {preworkId: PreID});
+    };
 
     return (
-      <View style={styles.card}>
-        <Image source={{uri: item?.item?.upload_image}} style={styles.image} />
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => openParticularPrework(item)}>
+        <Image source={{uri: preworkImgs[0]?.files}} style={styles.image} />
         {/* {item.isNew && (
           <View style={styles.newBid}>
             <Text style={styles.newBidText}>NEW BID</Text>
@@ -58,34 +87,34 @@ const OpenPrework = () => {
           <View style={{flexDirection: 'row'}}>
             <Text style={styles.title}>{item?.item?.name}</Text>
             <View style={styles.row}>
-              {/* <Icon name="place" size={16} color="green" /> */}
-              <Text style={styles.text}>{item?.item?.timeperiod}</Text>
+              <CalenderIcon />
+              <Text style={styles.text}>{item?.item?.last_date}</Text>
             </View>
           </View>
           <View style={styles.row}>
             <View style={styles.row}>
-              {/* <Icon name="calendar-today" size={16} color="green" /> */}
+              <LocationIcon />
               <Text style={styles.text}>{item?.item?.address}</Text>
             </View>
 
             <View style={styles.row}>
-              {/* <Icon name="calendar-today" size={16} color="green" /> */}
-              <Text style={styles.text}>{item?.item?.bidprice}</Text>
+              <MoneyIcon />
+              <Text style={styles.text}>{item?.item?.custombid}</Text>
             </View>
           </View>
           <View style={styles.row}>
             <View style={styles.row}>
-              {/* <Icon name="construction" size={16} color="green" /> */}
-              <Text style={styles.text}>{item?.item?.bidRange}</Text>
+              <BiddingIcon />
+              <Text style={styles.text}>{item?.item?.budget_range}</Text>
             </View>
 
             <View style={styles.row}>
-              {/* <Icon name="construction" size={16} color="green" /> */}
+              <MaterialIcon />
               <Text style={styles.text}>{item?.item?.material}</Text>
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -95,14 +124,21 @@ const OpenPrework = () => {
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
-        {preworkList ? (
-          <FlatList
-            data={preworkList}
-            keyExtractor={item => item.id}
-            renderItem={({item}) => <ProjectCard item={item} />}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.list}
-          />
+        {preworkList && preworkList.length > 0 ? (
+          <View>
+            <FlatList
+              data={preworkList}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => <ProjectCard item={item} />}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.list}
+            />
+            <TouchableOpacity
+              onPress={() => navigation.navigate('createprework')}
+              style={styles.create}>
+              <CreateBtn />
+            </TouchableOpacity>
+          </View>
         ) : (
           <View style={styles.empty}>
             <NoData height={360} width={360} />
@@ -132,8 +168,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLOR.White,
-    paddingHorizontal: WIDTH(4),
-    paddingTop: WIDTH(4),
+    paddingHorizontal: WIDTH(2),
+    paddingTop: WIDTH(3),
   },
 
   txt: {
@@ -160,11 +196,11 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   card: {
-    width: WIDTH(88),
+    width: WIDTH(90),
     backgroundColor: '#fff',
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
-    marginBottom: HEIGHT(3),
+    marginBottom: HEIGHT(2.5),
     overflow: 'hidden',
     elevation: 4, // Shadow for Android
     shadowColor: '#000', // Shadow for iOS
@@ -176,7 +212,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 60,
+    height: 130,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
@@ -194,7 +230,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    // marginBottom: 5,
   },
   text: {
     fontSize: 14,

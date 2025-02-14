@@ -16,19 +16,19 @@ import {
   NotoSans_Light,
   NotoSans_Medium,
   WIDTH,
-} from '../../../config/AppConst';
+} from '../../../../config/AppConst';
 import {useNavigation} from '@react-navigation/native';
-import COLOR from '../../../config/color.json';
+import COLOR from '../../../../config/color.json';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import ApiManager from '../../API/Api';
-import EditIcon from '../../../assets/Svg/edit.svg';
+import EditIcon from '../../../../assets/Svg/edit.svg';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
-import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
-import ApiManager from '../../../API/Api';
-import CustomButton from '../../../Component/CustomButton/CustomButton';
+import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import ApiManager from '../../../../API/Api';
+import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const CustomerProfile = () => {
@@ -36,44 +36,50 @@ const CustomerProfile = () => {
   const [edit, setEdit] = useState(false);
   const [userId, setUserId] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
-  const [userImage, setUserImage] = useState(data?.profile_image || '');
+  const [userImage, setuserImage] = useState('');
 
-  console.log('data', data);
+  const fetchCustomerProfile = async () => {
+    try {
+      const userID = await AsyncStorage.getItem('userId');
+      setUserId(userID);
+      console.log('UserID:', userID);
 
-  useEffect(() => {
-    // GetCustomerProfile()
-    const fetchData = async () => {
-      try {
-        const userID = await AsyncStorage.getItem('userId');
-        setUserId(userID);
-        console.log('UserID:', userID);
-
-        if (userID) {
-          const response = await ApiManager.customerProfile(userID);
-          // console.log('API Response:', response?.data);
-
-          if (response?.data?.status === 200) {
-            const customerData = response?.data?.customer;
-            setData(customerData);
-          }
+      if (userID) {
+        const response = await ApiManager.customerProfile(userID);
+        if (response?.data?.status === 200) {
+          const customerData = response?.data?.customer;
+          setData(customerData);
         }
-
-        const getCustData = await AsyncStorage.getItem('customerData');
-        if (getCustData) {
-          console.log('getCustData (Raw):', getCustData);
-          const parsedData = JSON.parse(getCustData);
-          console.log('Parsed Customer Data:', parsedData);
-        } else {
-          console.log('No customer data found.');
-        }
-      } catch (error) {
-        console.error('Error in fetching data:', error);
       }
-    };
 
-    fetchData();
+      const getCustData = await AsyncStorage.getItem('customerData');
+      if (getCustData) {
+        console.log('getCustData (Raw):', getCustData);
+        const parsedData = JSON.parse(getCustData);
+        console.log('Parsed Customer Data:', parsedData);
+      } else {
+        console.log('No customer data found.');
+      }
+    } catch (error) {
+      console.error('Error in fetching data:', error);
+    }
+  };
+
+  // Fetch data when the component mounts
+  useEffect(() => {
+    fetchCustomerProfile();
   }, []);
-  console.log('id', userId);
+
+  // const CustomerProfileAPI = async () => {
+  //   await ApiManager.customerProfile(userId)
+  //     .then(res => {
+  //       if (response?.data?.status === 200) {
+  //         const customerData = response?.data?.customer;
+  //         setData(customerData);
+  //       }
+  //     })
+  //     .catch(err => console.log(err));
+  // };
 
   // const CustomerUpdateAPI = async () => {
   //   console.log('Updating customer profile...');
@@ -104,16 +110,18 @@ const CustomerProfile = () => {
 
   //     if (res?.data?.status === 200) {
   //       console.log('Update Success:', res.data);
-  //       setData(res.data.customer);
   //       await AsyncStorage.setItem(
   //         'customerData',
   //         JSON.stringify(res.data.customer),
   //       );
-  //       setEdit(false)
+  //       setEdit(false);
   //       Snackbar.show({
   //         text: 'Profile updated successfully!',
   //         duration: Snackbar.LENGTH_SHORT,
   //       });
+
+  //       // Fetch updated profile data after update
+  //       fetchCustomerProfile();
   //     } else {
   //       console.warn('Failed to update profile:', res?.data?.message);
   //       Snackbar.show({
@@ -132,14 +140,14 @@ const CustomerProfile = () => {
 
   const selectImage = async () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel) {
-        // Do nothing, keep the existing image
-        return;
-      }
-      if (fileobj?.assets?.length > 0) {
-        const img = fileobj.assets[0].uri;
-        setUserImage(img);
-        setDocumentFile(fileobj.assets); // Store the full file object for uploading
+      if (fileobj?.didCancel === true) {
+        setuserImage('');
+        // setUserData(prev => ({...prev, img: ''})); // Update userData
+      } else {
+        const img = fileobj?.assets[0]?.uri || '';
+        setuserImage(img);
+        // setUserData(prev => ({...prev, img})); // Update userData
+        setDocumentFile(fileobj?.assets);
       }
     });
   };
@@ -165,15 +173,15 @@ const CustomerProfile = () => {
     <View style={{flex: 1}}>
       <CustomHeader name="Profile" />
       <ImageBackground
-        source={require('../../../assets/Imgs/Background.png')}
+        source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           onPress={() => {
             setEdit(!edit);
           }}
           style={styles.edit}>
           <EditIcon color="grey" />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
@@ -190,97 +198,83 @@ const CustomerProfile = () => {
                 borderRadius: 50,
                 borderWidth: 1,
               }}
-              source={{uri: userImage || data?.profile_image}} // Use selected image or default profile image
+              source={{uri: data?.profile_image}} // Use selected image or default profile image
               resizeMode="cover"
             />
-            {/* {edit ? (
+            {edit ? (
               <Badge
                 onPress={() => selectImage()}
                 size={32}
                 style={styles.badge}>
                 <Octicons size={18} name="pencil" />
               </Badge>
-            ) : null} */}
+            ) : null}
           </View>
 
-          <View style={styles.InputField}>
-            <TextInput
-              style={styles.text}
-              placeholder={data?.name}
-              editable={edit}
-              value={data?.name}
-              onChangeText={text => onChange('name', text)}
-            />
-          </View>
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.name}
+            editable={edit}
+            value={data?.name}
+            onChangeText={text => onChange('name', text)}
+          />
 
-          <View style={styles.InputField}>
-            <TextInput
-              style={styles.text}
-              keyboardType="number-pad"
-              placeholder={data?.mobile_no}
-              editable={edit}
-              value={data?.mobile_no}
-              onChangeText={text => onChange('mobile_no', text)}
-            />
-          </View>
+          <TextInput
+            style={styles.InputField}
+            keyboardType="number-pad"
+            placeholder={data?.mobile_no}
+            editable={edit}
+            value={data?.mobile_no}
+            onChangeText={text => onChange('mobile_no', text)}
+          />
 
-          <View style={styles.InputField}>
-            <TextInput
-              style={styles.text}
-              placeholder={data?.email}
-              editable={edit}
-              value={data?.email}
-              onChangeText={text => onChange('email', text)}
-            />
-          </View>
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.email}
+            editable={edit}
+            value={data?.email}
+            onChangeText={text => onChange('email', text)}
+          />
 
-          <View style={styles.InputField}>
-            <TextInput
-              style={styles.text}
-              placeholder={data?.address || 'Address'}
-              editable={edit}
-              value={data?.address}
-              onChangeText={text => onChange('address', text)}
-            />
-          </View>
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.address || 'Address'}
+            editable={edit}
+            value={data?.address}
+            onChangeText={text => onChange('address', text)}
+          />
 
           <View style={{flexDirection: 'row', gap: 12}}>
-            <View style={[styles.InputField, {width: WIDTH(44)}]}>
-              <TextInput
-                style={styles.text}
-                placeholder={data?.city || 'City'}
-                editable={edit}
-                value={data?.city}
-                onChangeText={text => onChange('city', text)}
-              />
-            </View>
-            <View style={[styles.InputField, {width: WIDTH(44)}]}>
-              <TextInput
-                style={styles.text}
-                keyboardType="number-pad"
-                placeholder={data?.pincode || 'Pincode'}
-                editable={edit}
-                value={data?.pincode}
-                onChangeText={text => onChange('pincode', text)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.InputField}>
             <TextInput
-              style={styles.text}
-              placeholder={data?.state || 'State'}
+              style={[styles.InputField, {width: WIDTH(44)}]}
+              placeholder={data?.city || 'City'}
               editable={edit}
-              value={data?.state}
-              onChangeText={text => onChange('state', text)}
+              value={data?.city}
+              onChangeText={text => onChange('city', text)}
+            />
+            <TextInput
+              style={[styles.InputField, {width: WIDTH(44)}]}
+              keyboardType="number-pad"
+              placeholder={data?.pincode || 'Pincode'}
+              editable={edit}
+              value={data?.pincode}
+              onChangeText={text => onChange('pincode', text)}
             />
           </View>
 
-          {/* <View style={{marginBottom: HEIGHT(2)}}>
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.state || 'State'}
+            editable={edit}
+            value={data?.state}
+            onChangeText={text => onChange('state', text)}
+          />
+
+          <View style={{marginBottom: HEIGHT(2)}}>
             {edit ? (
-              <CustomButton name="SAVE" onPress={() => CustomerUpdateAPI()} />
+              <CustomButton name="SAVE" onPress={() => console.log('update')} />
             ) : null}
-          </View> */}
+          </View>
         </ScrollView>
       </ImageBackground>
     </View>

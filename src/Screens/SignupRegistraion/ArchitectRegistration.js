@@ -94,12 +94,14 @@ const ArchitectRegistration = () => {
         }, {});
 
         if (res?.data?.status == 200) {
+          console.log('arres?.data', res?.data);
+          
           await AsyncStorage.setItem(
             'ArchitechData',
             JSON.stringify(simpleData),
           );
           await AsyncStorage.setItem(
-            'userId',
+            'ArchitectId',
             JSON.stringify(res?.data?.user_id),
           );
 
@@ -135,7 +137,7 @@ const ArchitectRegistration = () => {
   const validateForm = () => {
     let newErrors = {};
 
-    if (!userData.name.trim() || userData.name.length < 3) {
+    if (!/^[A-Za-z\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 
@@ -156,13 +158,14 @@ const ArchitectRegistration = () => {
       newErrors.confirmPw = 'Passwords do not match';
     }
 
-    // if (!userData.img) {
-    //   Snackbar.show({
-    //     text: 'Upload Img',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    // } 
+    if (!userImage) {
+      Snackbar.show({
+        text: 'Upload Img',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      newErrors.img = 'Upload Img';
+    }
 
     setError(newErrors);
 
@@ -173,18 +176,32 @@ const ArchitectRegistration = () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
       if (fileobj?.didCancel === true) {
         setuserImage('');
+        setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
+        setUserData(prev => ({...prev, img})); // Update userData
         setDocumentFile(fileobj?.assets);
       }
     });
   };
 
   const onChange = (key, value) => {
+    let filteredValue = value;
+
+    if (
+      key === 'name' ||
+      key === 'number' ||
+      key === 'address' ||
+      key === 'city' ||
+      key === 'state'
+    ) {
+      filteredValue = value.replace(/\./g, '');
+    }
+
     setUserData(prev => ({
       ...prev,
-      [key]: value,
+      [key]: filteredValue,
     }));
   };
 

@@ -23,49 +23,147 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import ApiManager from '../../API/Api';
+import EditIcon from '../../../assets/Svg/edit.svg';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
+import ApiManager from '../../../API/Api';
+import CustomButton from '../../../Component/CustomButton/CustomButton';
+import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
 
 const ConstractorProfile = () => {
+  const [data, setData] = useState([]);
+  const [edit, setEdit] = useState(false);
+  const [userId, setUserId] = useState('');
+  const [documentFile, setDocumentFile] = useState(null);
+  const [userImage, setuserImage] = useState('');
+
+  const fetchContractorProfile = async () => {
+    try {
+      const userID = await AsyncStorage.getItem('contractoruserId');
+      setUserId(userID);
+      console.log('UserIDCC:', userID);
+
+      if (userID) {
+        const response = await ApiManager.ContractorProfile(userID);
+        if (response?.data?.status === 200) {
+          console.log('333', response?.data?.['contractors ']);
+
+          const contractorData = response?.data?.['contractors '];
+          setData(contractorData);
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetching data:', error);
+    }
+  };
+
+  // Fetch data when the component mounts
+  useEffect(() => {
+    fetchContractorProfile();
+  }, []);
+
+  const selectImage = async () => {
+    launchImageLibrary({quality: 0.7}, fileobj => {
+      if (fileobj?.didCancel === true) {
+        setuserImage('');
+        // setUserData(prev => ({...prev, img: ''})); // Update userData
+      } else {
+        const img = fileobj?.assets[0]?.uri || '';
+        setuserImage(img);
+        // setUserData(prev => ({...prev, img})); // Update userData
+        setDocumentFile(fileobj?.assets);
+      }
+    });
+  };
+
+  const onChange = (key, value) => {
+    setData(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   return (
-    <ImageBackground
-      source={require('../../../assets/Imgs/Background.png')}
-      style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}>
+    <View style={{flex: 1}}>
+      <CustomHeader name="Profile" />
+      <ImageBackground
+        source={require('../../../assets/Imgs/Background.png')}
+        style={styles.container}>
+        <TouchableOpacity
+          onPress={() => {
+            setEdit(!edit);
+          }}
+          style={styles.edit}>
+          <EditIcon color="grey" />
+        </TouchableOpacity>
         <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
-          <Image
-            style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
-            source={
-              // userImage == ''
-              //   ? userDetails?.length == []
-              // ?
-              require('../../../assets/Icons/avatar.jpg')
-              //   : {uri: userDetails?.profileImg}
-              // : {uri: userImage}
-            }
-            resizeMode="cover"
-          />
+          <View
+            style={{
+              paddingTop: HEIGHT(3),
+              paddingBottom: HEIGHT(1),
+              alignItems: 'center',
+            }}>
+            <Image
+              style={{
+                width: WIDTH(30),
+                height: WIDTH(30),
+                borderRadius: 50,
+                borderWidth: 1,
+              }}
+              source={{uri: data?.profile_image}} // Use selected image or default profile image
+              resizeMode="cover"
+            />
+            {edit ? (
+              <Badge
+                onPress={() => selectImage()}
+                size={32}
+                style={styles.badge}>
+                <Octicons size={18} name="pencil" />
+              </Badge>
+            ) : null}
+          </View>
         </View>
 
-        <View style={styles.InputField}>
-          <TextInput style={styles.text} />
-        </View>
+        <TextInput
+          style={styles.InputField}
+          placeholder={data?.name}
+          editable={edit}
+          value={data?.name}
+          onChangeText={text => onChange('name', text)}
+        />
 
-        <View style={styles.InputField}>
-          <TextInput style={styles.text} />
-        </View>
+        <TextInput
+          style={styles.InputField}
+          keyboardType="number-pad"
+          placeholder={data?.mobile_no}
+          editable={edit}
+          value={data?.mobile_no}
+          onChangeText={text => onChange('mobile_no', text)}
+        />
 
-        <View style={styles.InputField}>
-          <TextInput style={styles.text} />
-        </View>
+        <TextInput
+          style={styles.InputField}
+          placeholder={data?.email}
+          editable={edit}
+          value={data?.email}
+          onChangeText={text => onChange('email', text)}
+        />
 
-        <View style={styles.InputField}>
-          <TextInput style={styles.text} />
+        <TextInput
+          style={styles.InputField}
+          placeholder={data?.address || 'Address'}
+          editable={edit}
+          value={data?.address}
+          onChangeText={text => onChange('address', text)}
+        />
+
+        <View style={{marginBottom: HEIGHT(2)}}>
+          {edit ? (
+            <CustomButton name="SAVE" onPress={() => console.log('update')} />
+          ) : null}
         </View>
-      </ScrollView>
-    </ImageBackground>
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -99,4 +197,10 @@ const styles = StyleSheet.create({
   },
 
   name: {},
+
+  edit: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
+  },
 });

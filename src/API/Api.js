@@ -36,6 +36,8 @@ const requests1 = {
   get: path => Axios(constructApiRequest1(path, 'get')),
   post: (path, params) => Axios(constructApiRequest1(path, 'post', params)),
   put: (path, params) => Axios(constructApiRequest1(path, 'put', params)),
+  update: path => Axios(constructApiRequest1(path, 'update')),
+
   delete: path => Axios(constructApiRequest1(path, 'delete')),
 };
 
@@ -56,7 +58,18 @@ const requestPath = {
 
   //customer
   customerProfile: 'auth/customerProfile',
-  ListOfPrework: 'auth/listPrework',
+  ListOfPrework: 'auth/listOpenPreworks',
+  openPreworkById: 'auth/openPrework',
+  closedPrework: 'auth/listClosePreworks',
+  closedPreworkById: 'auth/ClosePrework',
+  architectList: 'auth/ArchitectureList',
+  architectListById: 'auth/getArchitectureById',
+
+  // Contractor
+  contractoreProfile: 'auth/contractorProfile',
+
+  // Architect
+  architectProfile: 'auth/architectureProfile',
 
   // Update request
 
@@ -98,8 +111,36 @@ const ApiManager = {
     return requests.get(`${requestPath.customerProfile}/${userId}`);
   },
 
-  ListOfPrework: () => {
-    return requests.get(requestPath.ListOfPrework);
+  ListOfPrework: userId => {
+    return requests.get(`${requestPath.ListOfPrework}/${userId}`);
+  },
+
+  OpenPreworkById: preworkId => {
+    return requests.get(`${requestPath.openPreworkById}/${preworkId}`);
+  },
+
+  ClosedPrework: () => {
+    return requests.get(requestPath.closedPrework);
+  },
+
+  ClosedPreworkById: preworkId => {
+    return requests.get(`${requestPath.closedPreworkById}/${preworkId}`);
+  },
+
+  ArchitectList: () => {
+    return requests.get(requestPath.architectList);
+  },
+
+  ArchitectById: architectId => {
+    return requests.get(`${requestPath.architectListById}/${architectId}`);
+  },
+
+  ContractorProfile: ContractorId => {
+    return requests.get(`${requestPath.contractoreProfile}/${ContractorId}`);
+  },
+
+  ArchitectProfile: ArchitectId => {
+    return requests.get(`${requestPath.architectProfile}/${ArchitectId}`);
   },
 
   // Update API

@@ -12,11 +12,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ContractorTabNav from '../BottomNavigation/ContractorTabNav';
 import ArchitectTabNav from '../BottomNavigation/ArchitectTabNav';
 import CustomerTabNav from '../BottomNavigation/CustomerTabNav';
-import CustomerProfile from '../../Screens/Users/Customer/CustomerProfile';
-import ArchitectList from '../../Screens/Users/Customer/ArchitectList';
+import CustomerProfile from '../../Screens/Users/Customer/OtherScreens/CustomerProfile';
+import ArchitectList from '../../Screens/Users/Customer/OtherScreens/ArchitectList';
 import ContractorProfile from '../../Screens/Users/Contractor/ContractorProfile';
-import CreatePreWork from '../../Screens/Users/Customer/CreatePreWork';
 import OTPScreen from '../../Screens/OTPScreen/OTPScreen';
+import OpenPreworkDeatils from '../../Screens/Users/Customer/OtherScreens/OpenPreworkDetails';
+import ClosedPreworkDetails from '../../Screens/Users/Customer/OtherScreens/ClosedPreworkDetails';
+import ArchitectDetails from '../../Screens/Users/Customer/OtherScreens/ArchitectDetails';
+import CreatePreWork from '../../Screens/Users/Customer/OtherScreens/CreatePreWork';
+import ArchitectPastPreworkDetails from '../../Screens/Users/Customer/OtherScreens/ArchitectPastPreworkDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,16 +60,36 @@ const StackNavigation = () => {
           component={ArchitectRegistration}
         />
         <Stack.Screen name="forgotpassword" component={ForgotPassword} />
+
+        {/* Bottom Tabs */}
         <Stack.Screen name="customerTabs" component={CustomerTabNav} />
         <Stack.Screen name="contractorTabs" component={ContractorTabNav} />
         <Stack.Screen name="architectTabs" component={ArchitectTabNav} />
 
+        {/* Customer */}
         <Stack.Screen
           name="customerprofilescreen"
           component={CustomerProfile}
         />
         <Stack.Screen name="architectlist" component={ArchitectList} />
+        <Stack.Screen
+          name="architectDetailscreen"
+          component={ArchitectDetails}
+        />
+
         <Stack.Screen name="createprework" component={CreatePreWork} />
+        <Stack.Screen
+          name="openpreworkdeatils"
+          component={OpenPreworkDeatils}
+        />
+        <Stack.Screen
+          name="closedpreworkdetails"
+          component={ClosedPreworkDetails}
+        />
+        <Stack.Screen
+          name="architectpastpreworkdetails"
+          component={ArchitectPastPreworkDetails}
+        />
 
         {/* Contractor */}
         <Stack.Screen name="contractorprofile" component={ContractorProfile} />

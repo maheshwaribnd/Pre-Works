@@ -21,7 +21,6 @@ const Login = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const userType = route.params?.userType;
-  console.log('userType000', userType);
 
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState({
@@ -44,12 +43,10 @@ const Login = () => {
       password: userData.password,
       user_type: userType,
     };
-    console.log('API Call Params:', params)
 
     ApiManager.userLogin(params)
       .then(async res => {
         if (res?.data?.status === 200) {
-          console.log('loginres', res?.data);
           // await AsyncStorage.setItem(
           //   'userId',
           //   JSON.stringify(res?.data?.user_id),
@@ -59,9 +56,6 @@ const Login = () => {
             JSON.stringify(res?.data?.user_id),
           );
           const storedUserId = await AsyncStorage.getItem('userId');
-          console.log('Stored User ID:', storedUserId);
-
-          console.log('res?.data?.user_type', res?.data?.user_type);
 
           if (userType === 'customer') {
             navigation.navigate('customerTabs');

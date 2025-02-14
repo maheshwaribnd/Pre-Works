@@ -55,7 +55,7 @@ const CustomerRegistraion = () => {
   const validateForm = () => {
     let newErrors = {};
 
-    if (!userData.name.trim() || userData.name.length < 3) {
+    if (!/^[A-Za-z\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 
@@ -76,13 +76,14 @@ const CustomerRegistraion = () => {
       newErrors.confirmPw = 'Passwords do not match';
     }
 
-    // if (!userData.img) {
-    //   Snackbar.show({
-    //     text: 'Upload Img',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    // }
+    if (!userImage) {
+      Snackbar.show({
+        text: 'Upload Img',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      newErrors.img = 'Upload Img';
+    }
 
     setError(newErrors);
 
@@ -90,9 +91,15 @@ const CustomerRegistraion = () => {
   };
 
   const onChange = (key, value) => {
+    let filteredValue = value;
+
+    if (key === 'name' || key === 'number') {
+      filteredValue = value.replace(/\./g, '');
+    }
+
     setUserData(prev => ({
       ...prev,
-      [key]: value,
+      [key]: filteredValue,
     }));
   };
 
@@ -111,9 +118,11 @@ const CustomerRegistraion = () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
       if (fileobj?.didCancel === true) {
         setuserImage('');
+        setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
+        setUserData(prev => ({...prev, img})); // Update userData
         setDocumentFile(fileobj?.assets);
       }
     });
@@ -136,36 +145,36 @@ const CustomerRegistraion = () => {
     } else {
       formData.append('profile_image', undefined);
     }
-    console.log('CustomerformData', formData);
 
     await ApiManager.customerRegistration(formData)
       .then(async res => {
-        console.log('rescust', res?.data);
-
         const simpleData = formData._parts.reduce((acc, [key, value]) => {
           acc[key] = value;
           return acc;
         }, {});
 
-        // if (res?.data?.status == 200) {
-        await AsyncStorage.setItem('CustomerData', JSON.stringify(simpleData));
-        await AsyncStorage.setItem(
-          'userId',
-          JSON.stringify(res?.data?.user_id),
-        );
+        if (res?.data?.status == 200) {
+          await AsyncStorage.setItem(
+            'CustomerData',
+            JSON.stringify(simpleData),
+          );
+          await AsyncStorage.setItem(
+            'userId',
+            JSON.stringify(res?.data?.user_id),
+          );
 
-        Snackbar.show({
-          text: res?.data?.message,
-          backgroundColor: '#27cc5d',
-          duration: Snackbar.LENGTH_SHORT,
-        });
-        // } else {
-        //   Snackbar.show({
-        //     text: res?.data?.message,
-        //     backgroundColor: '#D1264A',
-        //     duration: Snackbar.LENGTH_SHORT,
-        //   });
-        // }
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        } else {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#D1264A',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
       })
       .catch(err => {
         console.log('error', err);

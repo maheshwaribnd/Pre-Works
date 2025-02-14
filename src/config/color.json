@@ -10,5 +10,7 @@
   "TabNavigateButton": "#00A976",
   "TextColor": "#019443",
   "TextLightColor": "#06B667",
-  "BottomTabTxt": "#07BB6F"
+  "BottomTabTxt": "#07BB6F",
+  "PrimaryLightColor": "#0AD788",
+  "PrimaryDarkColor": " #03A151"
 }
