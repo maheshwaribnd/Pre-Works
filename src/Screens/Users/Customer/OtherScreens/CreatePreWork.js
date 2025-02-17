@@ -105,10 +105,11 @@ const CreatePreWork = () => {
         });
       });
     }
+    console.log('formData', formData);
 
     await ApiManager.createPreWork(formData)
       .then(res => {
-        if (res?.data?.status == 200) {
+        if (res?.data?.status === 200) {
           console.log('API Response:', res?.data);
           Snackbar.show({
             text: res?.data?.message,

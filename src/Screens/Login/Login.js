@@ -44,18 +44,21 @@ const Login = () => {
       user_type: userType,
     };
 
+    console.log('paramslogin', params);
+
     ApiManager.userLogin(params)
       .then(async res => {
         if (res?.data?.status === 200) {
-          // await AsyncStorage.setItem(
-          //   'userId',
-          //   JSON.stringify(res?.data?.user_id),
-          // );
+          console.log('res?.datalogin', res?.data);
+
+          await AsyncStorage.setItem(
+            'successStatus',
+            JSON.stringify(res?.data?.success),
+          );
           await AsyncStorage.setItem(
             'userId',
             JSON.stringify(res?.data?.user_id),
           );
-          const storedUserId = await AsyncStorage.getItem('userId');
 
           if (userType === 'customer') {
             navigation.navigate('customerTabs');
@@ -142,7 +145,7 @@ const Login = () => {
           style={styles.PassInputField}
           placeholder="Enter password"
           placeholderTextColor="gray"
-          keyboardType="default"
+          keyboardType="name-phone-pad"
           value={userData.password}
           onChangeText={text => onChange('password', text)}
         />

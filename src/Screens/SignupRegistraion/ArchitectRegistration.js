@@ -69,7 +69,7 @@ const ArchitectRegistration = () => {
     formData.append('email', userData.email);
     formData.append('mobile_no', userData.number);
     formData.append('password', userData.password);
-    // formData.append('confirm_pass', userData.confirmPw);
+    formData.append('password_confirmation', userData.confirmPw);
     formData.append('address', userData.address);
     formData.append('city', userData.city);
     formData.append('state', userData.state);

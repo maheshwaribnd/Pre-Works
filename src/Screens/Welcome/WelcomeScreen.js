@@ -53,11 +53,14 @@ const WelcomeScreen = () => {
         const getArchitechData = await AsyncStorage.getItem('ArchitechData');
         console.log('getArchitechData', getArchitechData);
 
-        if (getCustomerData) {
+        const successStatus = await AsyncStorage.getItem('successStatus');
+        console.log('successStatus', successStatus);
+
+        if (getCustomerData && successStatus === true) {
           navigation.navigate('customerTabs');
-        } else if (getContractorData) {
+        } else if (getContractorData && successStatus === true) {
           navigation.navigate('contractorTabs');
-        } else if (getArchitechData) {
+        } else if (getArchitechData && successStatus === true) {
           navigation.navigate('architectTabs');
         }
       } catch (error) {

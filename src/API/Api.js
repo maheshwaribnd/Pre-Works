@@ -119,8 +119,8 @@ const ApiManager = {
     return requests.get(`${requestPath.openPreworkById}/${preworkId}`);
   },
 
-  ClosedPrework: () => {
-    return requests.get(requestPath.closedPrework);
+  ClosedPrework: userId => {
+    return requests.get(`${requestPath.closedPrework}/${userId}`);
   },
 
   ClosedPreworkById: preworkId => {

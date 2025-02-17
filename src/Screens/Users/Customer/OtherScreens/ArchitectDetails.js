@@ -26,7 +26,11 @@ const ArchitectDetails = () => {
 
   const [architectData, setArchitectData] = useState({});
   const [architectWorkList, setArchitectWorkList] = useState([]);
+  const [images, setImages] = useState([]);
+
   const [loader, setLoader] = useState(false);
+
+  console.log('images111', images);
 
   useEffect(() => {
     ArchitectByIdAPI();
@@ -38,6 +42,8 @@ const ArchitectDetails = () => {
       .then(res => {
         if (res?.data?.status === 200) {
           setLoader(false);
+          console.log('res?.data', res?.data?.architectureWorks);
+          setImages(res?.data?.architectureWorks);
           setArchitectData(res?.data?.architectureDetails);
           setArchitectWorkList(res?.data?.preworks);
         }
@@ -46,10 +52,13 @@ const ArchitectDetails = () => {
   };
 
   const RenderWorkList = item => {
+    console.log('item', item);
+
     const PastPreworkFunction = () => {
       navigation.navigate('architectpastpreworkdetails', {
         item: item?.item,
         loader: loader,
+        images: images
       });
     };
 
@@ -59,7 +68,10 @@ const ArchitectDetails = () => {
           PastPreworkFunction();
         }}>
         <View style={styles.workCard}>
-          <Image source={{uri: item?.item?.image}} style={styles.workImage} />
+          <Image
+            source={{uri: item?.item?.profile_image}}
+            style={styles.workImage}
+          />
           <View style={styles.workInfo}>
             <Text style={styles.workTitle}>{item?.item?.name}</Text>
             <Text style={styles.workDescription}>

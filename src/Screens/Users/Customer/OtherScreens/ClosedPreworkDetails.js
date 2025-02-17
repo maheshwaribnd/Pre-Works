@@ -30,6 +30,7 @@ const ClosedPreworkDetails = () => {
   const PreworkId = route?.params?.preworkId;
 
   const [data, setData] = useState(null);
+  const [resImgs, setResImgs] = useState([]);
 
   useEffect(() => {
     ClosedPreWorkByIdAPI();
@@ -39,6 +40,7 @@ const ClosedPreworkDetails = () => {
     ApiManager.ClosedPreworkById(PreworkId).then(res => {
       if (res?.data?.status === 200) {
         setData(res?.data?.prework);
+        setResImgs(res?.data?.preworkfiles);
       }
     });
   };
@@ -52,21 +54,29 @@ const ClosedPreworkDetails = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.contentWrapper}>
             {/* Swiper for Images */}
-            {/* {data?.upload_image && data.upload_image.length > 0 ? (
             <Swiper
               autoplay
               loop
               showsPagination
-              paginationStyle={styles.pagination}>
-              {data.upload_image.map((img, index) => (
-                <View key={index} style={styles.imageContainer}>
-                  <Image source={{uri: img}} style={styles.image} />
-                </View>
-              ))}
+              style={{height: 240}} // Make sure it has height
+              paginationStyle={{bottom: 0}}>
+              {resImgs.map(
+                (item, index) => (
+                  console.log('item?.files', item?.files),
+                  (
+                    <View
+                      key={index}
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <Image source={{uri: item?.files}} style={styles.imgs} />
+                    </View>
+                  )
+                ),
+              )}
             </Swiper>
-          ) : (
-            <Text style={styles.noImageText}>No images available</Text>
-          )} */}
 
             {/* Title */}
             <Text style={styles.nametitle}>{data?.name}</Text>
@@ -186,5 +196,12 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_Medium,
     color: COLOR.Gray,
     lineHeight: 22,
+  },
+  imgs: {
+    width: 330,
+    height: 200,
+    resizeMode: 'cover',
+    borderRadius: 9,
+    marginBottom: HEIGHT(4),
   },
 });

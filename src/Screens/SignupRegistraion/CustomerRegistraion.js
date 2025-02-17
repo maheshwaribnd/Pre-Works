@@ -153,11 +153,13 @@ const CustomerRegistraion = () => {
           return acc;
         }, {});
 
-        if (res?.data?.status == 200) {
+        if (res?.data?.status === 200) {
           await AsyncStorage.setItem(
             'CustomerData',
             JSON.stringify(simpleData),
           );
+          // const getCustomerData = await AsyncStorage.getItem('CustomerData');
+          // console.log('getCust111', getCustomerData);
           await AsyncStorage.setItem(
             'userId',
             JSON.stringify(res?.data?.user_id),

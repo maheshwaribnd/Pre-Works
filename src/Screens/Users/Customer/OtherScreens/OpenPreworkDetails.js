@@ -34,7 +34,6 @@ const OpenPreworkDetails = () => {
   const [resImgs, setResImgs] = useState([]);
 
   const [loader, setLoader] = useState(false);
-  console.log('resImgs', resImgs);
 
   useEffect(() => {
     PreWorkByIdAPI();
@@ -48,6 +47,7 @@ const OpenPreworkDetails = () => {
       if (res?.data?.status === 200) {
         setResImgs(res?.data?.preworkfiles || []); // Ensure array format
         setData(res?.data?.prework || []); // Ensure object format
+        setLoader(false);
       }
     } catch (error) {
       console.error('API Error:', error);
@@ -75,8 +75,8 @@ const OpenPreworkDetails = () => {
                 autoplay
                 loop
                 showsPagination
-                style={{height: 250}} // Make sure it has height
-              >
+                style={{height: 240}} // Make sure it has height
+                paginationStyle={{bottom: 0}}>
                 {resImgs.map((item, index) => (
                   <View
                     key={index}
@@ -85,15 +85,7 @@ const OpenPreworkDetails = () => {
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>
-                    <Image
-                      source={{uri: item.files}}
-                      style={{
-                        width: 300,
-                        height: 200,
-                        resizeMode: 'cover',
-                        borderRadius: 9,
-                      }}
-                    />
+                    <Image source={{uri: item?.files}} style={styles.imgs} />
                   </View>
                 ))}
               </Swiper>
@@ -153,7 +145,7 @@ const styles = StyleSheet.create({
   },
 
   contentWrapper: {
-    padding: WIDTH(4),
+    padding: WIDTH(2),
   },
 
   imageContainer: {
@@ -231,6 +223,13 @@ const styles = StyleSheet.create({
   },
   pagination: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 20,
+  },
+  imgs: {
+    width: 330,
+    height: 200,
+    resizeMode: 'cover',
+    borderRadius: 9,
+    marginBottom: HEIGHT(4),
   },
 });

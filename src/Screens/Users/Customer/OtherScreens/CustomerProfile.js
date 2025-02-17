@@ -34,119 +34,115 @@ import {launchImageLibrary} from 'react-native-image-picker';
 const CustomerProfile = () => {
   const [data, setData] = useState([]);
   const [edit, setEdit] = useState(false);
-  const [userId, setUserId] = useState('');
+  const [cusId, setCusId] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
+  console.log('cusdata', data);
 
-  const fetchCustomerProfile = async () => {
-    try {
+  useEffect(() => {
+    const fetchUser = async () => {
       const userID = await AsyncStorage.getItem('userId');
-      setUserId(userID);
-      console.log('UserID:', userID);
+      if (userID) setCusId(userID);
+    };
+    fetchUser();
+  }, []);
 
-      if (userID) {
-        const response = await ApiManager.customerProfile(userID);
-        if (response?.data?.status === 200) {
-          const customerData = response?.data?.customer;
-          setData(customerData);
-        }
-      }
+  useEffect(() => {
+    if (cusId) {
+      CustomerProfileAPI();
+    }
+  }, [cusId]);
 
-      const getCustData = await AsyncStorage.getItem('customerData');
-      if (getCustData) {
-        console.log('getCustData (Raw):', getCustData);
-        const parsedData = JSON.parse(getCustData);
-        console.log('Parsed Customer Data:', parsedData);
-      } else {
-        console.log('No customer data found.');
+  const CustomerProfileAPI = async () => {
+    if (!cusId) return;
+    try {
+      const res = await ApiManager.customerProfile(cusId);
+      if (res?.data?.status === 200) {
+        setData({
+          name: res.data.customer?.name || '',
+          email: res.data.customer?.email || '',
+          mobile_no: res.data.customer?.mobile_no || '',
+          address: res.data.customer?.address || '',
+          city: res.data.customer?.city || '',
+          pincode: res.data.customer?.pincode || '',
+          state: res.data.customer?.state || '',
+          profile_image: res.data.customer?.profile_image || '',
+        });
+        setuserImage(res.data.customer?.profile_image || '');
       }
-    } catch (error) {
-      console.error('Error in fetching data:', error);
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  // Fetch data when the component mounts
-  useEffect(() => {
-    fetchCustomerProfile();
-  }, []);
+  const CustomerUpdateAPI = async () => {
+    const formData = new FormData();
+    formData.append('name', data?.name);
+    formData.append('email', data?.email);
+    formData.append('mobile_no', data?.mobile_no);
+    formData.append('address', data?.address);
+    formData.append('city', data?.city);
+    formData.append('pincode', data?.pincode);
+    formData.append('state', data?.state);
 
-  // const CustomerProfileAPI = async () => {
-  //   await ApiManager.customerProfile(userId)
-  //     .then(res => {
-  //       if (response?.data?.status === 200) {
-  //         const customerData = response?.data?.customer;
-  //         setData(customerData);
-  //       }
-  //     })
-  //     .catch(err => console.log(err));
-  // };
+    if (documentFile?.length > 0) {
+      formData.append('profile_image', {
+        uri: documentFile[0].uri,
+        type: documentFile[0].type,
+        name: documentFile[0].fileName,
+      });
+    }
 
-  // const CustomerUpdateAPI = async () => {
-  //   console.log('Updating customer profile...');
+    try {
+      setEdit(false);
+      const res = await ApiManager.CustomerUpdate(cusId, formData);
+      console.log('updated res000', res?.data);
 
-  //   const formData = new FormData();
-  //   formData.append('name', data.name);
-  //   formData.append('email', data.email);
-  //   formData.append('mobile_no', data.mobile_no);
-  //   formData.append('address', data.address);
-  //   formData.append('city', data.city);
-  //   formData.append('pincode', data.pincode);
-  //   formData.append('state', data.state);
+      if (res?.data?.status === 200) {
+        console.log('updated res', res?.data);
 
-  //   if (documentFile?.length > 0) {
-  //     formData.append('profile_image', {
-  //       uri: documentFile[0]?.uri,
-  //       type: documentFile[0]?.type,
-  //       name: documentFile[0]?.fileName,
-  //     });
-  //   } else if (!data?.profile_image) {
-  //     formData.append('profile_image', ''); // Append empty string if no image
-  //   }
+        setData({
+          name: res.data.customer?.name || '',
+          email: res.data.customer?.email || '',
+          mobile_no: res.data.customer?.mobile_no || '',
+          address: res.data.customer?.address || '',
+          city: res.data.customer?.city || '',
+          pincode: res.data.customer?.pincode || '',
+          state: res.data.customer?.state || '',
+          profile_image: res.data.customer?.profile_image || '',
+        });
+        setuserImage(res.data.customer?.profile_image || '');
+        await AsyncStorage.setItem(
+          'customerData',
+          JSON.stringify(res.data.customer),
+        );
 
-  //   console.log('FormData:', formData);
-
-  //   try {
-  //     const res = await ApiManager.CustomerUpdate(userId, formData);
-
-  //     if (res?.data?.status === 200) {
-  //       console.log('Update Success:', res.data);
-  //       await AsyncStorage.setItem(
-  //         'customerData',
-  //         JSON.stringify(res.data.customer),
-  //       );
-  //       setEdit(false);
-  //       Snackbar.show({
-  //         text: 'Profile updated successfully!',
-  //         duration: Snackbar.LENGTH_SHORT,
-  //       });
-
-  //       // Fetch updated profile data after update
-  //       fetchCustomerProfile();
-  //     } else {
-  //       console.warn('Failed to update profile:', res?.data?.message);
-  //       Snackbar.show({
-  //         text: res?.data?.message || 'Update failed!',
-  //         duration: Snackbar.LENGTH_SHORT,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.error('Error updating profile:', err);
-  //     Snackbar.show({
-  //       text: 'Something went wrong! Try again.',
-  //       duration: Snackbar.LENGTH_SHORT,
-  //     });
-  //   }
-  // };
+        Snackbar.show({
+          text: res?.data?.message || 'Profile updated successfully!',
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else {
+        Snackbar.show({
+          text: res?.data?.message || 'Update failed!',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+    } catch (err) {
+      console.log('Update Error:', err);
+    }
+  };
 
   const selectImage = async () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel === true) {
+      if (fileobj?.didCancel) {
         setuserImage('');
-        // setUserData(prev => ({...prev, img: ''})); // Update userData
+        setData(prev => ({...prev, profile_image: ''}));
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
-        // setUserData(prev => ({...prev, img})); // Update userData
+        setData(prev => ({...prev, profile_image: img}));
         setDocumentFile(fileobj?.assets);
       }
     });
@@ -158,16 +154,6 @@ const CustomerProfile = () => {
       [key]: value,
     }));
   };
-
-  // const GetCustomerProfile = async () => {
-  //   const userID = await AsyncStorage.getItem('userId');
-  //   console.log('UserID:', userID);
-
-  //   ApiManager.customerProfile(userID).then((res) => {
-  //     console.log('111', res?.data?.customer);
-
-  //   })
-  // }
 
   return (
     <View style={{flex: 1}}>
@@ -192,13 +178,8 @@ const CustomerProfile = () => {
               alignItems: 'center',
             }}>
             <Image
-              style={{
-                width: WIDTH(30),
-                height: WIDTH(30),
-                borderRadius: 50,
-                borderWidth: 1,
-              }}
-              source={{uri: data?.profile_image}} // Use selected image or default profile image
+              style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
+              source={{uri: userImage}}
               resizeMode="cover"
             />
             {edit ? (
@@ -272,7 +253,7 @@ const CustomerProfile = () => {
 
           <View style={{marginBottom: HEIGHT(2)}}>
             {edit ? (
-              <CustomButton name="SAVE" onPress={() => console.log('update')} />
+              <CustomButton name="SAVE" onPress={() => CustomerUpdateAPI()} />
             ) : null}
           </View>
         </ScrollView>

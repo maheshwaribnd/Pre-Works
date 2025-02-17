@@ -27,7 +27,6 @@ const OpenPrework = () => {
   const navigation = useNavigation();
   const [preworkList, setPreworkList] = useState([]);
   const [preworkImgs, setPreworkImgs] = useState([]);
-  const [loader, setLoader] = useState(false);
   const [cusId, setCusId] = useState(null);
 
   useEffect(() => {
@@ -53,11 +52,7 @@ const OpenPrework = () => {
       .then(res => {
         if (res?.data?.status === 200) {
           const response = res?.data?.preworks;
-
-          const imgsResponse = res?.data?.preworkFiles;
-          console.log('responseoOPL', response);
-          console.log('imgsResponse', imgsResponse);
-
+          const imgsResponse = res?.data;
           setPreworkList(response || []);
           setPreworkImgs(imgsResponse);
         } else {
@@ -77,7 +72,13 @@ const OpenPrework = () => {
       <TouchableOpacity
         style={styles.card}
         onPress={() => openParticularPrework(item)}>
-        <Image source={{uri: preworkImgs[0]?.files}} style={styles.image} />
+        {preworkList[0]?.files?.length > 0 && (
+          <Image
+            source={{uri: preworkList[0].files[0].files}}
+            style={styles.image}
+          />
+        )}
+
         {/* {item.isNew && (
           <View style={styles.newBid}>
             <Text style={styles.newBidText}>NEW BID</Text>
@@ -212,12 +213,12 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 130,
+    height: 160,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   cardContent: {
-    padding: 12,
+    padding: 10,
   },
   title: {
     fontSize: 24,

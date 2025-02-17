@@ -15,19 +15,34 @@ import {useNavigation} from '@react-navigation/native';
 import CreateBtn from '../../../../assets/Svg/createBtn.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ClosedPrework = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
+  const [cusId, setCusId] = useState(null);
 
   useEffect(() => {
-    ClosedPreworkAPI();
+    getUser();
   }, []);
 
+  useEffect(() => {
+    if (cusId) {
+      ClosedPreworkAPI();
+    }
+  }, [cusId]);
+
+  const getUser = async () => {
+    const UserID = await AsyncStorage.getItem('userId');
+    setCusId(UserID);
+  };
+
   const ClosedPreworkAPI = () => {
-    ApiManager.ClosedPrework().then(res => {
+    ApiManager.ClosedPrework(cusId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.preworks;
+        console.log('responseclosed', response);
+
         setData(response);
       }
     });
@@ -42,7 +57,9 @@ const ClosedPrework = () => {
       <TouchableOpacity
         style={styles.card}
         onPress={() => ParticularClosePrework(item)}>
-        <Image source={{uri: item?.item?.upload_image}} style={styles.image} />
+        {data[0]?.files?.length > 0 && (
+          <Image source={{uri: data[0].files[0].files}} style={styles.image} />
+        )}
         {/* {item.isNew && (
             <View style={styles.newBid}>
               <Text style={styles.newBidText}>NEW BID</Text>
@@ -130,7 +147,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 130,
+    height: 160,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
