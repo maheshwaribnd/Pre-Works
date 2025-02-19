@@ -43,10 +43,9 @@ const OpenPreworkDetails = () => {
     try {
       setLoader(true);
       const res = await ApiManager.OpenPreworkById(PreworkId);
-      console.log('API ResponseOPbyID:', res.data); // Debugging
       if (res?.data?.status === 200) {
-        setResImgs(res?.data?.preworkfiles || []); // Ensure array format
-        setData(res?.data?.prework || []); // Ensure object format
+        setResImgs(res?.data?.preworkfiles || []);
+        setData(res?.data?.prework || []);
         setLoader(false);
       }
     } catch (error) {
@@ -111,15 +110,12 @@ const OpenPreworkDetails = () => {
                   <Text style={styles.detailText}>{data?.budget_range}</Text>
                 </View>
                 <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>{data?.custombid}</Text>
-                </View>
-              </View>
-
-              <View style={styles.detailsContainer}>
-                <View style={styles.row}>
                   <LocationIcon />
-                  <Text style={styles.detailText}>{data?.address}</Text>
+                  <Text style={[styles.detailText, {width: WIDTH(35)}]}>
+                    {data?.address}
+                  </Text>
+                  {/* <BiddingIcon />
+                  <Text style={styles.detailText}>{data?.custombid}</Text> */}
                 </View>
               </View>
 
@@ -197,6 +193,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginVertical: HEIGHT(2),
+    marginHorizontal: WIDTH(4),
   },
   sectionTitle: {
     fontSize: 18,

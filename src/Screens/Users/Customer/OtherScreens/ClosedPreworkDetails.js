@@ -47,74 +47,54 @@ const ClosedPreworkDetails = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name="Open Pre-Works" />
+      <CustomHeader name="Closed Pre-Works Requirement" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.contentWrapper}>
-            {/* Swiper for Images */}
+          <View style={styles.cardWrapper}>
             <Swiper
               autoplay
               loop
               showsPagination
-              style={{height: 240}} // Make sure it has height
-              paginationStyle={{bottom: 0}}>
-              {resImgs.map(
-                (item, index) => (
-                  console.log('item?.files', item?.files),
-                  (
-                    <View
-                      key={index}
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <Image source={{uri: item?.files}} style={styles.imgs} />
-                    </View>
-                  )
-                ),
-              )}
+              paginationStyle={{bottom: 0}}
+              style={styles.imageSlider}>
+              {resImgs.map((item, index) => (
+                <View key={index} style={styles.imageContainer}>
+                  <Image source={{uri: item?.files}} style={styles.image} />
+                </View>
+              ))}
             </Swiper>
-
-            {/* Title */}
-            <Text style={styles.nametitle}>{data?.name}</Text>
-
-            {/* Details Section */}
-            <View style={styles.detailsContainer}>
-              <View style={styles.row}>
-                <CalenderIcon />
-                <Text style={styles.detailText}>{data?.last_date}</Text>
+            <View style={styles.contentWrapper}>
+              <Text style={styles.title}>{data?.name}</Text>
+              <View style={styles.detailsWrapper}>
+                <View style={styles.row}>
+                  <CalenderIcon />
+                  <Text style={styles.detailText}>{data?.last_date}</Text>
+                </View>
+                <View style={styles.row}>
+                  <MaterialIcon />
+                  <Text style={styles.detailText}>{data?.material}</Text>
+                </View>
               </View>
-              <View style={styles.row}>
-                <MaterialIcon />
-                <Text style={styles.detailText}>{data?.material}</Text>
+              <View style={styles.detailsWrapper}>
+                <View style={styles.row}>
+                  <MoneyIcon />
+                  <Text style={styles.detailText}>{data?.budget_range}</Text>
+                </View>
+                <View style={styles.row}>
+                  <BiddingIcon />
+                  <Text style={styles.detailText}>{data?.custombid}</Text>
+                </View>
               </View>
-            </View>
-
-            <View style={styles.detailsContainer}>
-              <View style={styles.row}>
-                <MoneyIcon />
-                <Text style={styles.detailText}>{data?.budget_range}</Text>
-              </View>
-              <View style={styles.row}>
-                <BiddingIcon />
-                <Text style={styles.detailText}>{data?.custombid}</Text>
-              </View>
-            </View>
-
-            <View style={styles.detailsContainer}>
               <View style={styles.row}>
                 <LocationIcon />
                 <Text style={styles.detailText}>{data?.address}</Text>
               </View>
-            </View>
-
-            {/* Description */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.description}>{data?.description}</Text>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Description</Text>
+                <Text style={styles.description}>{data?.description}</Text>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -130,52 +110,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLOR.White,
   },
-
-  contentWrapper: {
-    padding: WIDTH(4),
+  cardWrapper: {
+    backgroundColor: COLOR.White,
+    borderRadius: 16,
+    elevation: 5,
+    margin: HEIGHT(3),
+    overflow: 'hidden',
   },
-
+  imageSlider: {
+    height: 240,
+  },
   imageContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   image: {
-    width: windowWidth * 0.9,
-    height: HEIGHT(30),
+    width: '100%',
+    height: 200,
     resizeMode: 'cover',
-    borderRadius: 10,
+    borderRadius: 9,
   },
-  pagination: {
-    position: 'absolute',
-    bottom: 10,
+  contentWrapper: {
+    padding: WIDTH(4),
   },
-  noImageText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: COLOR.Gray,
-    marginVertical: HEIGHT(5),
-  },
-  nametitle: {
+  title: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
-    textAlign: 'center',
     color: COLOR.Black,
-    marginVertical: HEIGHT(2),
+    textAlign: 'center',
+    marginBottom: HEIGHT(2),
   },
-  detailsContainer: {
+  detailsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // backgroundColor: COLOR.LightGray,
-    borderRadius: 8,
-    paddingHorizontal: WIDTH(4),
-    marginVertical: HEIGHT(0.5),
+    marginVertical: HEIGHT(1),
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: WIDTH(2),
-    marginVertical: HEIGHT(1),
+    marginBottom: HEIGHT(1),
   },
   detailText: {
     fontSize: 16,
@@ -196,12 +170,5 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_Medium,
     color: COLOR.Gray,
     lineHeight: 22,
-  },
-  imgs: {
-    width: 330,
-    height: 200,
-    resizeMode: 'cover',
-    borderRadius: 9,
-    marginBottom: HEIGHT(4),
   },
 });

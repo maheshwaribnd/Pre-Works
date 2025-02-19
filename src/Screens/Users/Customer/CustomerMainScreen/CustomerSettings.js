@@ -27,11 +27,42 @@ import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
+import ApiManager from '../../../../API/Api';
+import {useSelector} from 'react-redux';
 
 const CustomerSettings = () => {
   const navigation = useNavigation();
+  const typeSelector = useSelector(state => state.userTypee.usertype);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setDeleteShowModal] = useState(false);
+  const [cusId, setCusId] = useState('');
+  const [userImage, setuserImage] = useState('');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userID = await AsyncStorage.getItem('userId');
+      if (userID) setCusId(userID);
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (cusId) {
+      CustomerProfileAPI();
+    }
+  }, [cusId]);
+
+  const CustomerProfileAPI = async () => {
+    if (!cusId) return;
+    try {
+      const res = await ApiManager.customerProfile(cusId);
+      if (res?.data?.status === 200) {
+        setuserImage(res.data.customer?.profile_image || '');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const LogoutFunction = async () => {
     try {
@@ -43,8 +74,27 @@ const CustomerSettings = () => {
     }
   };
 
-  const DeletFunction = () => {
-    console.log('delete Account');
+  const AccountDeleteAPI = () => {
+    ApiManager.DeleteAccount(typeSelector, cusId)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          navigation.navigate('welcome');
+        } else {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#D1264A',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   return (
@@ -59,14 +109,7 @@ const CustomerSettings = () => {
           <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
             <Image
               style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
-              source={
-                // userImage == ''
-                //   ? userDetails?.length == []
-                // ?
-                require('../../../../assets/Icons/avatar.jpg')
-                //   : {uri: userDetails?.profileImg}
-                // : {uri: userImage}
-              }
+              source={{uri: userImage}}
               resizeMode="cover"
             />
           </View>
@@ -154,15 +197,16 @@ const CustomerSettings = () => {
               showModal={showDeleteModal}
               setShowModal={setDeleteShowModal}
               text="Delete Account"
-              onpress={DeletFunction()}
+              onpress={() => {
+                AccountDeleteAPI();
+                console.log('delete button pressed');
+              }}
             />
           ) : null}
 
           <TouchableOpacity
             style={styles.InputField}
-            onPress={() => {
-              setShowModal(true), console.log('log');
-            }}>
+            onPress={() => setShowModal(true)}>
             <View style={{flexDirection: 'row', gap: 6}}>
               <Image
                 source={require('../../../../assets/settingsIcon/logout.png')}

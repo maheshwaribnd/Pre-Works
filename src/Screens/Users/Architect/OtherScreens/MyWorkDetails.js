@@ -26,111 +26,108 @@ import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {ActivityIndicator} from 'react-native-paper';
 
-const ArchitectPastPreworkDetails = () => {
+const MyWorkDetails = () => {
   const route = useRoute();
-  const itemDetails = route?.params?.item;
-  const itemImages = route?.params?.images;
+  const WorkId = route?.params?.WorkId;
 
-  const loader = route?.params?.loader;
+  const [data, setData] = useState([]);
+  const [resImgs, setResImgs] = useState([]);
+
+  const [loader, setLoader] = useState(false);
+
+  useEffect(() => {
+    ArchitectMyWorkByIdAPI();
+  }, []);
+
+  const ArchitectMyWorkByIdAPI = async () => {
+    ApiManager.ArchitectMyWorkById(WorkId)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          console.log('API arcmyworkbyID:', res.data); // Debugging
+        }
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+      });
+  };
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name={itemDetails?.name} />
+      <CustomHeader name="Open Pre-Works" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {loader ? (
+          {/* {loader ? (
             <View
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
               <ActivityIndicator />
             </View>
           ) : (
             <View style={styles.contentWrapper}>
-              {/* Swiper for Images */}
               <Swiper
                 autoplay
                 loop
                 showsPagination
                 style={{height: 240}} // Make sure it has height
                 paginationStyle={{bottom: 0}}>
-                {itemImages.map(
-                  (item, index) => (
-                    console.log('item?.files', item?.files),
-                    (
-                      <View
-                        key={index}
-                        style={{
-                          flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}>
-                        <Image
-                          source={{uri: item?.files}}
-                          style={styles.imgs}
-                        />
-                      </View>
-                    )
-                  ),
-                )}
+                {resImgs.map((item, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image source={{uri: item?.files}} style={styles.imgs} />
+                  </View>
+                ))}
               </Swiper>
 
-              {/* Title */}
-              <Text style={styles.nametitle}>{itemDetails?.name}</Text>
+              <Text style={styles.nametitle}>{data?.name}</Text>
 
-              {/* Details Section */}
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <CalenderIcon />
-                  <Text style={styles.detailText}>
-                    {itemDetails?.last_date}
-                  </Text>
+                  <Text style={styles.detailText}>{data?.last_date}</Text>
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>{itemDetails?.material}</Text>
+                  <Text style={styles.detailText}>{data?.material}</Text>
                 </View>
               </View>
 
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <MoneyIcon />
-                  <Text style={styles.detailText}>
-                    {itemDetails?.budget_range}
-                  </Text>
+                  <Text style={styles.detailText}>{data?.budget_range}</Text>
                 </View>
-                {/* <View style={styles.row}>
+                <View style={styles.row}>
                   <BiddingIcon />
-                  <Text style={styles.detailText}>
-                    {itemDetails?.custombid}
-                  </Text>
-                </View> */}
-                <View style={styles.detailsContainer}>
-                  <View style={styles.row}>
-                    <LocationIcon />
-                    <Text style={styles.detailText}>
-                      {itemDetails?.address}
-                    </Text>
-                  </View>
+                  <Text style={styles.detailText}>{data?.custombid}</Text>
                 </View>
               </View>
 
-              {/* Description */}
+              <View style={styles.detailsContainer}>
+                <View style={styles.row}>
+                  <LocationIcon />
+                  <Text style={styles.detailText}>{data?.address}</Text>
+                </View>
+              </View>
+
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>
-                  {itemDetails?.description}
-                </Text>
+                <Text style={styles.description}>{data?.description}</Text>
               </View>
             </View>
-          )}
+          )} */}
         </ScrollView>
       </ImageBackground>
     </View>
   );
 };
 
-export default ArchitectPastPreworkDetails;
+export default MyWorkDetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -139,7 +136,7 @@ const styles = StyleSheet.create({
   },
 
   contentWrapper: {
-    padding: WIDTH(4),
+    padding: WIDTH(2),
   },
 
   imageContainer: {
@@ -191,7 +188,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginVertical: HEIGHT(2),
-    marginHorizontal: WIDTH(4),
   },
   sectionTitle: {
     fontSize: 18,
@@ -204,6 +200,21 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_Medium,
     color: COLOR.Gray,
     lineHeight: 22,
+  },
+
+  imageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: 250, // Adjust height as needed
+    resizeMode: 'cover', // Ensure images are displayed properly
+  },
+  pagination: {
+    position: 'absolute',
+    bottom: 20,
   },
   imgs: {
     width: 330,

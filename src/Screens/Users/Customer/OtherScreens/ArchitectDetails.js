@@ -6,6 +6,7 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -27,10 +28,7 @@ const ArchitectDetails = () => {
   const [architectData, setArchitectData] = useState({});
   const [architectWorkList, setArchitectWorkList] = useState([]);
   const [images, setImages] = useState([]);
-
   const [loader, setLoader] = useState(false);
-
-  console.log('images111', images);
 
   useEffect(() => {
     ArchitectByIdAPI();
@@ -51,6 +49,29 @@ const ArchitectDetails = () => {
       .catch(err => console.log(err));
   };
 
+  const openURL = url => {
+    Linking.canOpenURL(url)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log('URL not supported');
+        }
+      })
+      .catch(err => console.error('An error occurred', err));
+  };
+
+  const phoneNumber = architectData?.mobile_no || '';
+  const whatsapp = architectData?.whatsup_no;
+  const email = architectData?.email || '';
+  const socialMediaLink = architectData?.instagram_link || '';
+
+  // Define handlers
+  const handleCall = () => openURL(`tel:${phoneNumber}`);
+  const handleWhatsApp = () => openURL(`https://wa.me/${whatsapp}`);
+  const handleInstagram = () => openURL(socialMediaLink);
+  const handleGmail = () => openURL(`mailto:${email}`);
+
   const RenderWorkList = item => {
     console.log('item', item);
 
@@ -58,7 +79,7 @@ const ArchitectDetails = () => {
       navigation.navigate('architectpastpreworkdetails', {
         item: item?.item,
         loader: loader,
-        images: images
+        images: images,
       });
     };
 
@@ -114,19 +135,23 @@ const ArchitectDetails = () => {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleCall}>
             <Call color={COLOR.Primary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleWhatsApp}>
             <WhatsApp color={COLOR.Primary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleInstagram}>
             <Instagram color={COLOR.Primary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleGmail}>
             <Gmail color={COLOR.Primary} />
           </TouchableOpacity>
         </View>

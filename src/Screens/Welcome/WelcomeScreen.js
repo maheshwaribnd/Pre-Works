@@ -16,8 +16,7 @@ import {userTypeFunction} from '../../Redux/Reducers/userType';
 import ApiManager from '../../API/Api';
 
 const WelcomeScreen = () => {
-  const typeSelector = useSelector(state => state.userTypee.usertype);
-  console.log('typeSelectortypeSelector', typeSelector);
+
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -25,7 +24,7 @@ const WelcomeScreen = () => {
   const [userId, setUserId] = useState('');
 
   const Options = [
-    {id: 1, name: 'CUSTOMERS', type: 'customer'},
+    {id: 1, name: 'CUSTOMER', type: 'customer'},
     {id: 2, name: 'CONTRACTOR', type: 'contractor'},
     {id: 3, name: 'ARCHITECT', type: 'architect'},
   ];
@@ -56,11 +55,11 @@ const WelcomeScreen = () => {
         const successStatus = await AsyncStorage.getItem('successStatus');
         console.log('successStatus', successStatus);
 
-        if (getCustomerData && successStatus === true) {
+        if (getCustomerData || successStatus === true) {
           navigation.navigate('customerTabs');
-        } else if (getContractorData && successStatus === true) {
+        } else if (getContractorData || successStatus === true) {
           navigation.navigate('contractorTabs');
-        } else if (getArchitechData && successStatus === true) {
+        } else if (getArchitechData || successStatus === true) {
           navigation.navigate('architectTabs');
         }
       } catch (error) {

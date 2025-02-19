@@ -6,10 +6,10 @@ import {
   View,
 } from 'react-native';
 import React, { useState } from 'react';
-import COLOR from '../../../config/color.json';
-import {HEIGHT, WIDTH} from '../../../config/AppConst';
-import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
-import ApiManager from '../../../API/Api';
+import COLOR from '../../../../config/color.json';
+import {HEIGHT, WIDTH} from '../../../../config/AppConst';
+import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import ApiManager from '../../../../API/Api';
 
 const Profile = () => {
   const [data, setData] = useState([]);
@@ -39,7 +39,7 @@ const Profile = () => {
     <View style={{flex: 1}}>
       <CustomHeader name="Profile" />
       <ImageBackground
-        source={require('../../../assets/Imgs/Background.png')}
+        source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}

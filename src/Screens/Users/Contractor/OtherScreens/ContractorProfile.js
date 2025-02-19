@@ -16,21 +16,20 @@ import {
   NotoSans_Light,
   NotoSans_Medium,
   WIDTH,
-} from '../../../config/AppConst';
+} from '../../../../config/AppConst';
 import {useNavigation} from '@react-navigation/native';
-import COLOR from '../../../config/color.json';
+import COLOR from '../../../../config/color.json';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import ApiManager from '../../API/Api';
-import EditIcon from '../../../assets/Svg/edit.svg';
+import EditIcon from '../../../../assets/Svg/edit.svg';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
-import ApiManager from '../../../API/Api';
-import CustomButton from '../../../Component/CustomButton/CustomButton';
-import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
+import ApiManager from '../../../../API/Api';
+import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import CustomButton from '../../../../Component/CustomButton/CustomButton';
 
-const ConstractorProfile = () => {
+const ContractorProfile = () => {
   const [data, setData] = useState([]);
   const [edit, setEdit] = useState(false);
   const [userId, setUserId] = useState('');
@@ -87,7 +86,7 @@ const ConstractorProfile = () => {
     <View style={{flex: 1}}>
       <CustomHeader name="Profile" />
       <ImageBackground
-        source={require('../../../assets/Imgs/Background.png')}
+        source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <TouchableOpacity
           onPress={() => {
@@ -167,7 +166,7 @@ const ConstractorProfile = () => {
   );
 };
 
-export default ConstractorProfile;
+export default ContractorProfile;
 
 const styles = StyleSheet.create({
   container: {

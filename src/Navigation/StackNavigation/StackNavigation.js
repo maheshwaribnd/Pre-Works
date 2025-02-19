@@ -14,13 +14,15 @@ import ArchitectTabNav from '../BottomNavigation/ArchitectTabNav';
 import CustomerTabNav from '../BottomNavigation/CustomerTabNav';
 import CustomerProfile from '../../Screens/Users/Customer/OtherScreens/CustomerProfile';
 import ArchitectList from '../../Screens/Users/Customer/OtherScreens/ArchitectList';
-import ContractorProfile from '../../Screens/Users/Contractor/ContractorProfile';
+import ContractorProfile from '../../Screens/Users/Contractor/OtherScreens/ContractorProfile';
 import OTPScreen from '../../Screens/OTPScreen/OTPScreen';
 import OpenPreworkDeatils from '../../Screens/Users/Customer/OtherScreens/OpenPreworkDetails';
 import ClosedPreworkDetails from '../../Screens/Users/Customer/OtherScreens/ClosedPreworkDetails';
 import ArchitectDetails from '../../Screens/Users/Customer/OtherScreens/ArchitectDetails';
 import CreatePreWork from '../../Screens/Users/Customer/OtherScreens/CreatePreWork';
 import ArchitectPastPreworkDetails from '../../Screens/Users/Customer/OtherScreens/ArchitectPastPreworkDetails';
+import CreateMyWork from '../../Screens/Users/Architect/OtherScreens/CreateMyWork';
+import MyWorkDetails from '../../Screens/Users/Architect/OtherScreens/MyWorkDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -95,6 +97,9 @@ const StackNavigation = () => {
         <Stack.Screen name="contractorprofile" component={ContractorProfile} />
 
         {/* Architect */}
+
+        <Stack.Screen name="createmywork" component={CreateMyWork} />
+        <Stack.Screen name="myworkdetails" component={MyWorkDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -36,8 +36,7 @@ const requests1 = {
   get: path => Axios(constructApiRequest1(path, 'get')),
   post: (path, params) => Axios(constructApiRequest1(path, 'post', params)),
   put: (path, params) => Axios(constructApiRequest1(path, 'put', params)),
-  update: path => Axios(constructApiRequest1(path, 'update')),
-
+  update: (path, param) => Axios(constructApiRequest1(path, 'update', param)),
   delete: path => Axios(constructApiRequest1(path, 'delete')),
 };
 
@@ -53,6 +52,11 @@ const requestPath = {
 
   //customer
   createPrework: 'auth/createPrework',
+
+  // constractor
+
+  //architect
+  architectMyWorkCreate: 'auth/Architechwork',
 
   //Get request
 
@@ -70,10 +74,15 @@ const requestPath = {
 
   // Architect
   architectProfile: 'auth/architectureProfile',
+  architectMyWorkList: 'auth/ArchitechworkListing',
+  architectMyworkById: 'auth/getArchitectureById',
 
   // Update request
 
   customerUpdate: 'auth/customeredit/update',
+
+  // Delete Request
+  deleteAccount: 'auth/deleteAccount',
 };
 
 const ApiManager = {
@@ -104,6 +113,10 @@ const ApiManager = {
 
   createPreWork: params => {
     return requests1.post(requestPath.createPrework, params);
+  },
+
+  architectMyworkCreate: params => {
+    return requests1.post(requestPath.architectMyWorkCreate, params);
   },
 
   // Get API
@@ -143,13 +156,26 @@ const ApiManager = {
     return requests.get(`${requestPath.architectProfile}/${ArchitectId}`);
   },
 
+  // Architect
+  ArchitectMyWorkList: architectId => {
+    return requests.get(`${requestPath.architectMyWorkList}/${architectId}`);
+  },
+
+  ArchitectMyWorkById: workId => {
+    return requests.get(`${requestPath.architectMyworkById}/${workId}`);
+  },
+
   // Update API
 
   CustomerUpdate: (userId, formData) => {
-    return requests1.put(`${requestPath.customerUpdate}/${userId}`, formData);
+    return requests1.post(`${requestPath.customerUpdate}/${userId}`, formData);
   },
 
   // Delete API
+
+  DeleteAccount: (userType, userId) => {
+    return requests.post(`${requestPath.deleteAccount}/${userType}/${userId}`);
+  },
 
   // notification: userId => {
   //   return requests.get(`${requestPath.customerNotification}/${userId}`);

@@ -10,10 +10,10 @@ import {
 import React, {useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
-import COLOR from '../../../config/color.json';
-import CustomHeader from '../../../Component/CustomeHeader/CustomHeader';
-import {HEIGHT, WIDTH} from '../../../config/AppConst';
-import LogoutComp from '../../../Component/LogoutComp/LogoutComp';
+import COLOR from '../../../../config/color.json';
+import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import {HEIGHT, WIDTH} from '../../../../config/AppConst';
+import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
 
 const ArchitectSetting = () => {
   const navigation = useNavigation();
@@ -38,7 +38,7 @@ const ArchitectSetting = () => {
     <View style={{flex: 1}}>
       <CustomHeader name="Setting" />
       <ImageBackground
-        source={require('../../../assets/Imgs/Background.png')}
+        source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -52,7 +52,7 @@ const ArchitectSetting = () => {
               }}>
               <View style={{flexDirection: 'row', gap: 6}}>
                 <Image
-                  source={require('../../../assets/settingsIcon/logout.png')}
+                  source={require('../../../../assets/settingsIcon/logout.png')}
                   height={5}
                   width={5}
                   resizeMode="contain"

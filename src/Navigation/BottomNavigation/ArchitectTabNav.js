@@ -9,10 +9,13 @@ import {
   NotoSans_Light,
   WIDTH,
 } from '../../config/AppConst';
-import ArchitectSetting from '../../Screens/Users/Architect/ArchitectSetting';
-import MyWork from '../../Screens/Users/Architect/MyWork';
-import Profile from '../../Screens/Users/Architect/Profile';
+// import ArchitectSetting from '../../../Screens/Users/Architect/ArchitectSetting';
+// import MyWork from '../../../Screens/Users/Architect/MyWork';
+// import Profile from '../../../Screens/Users/Architect/Profile';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import ArchitectSetting from '../../Screens/Users/Architect/ArchitectMainScreens/ArchitectSetting';
+import Profile from '../../Screens/Users/Architect/ArchitectMainScreens/Profile';
+import MyWork from '../../Screens/Users/Architect/ArchitectMainScreens/MyWork';
 
 const Tab = createBottomTabNavigator();
 
@@ -20,13 +23,15 @@ const TabArr = [
   {
     name: 'My Work',
     component: MyWork,
-    // Icon: <Home />,
+    Icon1: require('../../assets/NavIcons/MyworkSelect.png'),
+    Icon2: require('../../assets/NavIcons/MyworkUnselect.png'),
   },
 
   {
     name: 'Profile',
     component: Profile,
-    // Icon: <Bodysync />,
+    Icon1: require('../../assets/NavIcons/profileSelect.png'),
+    Icon2: require('../../assets/NavIcons/profileUnselect.png'),
   },
 
   {

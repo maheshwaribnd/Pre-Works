@@ -9,46 +9,39 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {HEIGHT, NotoSans_Light, WIDTH} from '../../../../config/AppConst';
-import COLOR from '../../../../config/color.json';
+import ApiManager from '../../../../API/Api';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import COLOR from '../../../../config/color.json';
+import {HEIGHT, NotoSans_Light, WIDTH} from '../../../../config/AppConst';
+import RNPickerSelect from 'react-native-picker-select';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
-import DocumentPicker from 'react-native-document-picker';
-import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
-import RNPickerSelect from 'react-native-picker-select';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import ApiManager from '../../../../API/Api';
+import {useNavigation} from '@react-navigation/native';
 
-const CreatePreWork = () => {
+const CreateMyWork = () => {
   const navigation = useNavigation();
-  const [id, setId] = useState(null);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [archiId, setArchiId] = useState(null);
+
   const [materialSelected, setMaterialSelected] = useState('');
-  const [projectSelected, setProjectSelected] = useState('');
   const [uploadImgs, setUploadImgs] = useState([]); // Store multiple images
   const [documentFiles, setDocumentFiles] = useState([]);
   const [createData, setCreateData] = useState({
-    name: '',
-    siteAddress: '',
-    city: '',
-    pincode: '',
-    plotArea: '',
-    material: '',
-    budgetRange: '',
-    // customBid: '',
-    // Projects: '',
+    siteName: '',
+    address: '',
+    budget: '',
+    bid: '',
+    time: '',
     description: '',
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userID = await AsyncStorage.getItem('userId');
-        setId(userID);
+        const userID = await AsyncStorage.getItem('ArchitectId');
+        console.log('archituserID', userID);
+        setArchiId(userID);
       } catch (error) {
         console.error('Error in fetching data:', error);
       }
@@ -63,63 +56,30 @@ const CreatePreWork = () => {
     }));
   };
 
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
-
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
-
-  const handleConfirm = date => {
-    setSelectedDate(formatDate(date)); // Format date as needed
-    hideDatePicker();
-  };
-
-  const formatDate = date => {
-    return date.toLocaleDateString('en-GB'); // Formats as DD/MM/YYYY
-  };
-
-  const CreatePewWorkAPI = async () => {
+  const CreateWorkAPI = () => {
     const formData = new FormData();
 
-    formData.append('name', createData.name);
-    formData.append('address', createData.siteAddress);
-    formData.append('last_date', selectedDate);
-    formData.append('city', createData.city);
-    formData.append('pincode', createData.pincode);
-    formData.append('site_area', createData.plotArea);
+    formData.append('site_name', createData.siteName);
+    formData.append('address', createData.address);
+    formData.append('budget', createData.budget);
+    formData.append('bid', createData.bid);
+    formData.append('time', createData.time);
     formData.append('material', materialSelected);
-    formData.append('budget_range', createData.budgetRange);
-    // formData.append('custombid', createData.customBid);
-    // formData.append('projects', projectSelected);
-    formData.append('customer_id', id);
     formData.append('description', createData.description);
+    formData.append('architecture_id', archiId);
 
     if (documentFiles && documentFiles.length > 0) {
       documentFiles.forEach((file, index) => {
-        formData.append(
-          file.type === 'application/pdf'
-            ? `upload_pdf[${index}]`
-            : `upload_image[${index}]`,
-          {
-            uri:
-              Platform.OS === 'ios'
-                ? file.uri.replace('file://', '')
-                : file.uri,
-            type: file.type,
-            name: file.name || `file_${index}.${file.type.split('/')[1]}`, // Fallback name
-          },
-        );
+        formData.append(`image[${index}]`, {
+          uri: file.uri,
+          type: file.type,
+          name: file.fileName,
+        });
       });
     }
-
-    console.log('formData', formData);
-
-    await ApiManager.createPreWork(formData)
+    ApiManager.architectMyworkCreate(formData)
       .then(res => {
         if (res?.data?.status === 200) {
-          console.log('API Response create preworkk:', res?.data);
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
@@ -128,18 +88,14 @@ const CreatePreWork = () => {
 
           // Reset states
           setCreateData({
-            name: '',
-            siteAddress: '',
-            city: '',
-            pincode: '',
-            siteArea: '',
-            budgetRange: '',
-            customBid: '',
+            siteName: '',
+            address: '',
+            budget: '',
+            bid: '',
+            time: '',
             description: '',
           });
-          setSelectedDate(null);
           setMaterialSelected([]);
-          setProjectSelected([]);
           setDocumentFiles([]);
           setUploadImgs([]); // Clear preview images
           Snackbar.show({
@@ -147,7 +103,7 @@ const CreatePreWork = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          navigation.navigate('customerTabs');
+          navigation.navigate('architectTabs');
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -163,7 +119,6 @@ const CreatePreWork = () => {
 
   const handleUpload = async () => {
     try {
-      // Pick Images
       launchImageLibrary(
         {
           quality: 0.7,
@@ -182,25 +137,14 @@ const CreatePreWork = () => {
           ]);
         },
       );
-
-      // Pick PDF
-      const pdfFiles = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf],
-        allowMultiSelection: true,
-      });
-
-      setDocumentFiles(prevFiles => [...prevFiles, ...pdfFiles]);
     } catch (error) {
-      if (DocumentPicker.isCancel(error)) {
-        return;
-      }
-      Alert.alert('Error', 'Something went wrong while selecting files.');
+      Alert.alert('Error', 'Something went wrong while selecting images.');
     }
   };
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Create Pre-works" />
+      <CustomHeader name="Add My Work" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -210,48 +154,48 @@ const CreatePreWork = () => {
           <View style={{paddingVertical: HEIGHT(3), alignItems: 'center'}}>
             <TextInput
               style={styles.InputField}
-              placeholder="Name"
+              placeholder="Site Name"
               placeholderTextColor="gray"
               keyboardType="default"
               value={createData.name}
-              onChangeText={text => onChange('name', text)}
+              onChangeText={text => onChange('siteName', text)}
             />
 
             <TextInput
               style={styles.InputField}
-              placeholder="Site Address"
+              placeholder="Address"
               placeholderTextColor="gray"
               keyboardType="default"
               value={createData.siteAddress}
-              onChangeText={text => onChange('siteAddress', text)}
+              onChangeText={text => onChange('address', text)}
             />
 
             <View style={styles.experienceView}>
               <TextInput
                 style={[styles.InputField, {width: WIDTH(44)}]}
-                placeholder="City"
+                placeholder="Budget"
                 placeholderTextColor="gray"
                 keyboardType="default"
                 value={createData.city}
-                onChangeText={text => onChange('city', text)}
+                onChangeText={text => onChange('budget', text)}
               />
               <TextInput
                 style={[styles.InputField, {width: WIDTH(44)}]}
-                placeholder="Pincode"
+                placeholder="Bid"
                 placeholderTextColor="gray"
                 keyboardType="numeric"
                 value={createData.pincode}
-                onChangeText={text => onChange('pincode', text)}
+                onChangeText={text => onChange('bid', text)}
               />
             </View>
 
             <TextInput
               style={styles.InputField}
-              placeholder="Approx Plot Area (sqft) (Optional)"
+              placeholder="Time"
               placeholderTextColor="gray"
-              keyboardType="numeric"
+              keyboardType="default"
               value={createData.siteArea}
-              onChangeText={text => onChange('plotArea', text)}
+              onChangeText={text => onChange('time', text)}
             />
 
             {/* For Material Select */}
@@ -263,68 +207,13 @@ const CreatePreWork = () => {
               <RNPickerSelect
                 onValueChange={value => setMaterialSelected(value)}
                 items={[
-                  {label: 'Labour', value: 'Labour'},
-                  {label: 'Labour + Material', value: 'Labour + Material'},
+                  {label: 'With Material', value: 'With Material'},
+                  {label: 'Without Material', value: 'Without Material'},
                 ]}
-                placeholder={{label: 'Labour', value: null}}
+                placeholder={{label: 'Material', value: null}}
                 style={styles.picker}
               />
             </View>
-
-            <TextInput
-              style={styles.InputField}
-              placeholder="Budget Range"
-              keyboardType="numeric"
-              placeholderTextColor="gray"
-              value={createData.budgetRange}
-              onChangeText={text => onChange('budgetRange', text)}
-            />
-
-            <View>
-              <TouchableOpacity onPress={showDatePicker}>
-                <TextInput
-                  style={styles.InputField}
-                  placeholder="Last date for bidding"
-                  value={selectedDate}
-                  editable={false} // Prevent manual text input
-                />
-              </TouchableOpacity>
-
-              <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirm}
-                onCancel={hideDatePicker}
-              />
-            </View>
-
-            {/* <TextInput
-              style={styles.InputField}
-              placeholder="Custom Bid"
-              placeholderTextColor="gray"
-              keyboardType="numeric"
-              value={createData.customBid}
-              onChangeText={text => onChange('customBid', text)}
-            /> */}
-
-            {/* For Project Select */}
-
-            {/* <View
-              style={[
-                styles.InputField,
-                {alignItems: 'center', justifyContent: 'center'},
-              ]}>
-              <RNPickerSelect
-                onValueChange={value => setProjectSelected(value)}
-                items={[
-                  {label: 'Bungalow', value: 'Bungalow'},
-                  {label: 'House', value: 'House'},
-                  {label: 'Appartment', value: 'Appartment'},
-                ]}
-                style={styles.picker}
-                placeholder={{label: 'Project', value: null}}
-              />
-            </View> */}
 
             <View style={styles.btnWrap}>
               <TouchableOpacity
@@ -352,17 +241,20 @@ const CreatePreWork = () => {
 
             <TextInput
               value={createData.description}
+              placeholder="Description"
               onChangeText={text => onChange('description', text)}
               placeholderTextColor="gray"
               keyboardType="default"
               multiline={true}
               numberOfLines={10}
               textAlignVertical="top"
-              placeholder="Description"
-              style={[styles.InputField, {height: HEIGHT(25)}]}
+              style={[
+                styles.InputField,
+                {height: HEIGHT(25), textAlign: 'auto'},
+              ]}
             />
 
-            <CustomButton name="SUBMIT" onPress={() => CreatePewWorkAPI()} />
+            <CustomButton name="Save" onPress={() => CreateWorkAPI()} />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -370,7 +262,7 @@ const CreatePreWork = () => {
   );
 };
 
-export default CreatePreWork;
+export default CreateMyWork;
 
 const styles = StyleSheet.create({
   container: {

@@ -42,7 +42,6 @@ const OpenPrework = () => {
   const getUser = async () => {
     const UserID = await AsyncStorage.getItem('userId');
     setCusId(UserID);
-    console.log('UserID', UserID);
   };
 
   const PreworkListAPI = async () => {
@@ -52,11 +51,17 @@ const OpenPrework = () => {
       .then(res => {
         if (res?.data?.status === 200) {
           const response = res?.data?.preworks;
+
           const imgsResponse = res?.data;
           setPreworkList(response || []);
           setPreworkImgs(imgsResponse);
         } else {
           setPreworkList([]);
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
         }
       })
       .catch(err => console.log('err', err));
@@ -92,17 +97,7 @@ const OpenPrework = () => {
               <Text style={styles.text}>{item?.item?.last_date}</Text>
             </View>
           </View>
-          <View style={styles.row}>
-            <View style={styles.row}>
-              <LocationIcon />
-              <Text style={styles.text}>{item?.item?.address}</Text>
-            </View>
 
-            <View style={styles.row}>
-              <MoneyIcon />
-              <Text style={styles.text}>{item?.item?.custombid}</Text>
-            </View>
-          </View>
           <View style={styles.row}>
             <View style={styles.row}>
               <BiddingIcon />
@@ -113,6 +108,18 @@ const OpenPrework = () => {
               <MaterialIcon />
               <Text style={styles.text}>{item?.item?.material}</Text>
             </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.row}>
+              <LocationIcon />
+              <Text style={styles.text}>{item?.item?.address}</Text>
+            </View>
+
+            {/* <View style={styles.row}>
+              <MoneyIcon />
+              <Text style={styles.text}>{item?.item?.custombid}</Text>
+            </View> */}
           </View>
         </View>
       </TouchableOpacity>

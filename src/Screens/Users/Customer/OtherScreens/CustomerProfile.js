@@ -8,21 +8,13 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {
-  FONTSIZE,
-  HEIGHT,
-  NotoSans_Bold,
-  NotoSans_Light,
-  NotoSans_Medium,
-  WIDTH,
-} from '../../../../config/AppConst';
+import React, {useEffect, useState} from 'react';
+import {HEIGHT, WIDTH} from '../../../../config/AppConst';
 import {useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import ApiManager from '../../API/Api';
 import EditIcon from '../../../../assets/Svg/edit.svg';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -135,15 +127,16 @@ const CustomerProfile = () => {
   };
 
   const selectImage = async () => {
-    launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel) {
+    launchImageLibrary({quality: 0.7}, response => {
+      if (response?.didCancel) {
         setuserImage('');
         setData(prev => ({...prev, profile_image: ''}));
       } else {
-        const img = fileobj?.assets[0]?.uri || '';
-        setuserImage(img);
-        setData(prev => ({...prev, profile_image: img}));
-        setDocumentFile(fileobj?.assets);
+        const img = response?.assets?.[0]?.uri || '';
+        if (img) {
+          setuserImage(img);
+          setData(prev => ({...prev, profile_image: img}));
+        }
       }
     });
   };
@@ -164,10 +157,12 @@ const CustomerProfile = () => {
         <TouchableOpacity
           onPress={() => {
             setEdit(!edit);
+            console.log('Edit state:', !edit); // Debugging
           }}
           style={styles.edit}>
           <EditIcon color="grey" />
         </TouchableOpacity>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
@@ -182,6 +177,7 @@ const CustomerProfile = () => {
               source={{uri: userImage}}
               resizeMode="cover"
             />
+
             {edit ? (
               <Badge
                 onPress={() => selectImage()}
@@ -301,8 +297,9 @@ const styles = StyleSheet.create({
   },
 
   edit: {
-    position: 'absolute',
-    right: 6,
-    top: 6,
+    // position: 'absolute',
+    // top: 10,
+    right: 12,
+    padding: 10,
   },
 });
