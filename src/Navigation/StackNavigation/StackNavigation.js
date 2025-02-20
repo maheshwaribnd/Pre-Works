@@ -23,6 +23,7 @@ import CreatePreWork from '../../Screens/Users/Customer/OtherScreens/CreatePreWo
 import ArchitectPastPreworkDetails from '../../Screens/Users/Customer/OtherScreens/ArchitectPastPreworkDetails';
 import CreateMyWork from '../../Screens/Users/Architect/OtherScreens/CreateMyWork';
 import MyWorkDetails from '../../Screens/Users/Architect/OtherScreens/MyWorkDetails';
+import Profile from '../../Screens/Users/Architect/ArchitectMainScreens/Profile';
 
 const Stack = createNativeStackNavigator();
 
@@ -100,6 +101,8 @@ const StackNavigation = () => {
 
         <Stack.Screen name="createmywork" component={CreateMyWork} />
         <Stack.Screen name="myworkdetails" component={MyWorkDetails} />
+        <Stack.Screen name="architectprofile" component={Profile} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

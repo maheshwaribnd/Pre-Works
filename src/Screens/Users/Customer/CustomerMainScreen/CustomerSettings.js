@@ -197,10 +197,7 @@ const CustomerSettings = () => {
               showModal={showDeleteModal}
               setShowModal={setDeleteShowModal}
               text="Delete Account"
-              onpress={() => {
-                AccountDeleteAPI();
-                console.log('delete button pressed');
-              }}
+              onpress={() => AccountDeleteAPI()}
             />
           ) : null}
 

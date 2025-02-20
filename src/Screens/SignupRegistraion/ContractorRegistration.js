@@ -72,13 +72,13 @@ const ContractorRegistration = () => {
     formData.append('name', userData.name);
     formData.append('email', userData.email);
     formData.append('mobile_no', userData.number);
-    formData.append('password', userData.password);
-    formData.append('password_confirmation', userData.confirmPw);
     formData.append('address', userData.address);
     formData.append('city', userData.city);
     formData.append('state', userData.state);
-    formData.append('experience', userData.experience);
     formData.append('pincode', userData.pincode);
+    formData.append('experience', userData.experience);
+    formData.append('password', userData.password);
+    formData.append('password_confirmation', userData.confirmPw);
 
     // profile photo
     if (profileDocumentFile !== null) {
@@ -92,15 +92,15 @@ const ContractorRegistration = () => {
     }
 
     // upload Img
-    if (uploadDocumentFile !== null) {
-      formData.append('upload_image', {
-        uri: uploadDocumentFile[0].uri,
-        type: uploadDocumentFile[0].type,
-        name: uploadDocumentFile[0].fileName,
-      });
-    } else {
-      formData.append('upload_image', undefined);
-    }
+    // if (uploadDocumentFile !== null) {
+    //   formData.append('upload_image', {
+    //     uri: uploadDocumentFile[0].uri,
+    //     type: uploadDocumentFile[0].type,
+    //     name: uploadDocumentFile[0].fileName,
+    //   });
+    // } else {
+    //   formData.append('upload_image', undefined);
+    // }
     console.log('ContractorformData', formData);
 
     await ApiManager.contractorRegistration(formData)
@@ -111,12 +111,14 @@ const ContractorRegistration = () => {
         }, {});
 
         if (res?.data?.status == 200) {
+          console.log('Contractorres?.data', res?.data);
+          
           await AsyncStorage.setItem(
             'ContractorData',
             JSON.stringify(simpleData),
           );
           await AsyncStorage.setItem(
-            'contractoruserId',
+            'userId',
             JSON.stringify(res?.data?.user_id),
           );
 
@@ -259,19 +261,19 @@ const ContractorRegistration = () => {
     }));
   };
 
-  const handleUpload = async () => {
-    launchImageLibrary({quality: 0.7, mediaType: 'photo'}, response => {
-      if (response.didCancel) {
-        setUploadImg('');
-      } else if (response.errorCode) {
-        console.log('Image Picker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const img = response.assets[0].uri;
-        setUploadImg(img);
-        setUploadDocumentFile(response.assets);
-      }
-    });
-  };
+  // const handleUpload = async () => {
+  //   launchImageLibrary({quality: 0.7, mediaType: 'photo'}, response => {
+  //     if (response.didCancel) {
+  //       setUploadImg('');
+  //     } else if (response.errorCode) {
+  //       console.log('Image Picker Error: ', response.errorMessage);
+  //     } else if (response.assets && response.assets.length > 0) {
+  //       const img = response.assets[0].uri;
+  //       setUploadImg(img);
+  //       setUploadDocumentFile(response.assets);
+  //     }
+  //   });
+  // };
 
   const selectImage = async () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
@@ -446,7 +448,7 @@ const ContractorRegistration = () => {
           />
         </View>
 
-        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+        {/* <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <TouchableOpacity
             style={{
               alignItems: 'center',
@@ -469,7 +471,7 @@ const ContractorRegistration = () => {
               />
             ) : null}
           </View>
-        </View>
+        </View> */}
 
         <View style={{marginTop: HEIGHT(1), justifyContent: 'center'}}>
           <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>

@@ -21,6 +21,7 @@ const Login = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const userType = route.params?.userType;
+  console.log('usetpeeee', userType);
 
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState({
@@ -44,13 +45,9 @@ const Login = () => {
       user_type: userType,
     };
 
-    console.log('paramslogin', params);
-
     ApiManager.userLogin(params)
       .then(async res => {
         if (res?.data?.status === 200) {
-          console.log('res?.datalogin', res?.data);
-
           await AsyncStorage.setItem(
             'successStatus',
             JSON.stringify(res?.data?.success),

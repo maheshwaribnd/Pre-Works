@@ -29,7 +29,6 @@ const CustomerProfile = () => {
   const [cusId, setCusId] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
-  console.log('cusdata', data);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -88,11 +87,8 @@ const CustomerProfile = () => {
     try {
       setEdit(false);
       const res = await ApiManager.CustomerUpdate(cusId, formData);
-      console.log('updated res000', res?.data);
 
       if (res?.data?.status === 200) {
-        console.log('updated res', res?.data);
-
         setData({
           name: res.data.customer?.name || '',
           email: res.data.customer?.email || '',
@@ -154,38 +150,38 @@ const CustomerProfile = () => {
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
-        <TouchableOpacity
-          onPress={() => {
-            setEdit(!edit);
-            console.log('Edit state:', !edit); // Debugging
-          }}
-          style={styles.edit}>
-          <EditIcon color="grey" />
-        </TouchableOpacity>
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
-          <View
-            style={{
-              paddingTop: HEIGHT(3),
-              paddingBottom: HEIGHT(1),
-              alignItems: 'center',
-            }}>
-            <Image
-              style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
-              source={{uri: userImage}}
-              resizeMode="cover"
-            />
+          <View style={{flexDirection: 'row'}}>
+            <TouchableOpacity
+              onPress={() => setEdit(!edit)}
+              style={styles.edit}>
+              <EditIcon color="grey" />
+            </TouchableOpacity>
 
-            {edit ? (
-              <Badge
-                onPress={() => selectImage()}
-                size={32}
-                style={styles.badge}>
-                <Octicons size={18} name="pencil" />
-              </Badge>
-            ) : null}
+            <View
+              style={{
+                paddingTop: HEIGHT(2),
+                paddingBottom: HEIGHT(1),
+                marginLeft: WIDTH(19),
+                alignItems: 'center',
+              }}>
+              <Image
+                style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
+                source={{uri: userImage}}
+                resizeMode="cover"
+              />
+
+              {edit ? (
+                <Badge
+                  onPress={() => selectImage()}
+                  size={32}
+                  style={styles.badge}>
+                  <Octicons size={18} name="pencil" />
+                </Badge>
+              ) : null}
+            </View>
           </View>
 
           <TextInput
@@ -293,7 +289,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.Gray,
     position: 'absolute',
     bottom: 0,
-    right: 115,
+    right: 2,
   },
 
   edit: {

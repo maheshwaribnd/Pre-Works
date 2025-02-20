@@ -40,7 +40,6 @@ const CreateMyWork = () => {
     const fetchData = async () => {
       try {
         const userID = await AsyncStorage.getItem('ArchitectId');
-        console.log('archituserID', userID);
         setArchiId(userID);
       } catch (error) {
         console.error('Error in fetching data:', error);
@@ -175,7 +174,7 @@ const CreateMyWork = () => {
                 style={[styles.InputField, {width: WIDTH(44)}]}
                 placeholder="Budget"
                 placeholderTextColor="gray"
-                keyboardType="default"
+                keyboardType="numeric"
                 value={createData.city}
                 onChangeText={text => onChange('budget', text)}
               />

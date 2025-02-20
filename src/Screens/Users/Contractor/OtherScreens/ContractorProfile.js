@@ -40,13 +40,10 @@ const ContractorProfile = () => {
     try {
       const userID = await AsyncStorage.getItem('contractoruserId');
       setUserId(userID);
-      console.log('UserIDCC:', userID);
 
       if (userID) {
         const response = await ApiManager.ContractorProfile(userID);
         if (response?.data?.status === 200) {
-          console.log('333', response?.data?.['contractors ']);
-
           const contractorData = response?.data?.['contractors '];
           setData(contractorData);
         }

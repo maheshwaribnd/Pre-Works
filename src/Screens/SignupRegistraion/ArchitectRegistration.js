@@ -34,6 +34,8 @@ const ArchitectRegistration = () => {
 
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
+  const [backgddocumentFile, setbackgdDocumentFile] = useState(null);
+  const [backImage, setbackImage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userData, setUserData] = useState({
@@ -84,7 +86,16 @@ const ArchitectRegistration = () => {
     } else {
       formData.append('profile_image', undefined);
     }
-    console.log('ArchitectformData', formData);
+
+    if (backgddocumentFile !== null) {
+      formData.append('background_img', {
+        uri: backgddocumentFile[0].uri,
+        type: backgddocumentFile[0].type,
+        name: backgddocumentFile[0].fileName,
+      });
+    } else {
+      formData.append('background_img', undefined);
+    }
 
     await ApiManager.architectureRegistration(formData)
       .then(async res => {
@@ -94,14 +105,12 @@ const ArchitectRegistration = () => {
         }, {});
 
         if (res?.data?.status == 200) {
-          console.log('arres?.data', res?.data);
-          
           await AsyncStorage.setItem(
             'ArchitechData',
             JSON.stringify(simpleData),
           );
           await AsyncStorage.setItem(
-            'ArchitectId',
+            'userId',
             JSON.stringify(res?.data?.user_id),
           );
 
@@ -186,6 +195,20 @@ const ArchitectRegistration = () => {
     });
   };
 
+  const selectBackfroundImage = async () => {
+    launchImageLibrary({quality: 0.7}, fileobj => {
+      if (fileobj?.didCancel === true) {
+        setbackImage('');
+        // setUserData(prev => ({...prev, img: ''})); // Update userData
+      } else {
+        const img = fileobj?.assets[0]?.uri || '';
+        setbackImage(img);
+        // setUserData(prev => ({...prev, img})); // Update userData
+        setbackgdDocumentFile(fileobj?.assets);
+      }
+    });
+  };
+
   const onChange = (key, value) => {
     let filteredValue = value;
 
@@ -220,20 +243,40 @@ const ArchitectRegistration = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}>
-        <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
+        <View style={styles.profileContainer}>
+          {/* <View> */}
           <Image
-            style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
             source={
-              userImage == ''
-                ? require('../../assets/Icons/avatar.jpg')
-                : {uri: userImage}
+              backImage == ''
+                ? require('../../assets/Imgs/backgd.jpg')
+                : {uri: backImage}
             }
             resizeMode="cover"
+            style={styles.bgImage}
           />
-          <Badge onPress={() => selectImage()} size={32} style={styles.badge}>
+          <Badge
+            onPress={() => selectBackfroundImage()}
+            size={32}
+            style={styles.backBadge}>
             <Octicons size={18} name="pencil" />
           </Badge>
+          {/* </View> */}
+          <View style={styles.profileWrapper}>
+            <Image
+              style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
+              source={
+                userImage == ''
+                  ? require('../../assets/Icons/avatar.jpg')
+                  : {uri: userImage}
+              }
+              resizeMode="cover"
+            />
+            <Badge onPress={() => selectImage()} size={32} style={styles.badge}>
+              <Octicons size={18} name="pencil" />
+            </Badge>
+          </View>
         </View>
+
         <View style={styles.titleView}>
           <Text style={styles.title}>Please enter your personal Info</Text>
         </View>
@@ -445,7 +488,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.Gray,
     position: 'absolute',
     bottom: 0,
-    right: 115,
+    right: 25,
+  },
+
+  backBadge: {
+    backgroundColor: COLOR.Gray,
+    position: 'absolute',
+    bottom: 40,
+    right: 25,
   },
 
   subheadline: {
@@ -609,5 +659,35 @@ const styles = StyleSheet.create({
   okayTxt: {
     textAlign: 'center',
     color: COLOR.Black,
+  },
+
+  profileContainer: {
+    alignItems: 'center',
+  },
+  bgImage: {
+    width: '100%',
+    height: HEIGHT(25),
+    marginTop: HEIGHT(2),
+    borderWidth: 0.5,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderColor: COLOR.Gray,
+  },
+  profileWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: -HEIGHT(7),
+    paddingHorizontal: WIDTH(5),
+  },
+  profilePic: {
+    width: WIDTH(25),
+    height: WIDTH(25),
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: COLOR.White,
+  },
+  profileInfo: {
+    marginLeft: WIDTH(6),
+    marginTop: HEIGHT(7),
   },
 });

@@ -40,7 +40,6 @@ const ArchitectDetails = () => {
       .then(res => {
         if (res?.data?.status === 200) {
           setLoader(false);
-          console.log('res?.data', res?.data?.architectureWorks);
           setImages(res?.data?.architectureWorks);
           setArchitectData(res?.data?.architectureDetails);
           setArchitectWorkList(res?.data?.preworks);
@@ -184,6 +183,10 @@ const styles = StyleSheet.create({
   bgImage: {
     width: '100%',
     height: HEIGHT(25),
+    borderWidth: 0.5,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderColor: COLOR.Gray,
   },
   profileWrapper: {
     flexDirection: 'row',

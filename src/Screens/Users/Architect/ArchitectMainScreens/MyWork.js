@@ -24,6 +24,8 @@ const MyWork = () => {
   const navigation = useNavigation();
   const [archiId, setArchiId] = useState(null);
   const [listData, setListData] = useState([]);
+  // console.log('listData', listData);
+  // console.log('archiId', archiId);
 
   useEffect(() => {
     getUser();
@@ -36,14 +38,15 @@ const MyWork = () => {
   }, [archiId]);
 
   const getUser = async () => {
-    const UserID = await AsyncStorage.getItem('ArchitectId');
+    const UserID = await AsyncStorage.getItem('userId');
     setArchiId(UserID);
-  };
+  }
 
   const ArchitectWorkListAPI = () => {
     ApiManager.ArchitectMyWorkList(archiId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.data;
+        console.log('response', response);
         setListData(response);
       } else {
         Snackbar.show({
@@ -122,7 +125,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.White,
-    paddingHorizontal: WIDTH(4),
   },
 
   txt: {
@@ -133,8 +135,8 @@ const styles = StyleSheet.create({
 
   create: {
     position: 'absolute',
-    bottom: 6,
-    right: 10,
+    bottom: 0,
+    right: 9
   },
 
   empty: {
@@ -148,8 +150,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
   },
+  
   card: {
-    width: WIDTH(90),
+    width: WIDTH(95),
     backgroundColor: '#fff',
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
@@ -163,15 +166,18 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#8ECEAB',
   },
+
   image: {
     width: '100%',
     height: 160,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
+
   cardContent: {
     padding: 10,
   },
+
   title: {
     fontSize: 24,
     fontWeight: '500',
@@ -185,11 +191,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // marginBottom: 5,
   },
+
   text: {
     fontSize: 14,
     color: COLOR.Gray9,
     marginLeft: 5,
   },
+  
   newBid: {
     position: 'absolute',
     top: 10,
@@ -214,7 +222,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     backgroundColor: COLOR.White,
     borderColor: COLOR.LightGray,
-
     borderRadius: 6,
     marginHorizontal: HEIGHT(1),
     marginVertical: HEIGHT(0.8),

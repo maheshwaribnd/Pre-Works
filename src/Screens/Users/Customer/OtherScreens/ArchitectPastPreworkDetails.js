@@ -54,25 +54,17 @@ const ArchitectPastPreworkDetails = () => {
                 showsPagination
                 style={{height: 240}} // Make sure it has height
                 paginationStyle={{bottom: 0}}>
-                {itemImages.map(
-                  (item, index) => (
-                    console.log('item?.files', item?.files),
-                    (
-                      <View
-                        key={index}
-                        style={{
-                          flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}>
-                        <Image
-                          source={{uri: item?.files}}
-                          style={styles.imgs}
-                        />
-                      </View>
-                    )
-                  ),
-                )}
+                {itemImages.map((item, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image source={{uri: item?.files}} style={styles.imgs} />
+                  </View>
+                ))}
               </Swiper>
 
               {/* Title */}

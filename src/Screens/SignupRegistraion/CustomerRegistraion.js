@@ -158,8 +158,7 @@ const CustomerRegistraion = () => {
             'CustomerData',
             JSON.stringify(simpleData),
           );
-          // const getCustomerData = await AsyncStorage.getItem('CustomerData');
-          // console.log('getCust111', getCustomerData);
+
           await AsyncStorage.setItem(
             'userId',
             JSON.stringify(res?.data?.user_id),

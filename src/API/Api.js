@@ -80,6 +80,7 @@ const requestPath = {
   // Update request
 
   customerUpdate: 'auth/customeredit/update',
+  architectUpdate: 'auth/updateArchitechProfile',
 
   // Delete Request
   deleteAccount: 'auth/deleteAccount',
@@ -169,6 +170,10 @@ const ApiManager = {
 
   CustomerUpdate: (userId, formData) => {
     return requests1.post(`${requestPath.customerUpdate}/${userId}`, formData);
+  },
+
+  ArchitectUpdate: (userId, formData) => {
+    return requests1.post(`${requestPath.architectUpdate}/${userId}`, formData);
   },
 
   // Delete API

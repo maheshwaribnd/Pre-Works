@@ -16,8 +16,6 @@ import {userTypeFunction} from '../../Redux/Reducers/userType';
 import ApiManager from '../../API/Api';
 
 const WelcomeScreen = () => {
-
-
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -34,7 +32,6 @@ const WelcomeScreen = () => {
       try {
         const userID = await AsyncStorage.getItem('userId');
         setUserId(userID);
-        console.log('UserID:', userID);
       } catch (error) {
         console.error('Error in fetching data:', error);
       }

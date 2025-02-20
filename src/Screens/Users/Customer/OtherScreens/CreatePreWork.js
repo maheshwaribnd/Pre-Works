@@ -114,8 +114,6 @@ const CreatePreWork = () => {
       });
     }
 
-    console.log('formData', formData);
-
     await ApiManager.createPreWork(formData)
       .then(res => {
         if (res?.data?.status === 200) {
