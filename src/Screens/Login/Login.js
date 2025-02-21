@@ -48,6 +48,8 @@ const Login = () => {
     ApiManager.userLogin(params)
       .then(async res => {
         if (res?.data?.status === 200) {
+          console.log('loginres?.data', res?.data);
+
           await AsyncStorage.setItem(
             'successStatus',
             JSON.stringify(res?.data?.success),
@@ -69,15 +71,15 @@ const Login = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-        } else {
-          Snackbar.show({
-            text: res?.data?.errors,
-            backgroundColor: '#D1264A',
-            duration: Snackbar.LENGTH_SHORT,
-          });
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        Snackbar.show({
+          text: 'Invalid Credentials',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      });
   };
 
   const onChange = (key, value) => {

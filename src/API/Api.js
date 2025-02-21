@@ -71,15 +71,18 @@ const requestPath = {
 
   // Contractor
   contractoreProfile: 'auth/contractorProfile',
+  newPreworkList: 'auth/NewpreworkListing',
+  newPreworkById: 'auth/NewprewokByid',
 
   // Architect
   architectProfile: 'auth/architectureProfile',
   architectMyWorkList: 'auth/ArchitechworkListing',
-  architectMyworkById: 'auth/getArchitectureById',
+  architectMyworkById: 'auth/ArchitectWorkById',
 
   // Update request
 
-  customerUpdate: 'auth/customeredit/update',
+  customerUpdate: 'auth/updateCustomerProfile',
+  contractorUpdate: 'auth/updateContractorProfile',
   architectUpdate: 'auth/updateArchitechProfile',
 
   // Delete Request
@@ -121,6 +124,8 @@ const ApiManager = {
   },
 
   // Get API
+
+  // Customer
   customerProfile: userId => {
     return requests.get(`${requestPath.customerProfile}/${userId}`);
   },
@@ -149,27 +154,45 @@ const ApiManager = {
     return requests.get(`${requestPath.architectListById}/${architectId}`);
   },
 
+  // Contractor
+
   ContractorProfile: ContractorId => {
     return requests.get(`${requestPath.contractoreProfile}/${ContractorId}`);
   },
+
+  NewPreworkList: () => {
+    return requests.get(requestPath.newPreworkList);
+  },
+
+  NewPreworkById: preId => {
+    return requests.get(`${requestPath.newPreworkById}/${preId}`);
+  },
+
+  // Architect
 
   ArchitectProfile: ArchitectId => {
     return requests.get(`${requestPath.architectProfile}/${ArchitectId}`);
   },
 
-  // Architect
   ArchitectMyWorkList: architectId => {
     return requests.get(`${requestPath.architectMyWorkList}/${architectId}`);
   },
 
-  ArchitectMyWorkById: workId => {
-    return requests.get(`${requestPath.architectMyworkById}/${workId}`);
+  ArchitectMyWorkById: Id => {
+    return requests.get(`${requestPath.architectMyworkById}/${Id}`);
   },
 
   // Update API
 
   CustomerUpdate: (userId, formData) => {
     return requests1.post(`${requestPath.customerUpdate}/${userId}`, formData);
+  },
+
+  ContractorUpdate: (userId, formData) => {
+    return requests1.post(
+      `${requestPath.contractorUpdate}/${userId}`,
+      formData,
+    );
   },
 
   ArchitectUpdate: (userId, formData) => {

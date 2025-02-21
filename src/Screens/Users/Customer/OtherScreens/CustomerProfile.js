@@ -89,16 +89,7 @@ const CustomerProfile = () => {
       const res = await ApiManager.CustomerUpdate(cusId, formData);
 
       if (res?.data?.status === 200) {
-        setData({
-          name: res.data.customer?.name || '',
-          email: res.data.customer?.email || '',
-          mobile_no: res.data.customer?.mobile_no || '',
-          address: res.data.customer?.address || '',
-          city: res.data.customer?.city || '',
-          pincode: res.data.customer?.pincode || '',
-          state: res.data.customer?.state || '',
-          profile_image: res.data.customer?.profile_image || '',
-        });
+        console.log('cusUpdate', res?.data);
         setuserImage(res.data.customer?.profile_image || '');
         await AsyncStorage.setItem(
           'customerData',
@@ -123,16 +114,15 @@ const CustomerProfile = () => {
   };
 
   const selectImage = async () => {
-    launchImageLibrary({quality: 0.7}, response => {
-      if (response?.didCancel) {
+    launchImageLibrary({quality: 0.7}, fileobj => {
+      if (fileobj?.didCancel === true) {
         setuserImage('');
-        setData(prev => ({...prev, profile_image: ''}));
+        // setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
-        const img = response?.assets?.[0]?.uri || '';
-        if (img) {
-          setuserImage(img);
-          setData(prev => ({...prev, profile_image: img}));
-        }
+        const img = fileobj?.assets[0]?.uri || '';
+        setuserImage(img);
+        // setUserData(prev => ({...prev, img})); // Update userData
+        setDocumentFile(fileobj?.assets);
       }
     });
   };

@@ -24,8 +24,6 @@ const MyWork = () => {
   const navigation = useNavigation();
   const [archiId, setArchiId] = useState(null);
   const [listData, setListData] = useState([]);
-  // console.log('listData', listData);
-  // console.log('archiId', archiId);
 
   useEffect(() => {
     getUser();
@@ -40,13 +38,14 @@ const MyWork = () => {
   const getUser = async () => {
     const UserID = await AsyncStorage.getItem('userId');
     setArchiId(UserID);
-  }
+  };
 
   const ArchitectWorkListAPI = () => {
     ApiManager.ArchitectMyWorkList(archiId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.data;
         console.log('response', response);
+
         setListData(response);
       } else {
         Snackbar.show({
@@ -60,9 +59,8 @@ const MyWork = () => {
 
   const ProjectCard = item => {
     const openParticularWork = item => {
-      const WorkID = item?.item?.work_id;
-
-      // navigation.navigate('myworkdetails', {WorkId: WorkID});
+      const ID = item?.item?.id;
+      navigation.navigate('myworkdetails', {Id: ID});
     };
 
     return (
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
   create: {
     position: 'absolute',
     bottom: 0,
-    right: 9
+    right: 9,
   },
 
   empty: {
@@ -150,7 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
   },
-  
+
   card: {
     width: WIDTH(95),
     backgroundColor: '#fff',
@@ -197,7 +195,7 @@ const styles = StyleSheet.create({
     color: COLOR.Gray9,
     marginLeft: 5,
   },
-  
+
   newBid: {
     position: 'absolute',
     top: 10,

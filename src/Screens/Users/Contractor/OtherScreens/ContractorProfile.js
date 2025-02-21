@@ -28,6 +28,7 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import ApiManager from '../../../../API/Api';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const ContractorProfile = () => {
   const [data, setData] = useState([]);
@@ -35,28 +36,77 @@ const ContractorProfile = () => {
   const [userId, setUserId] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
+  console.log('data000', data);
 
-  const fetchContractorProfile = async () => {
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userID = await AsyncStorage.getItem('userId');
+      if (userID) setUserId(userID);
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      CustomerProfileAPI();
+    }
+  }, [userId]);
+
+  const CustomerProfileAPI = async () => {
+    if (!userId) return;
     try {
-      const userID = await AsyncStorage.getItem('contractoruserId');
-      setUserId(userID);
+      const res = await ApiManager.ContractorProfile(userId);
+      if (res?.data?.status === 200) {
+        console.log('res?.data000', res?.data);
+        setData(res?.data?.['contractors ']);
 
-      if (userID) {
-        const response = await ApiManager.ContractorProfile(userID);
-        if (response?.data?.status === 200) {
-          const contractorData = response?.data?.['contractors '];
-          setData(contractorData);
-        }
+        setuserImage(res?.data?.['contractors ']?.profile_image || '');
       }
-    } catch (error) {
-      console.error('Error in fetching data:', error);
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  // Fetch data when the component mounts
-  useEffect(() => {
-    fetchContractorProfile();
-  }, []);
+  const ContractorUpdateAPI = async () => {
+    const formData = new FormData();
+    formData.append('name', data?.name);
+    formData.append('email', data?.email);
+    formData.append('mobile_no', data?.mobile_no);
+    formData.append('address', data?.address);
+    formData.append('experience', data?.experience);
+
+    if (documentFile?.length > 0) {
+      formData.append('profile_image', {
+        uri: documentFile[0].uri,
+        type: documentFile[0].type,
+        name: documentFile[0].fileName,
+      });
+    }
+
+    try {
+      setEdit(false);
+      const res = await ApiManager.ContractorUpdate(userId, formData);
+
+      if (res?.data?.status === 200) {
+        console.log('contractorUpdate', res?.data);
+        // setuserImage(res.data.customer?.profile_image || '');
+
+        Snackbar.show({
+          text: res?.data?.message || 'Profile updated successfully!',
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else {
+        Snackbar.show({
+          text: res?.data?.message || 'Update failed!',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+    } catch (err) {
+      console.log('Update Error:', err);
+    }
+  };
 
   const selectImage = async () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
@@ -104,9 +154,9 @@ const ContractorProfile = () => {
                 width: WIDTH(30),
                 height: WIDTH(30),
                 borderRadius: 50,
-                borderWidth: 1,
+                borderWidth: 0.5,
               }}
-              source={{uri: data?.profile_image}} // Use selected image or default profile image
+              source={{uri: userImage}} // Use selected image or default profile image
               resizeMode="cover"
             />
             {edit ? (
@@ -153,9 +203,18 @@ const ContractorProfile = () => {
           onChangeText={text => onChange('address', text)}
         />
 
+        <TextInput
+          style={styles.InputField}
+          keyboardType="number-pad"
+          placeholder={data?.experience}
+          editable={edit}
+          value={data?.experience}
+          onChangeText={text => onChange('experience', text)}
+        />
+
         <View style={{marginBottom: HEIGHT(2)}}>
           {edit ? (
-            <CustomButton name="SAVE" onPress={() => console.log('update')} />
+            <CustomButton name="SAVE" onPress={() => ContractorUpdateAPI()} />
           ) : null}
         </View>
       </ImageBackground>
@@ -190,6 +249,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+  },
+
+  badge: {
+    backgroundColor: COLOR.Gray,
+    position: 'absolute',
+    bottom: 0,
+    right: 2,
   },
 
   name: {},

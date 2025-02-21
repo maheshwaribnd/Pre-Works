@@ -30,6 +30,9 @@ import ApiManager from '../../API/Api';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const CustomerRegistraion = () => {
+
+  const navigation = useNavigation();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [documentFile, setDocumentFile] = useState(null);
@@ -114,19 +117,7 @@ const CustomerRegistraion = () => {
     }
   };
 
-  const selectImage = async () => {
-    launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel === true) {
-        setuserImage('');
-        setUserData(prev => ({...prev, img: ''})); // Update userData
-      } else {
-        const img = fileobj?.assets[0]?.uri || '';
-        setuserImage(img);
-        setUserData(prev => ({...prev, img})); // Update userData
-        setDocumentFile(fileobj?.assets);
-      }
-    });
-  };
+  
 
   const CustomerSignupAPI = async () => {
     const formData = new FormData();
@@ -182,7 +173,20 @@ const CustomerRegistraion = () => {
       });
   };
 
-  const navigation = useNavigation();
+  const selectImage = async () => {
+    launchImageLibrary({quality: 0.7}, fileobj => {
+      if (fileobj?.didCancel === true) {
+        setuserImage('');
+        setUserData(prev => ({...prev, img: ''})); // Update userData
+      } else {
+        const img = fileobj?.assets[0]?.uri || '';
+        setuserImage(img);
+        setUserData(prev => ({...prev, img})); // Update userData
+        setDocumentFile(fileobj?.assets);
+      }
+    });
+  };
+
 
   // useEffect(() => {
   //   getToken();

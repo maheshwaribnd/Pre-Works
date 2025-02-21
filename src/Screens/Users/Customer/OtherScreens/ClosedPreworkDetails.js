@@ -59,7 +59,7 @@ const ClosedPreworkDetails = () => {
               showsPagination
               paginationStyle={{bottom: 0}}
               style={styles.imageSlider}>
-              {resImgs.map((item, index) => (
+              {resImgs?.map((item, index) => (
                 <View key={index} style={styles.imageContainer}>
                   <Image source={{uri: item?.files}} style={styles.image} />
                 </View>

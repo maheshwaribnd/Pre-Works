@@ -1,4 +1,5 @@
 import {
+  FlatList,
   Image,
   ImageBackground,
   ScrollView,
@@ -28,11 +29,10 @@ import {ActivityIndicator} from 'react-native-paper';
 
 const MyWorkDetails = () => {
   const route = useRoute();
-  const WorkId = route?.params?.WorkId;
+  const ID = route?.params?.Id;
 
   const [data, setData] = useState([]);
   const [resImgs, setResImgs] = useState([]);
-
   const [loader, setLoader] = useState(false);
 
   useEffect(() => {
@@ -40,10 +40,14 @@ const MyWorkDetails = () => {
   }, []);
 
   const ArchitectMyWorkByIdAPI = async () => {
-    ApiManager.ArchitectMyWorkById(WorkId)
+    setLoader(true);
+    ApiManager.ArchitectMyWorkById(ID)
       .then(res => {
         if (res?.data?.status === 200) {
-          console.log('API arcmyworkbyID:', res.data); // Debugging
+          const response = res?.data?.data;
+          setData(response);
+          setResImgs(response[0]?.images);
+          setLoader(false);
         }
       })
       .catch(err => {
@@ -58,12 +62,12 @@ const MyWorkDetails = () => {
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* {loader ? (
+          {loader ? (
             <View
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
               <ActivityIndicator />
             </View>
-          ) : (
+          ) : data?.length > 0 ? (
             <View style={styles.contentWrapper}>
               <Swiper
                 autoplay
@@ -71,7 +75,7 @@ const MyWorkDetails = () => {
                 showsPagination
                 style={{height: 240}} // Make sure it has height
                 paginationStyle={{bottom: 0}}>
-                {resImgs.map((item, index) => (
+                {resImgs?.map((item, index) => (
                   <View
                     key={index}
                     style={{
@@ -84,43 +88,45 @@ const MyWorkDetails = () => {
                 ))}
               </Swiper>
 
-              <Text style={styles.nametitle}>{data?.name}</Text>
+              <Text style={styles.nametitle}>{data[0]?.name}</Text>
 
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <CalenderIcon />
-                  <Text style={styles.detailText}>{data?.last_date}</Text>
+                  <Text style={styles.detailText}>{data[0]?.time}</Text>
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>{data?.material}</Text>
+                  <Text style={styles.detailText}>{data[0]?.material}</Text>
                 </View>
               </View>
 
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <MoneyIcon />
-                  <Text style={styles.detailText}>{data?.budget_range}</Text>
+                  <Text style={styles.detailText}>{data[0]?.budget}</Text>
                 </View>
                 <View style={styles.row}>
                   <BiddingIcon />
-                  <Text style={styles.detailText}>{data?.custombid}</Text>
+                  <Text style={styles.detailText}>{data[0]?.bid}</Text>
                 </View>
               </View>
 
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <LocationIcon />
-                  <Text style={styles.detailText}>{data?.address}</Text>
+                  <Text style={styles.detailText}>{data[0]?.address}</Text>
                 </View>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>{data?.description}</Text>
+                <Text style={styles.description}>{data[0]?.description}</Text>
               </View>
             </View>
-          )} */}
+          ) : (
+            <Text>No Data</Text>
+          )}
         </ScrollView>
       </ImageBackground>
     </View>
@@ -188,6 +194,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginVertical: HEIGHT(2),
+    marginHorizontal: WIDTH(4),
   },
   sectionTitle: {
     fontSize: 18,

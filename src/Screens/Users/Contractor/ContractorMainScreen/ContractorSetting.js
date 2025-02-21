@@ -26,11 +26,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
+import ApiManager from '../../../../API/Api';
 
 const ContractorSetting = () => {
   const navigation = useNavigation();
+  const [userId, setUserId] = useState('');
+  const [userImage, setuserImage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setDeleteShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userID = await AsyncStorage.getItem('userId');
+      if (userID) setUserId(userID);
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      CustomerProfileAPI();
+    }
+  }, [userId]);
+
+  const CustomerProfileAPI = async () => {
+    if (!userId) return;
+    try {
+      const res = await ApiManager.ContractorProfile(userId);
+      if (res?.data?.status === 200) {
+        setuserImage(res?.data?.['contractors ']?.profile_image || '');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const LogoutFunction = async () => {
     try {
@@ -55,15 +84,13 @@ const ContractorSetting = () => {
         showsHorizontalScrollIndicator={false}>
         <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
           <Image
-            style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
-            source={
-              // userImage == ''
-              //   ? userDetails?.length == []
-              // ?
-              require('../../../../assets/Icons/avatar.jpg')
-              //   : {uri: userDetails?.profileImg}
-              // : {uri: userImage}
-            }
+            style={{
+              width: WIDTH(30),
+              height: WIDTH(30),
+              borderRadius: 50,
+              marginBottom: HEIGHT(2),
+            }}
+            source={{uri: userImage}}
             resizeMode="cover"
           />
         </View>

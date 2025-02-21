@@ -94,7 +94,7 @@ const Profile = () => {
         uri: backgdDocumentFile[0].uri,
         type: backgdDocumentFile[0].type,
         name: backgdDocumentFile[0].fileName,
-      });
+      })
     }
 
     try {
@@ -106,7 +106,7 @@ const Profile = () => {
           text: res?.data?.message,
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
-        });
+        })
         // setData({
         //   name: res.data.customer?.name || '',
         //   email: res.data.customer?.email || '',
@@ -283,7 +283,7 @@ const Profile = () => {
             />
 
             <View style={{marginBottom: HEIGHT(2)}}>
-              {edit ? (
+              {!edit ? (
                 <CustomButton
                   name="SAVE"
                   onPress={() => ArchitectUpdateAPI()}

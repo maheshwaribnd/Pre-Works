@@ -34,9 +34,9 @@ const ContractorRegistration = () => {
   const navigation = useNavigation();
 
   const [userImage, setuserImage] = useState('');
-  const [profileDocumentFile, setProfileDocumentFile] = useState(null);
-  const [uploadImg, setUploadImg] = useState('');
-  const [uploadDocumentFile, setUploadDocumentFile] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
+  // const [uploadImg, setUploadImg] = useState('');
+  // const [uploadDocumentFile, setUploadDocumentFile] = useState(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -81,11 +81,11 @@ const ContractorRegistration = () => {
     formData.append('password_confirmation', userData.confirmPw);
 
     // profile photo
-    if (profileDocumentFile !== null) {
+    if (documentFile !== null) {
       formData.append('profile_image', {
-        uri: profileDocumentFile[0].uri,
-        type: profileDocumentFile[0].type,
-        name: profileDocumentFile[0].fileName,
+        uri: documentFile[0].uri,
+        type: documentFile[0].type,
+        name: documentFile[0].fileName,
       });
     } else {
       formData.append('profile_image', undefined);
@@ -111,8 +111,6 @@ const ContractorRegistration = () => {
         }, {});
 
         if (res?.data?.status == 200) {
-          console.log('Contractorres?.data', res?.data);
-          
           await AsyncStorage.setItem(
             'ContractorData',
             JSON.stringify(simpleData),
@@ -141,7 +139,7 @@ const ContractorRegistration = () => {
   };
 
   const validateForm = () => {
-    let newErrors = {...error}; // Preserve existing structure
+    let newErrors = {}; // Preserve existing structure
 
     // Name validation
     if (!/^[A-Za-z\s]{3,}$/.test(userData.name.trim())) {
@@ -284,7 +282,7 @@ const ContractorRegistration = () => {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
         setUserData(prev => ({...prev, img})); // Update userData
-        setProfileDocumentFile(fileobj?.assets);
+        setDocumentFile(fileobj?.assets);
       }
     });
   };
