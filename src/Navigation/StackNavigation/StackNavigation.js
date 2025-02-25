@@ -25,6 +25,9 @@ import CreateMyWork from '../../Screens/Users/Architect/OtherScreens/CreateMyWor
 import MyWorkDetails from '../../Screens/Users/Architect/OtherScreens/MyWorkDetails';
 import Profile from '../../Screens/Users/Architect/ArchitectMainScreens/Profile';
 import NewPreworkDetails from '../../Screens/Users/Contractor/OtherScreens/NewPreworkDetails';
+import PostBidScreen from '../../Screens/Users/Contractor/OtherScreens/PostBidScreen';
+import ProjectAppliedDetails from '../../Screens/Users/Contractor/OtherScreens/ProjectAppliedDetails';
+import ContractorMyWork from '../../Screens/Users/Contractor/OtherScreens/ContractorMyWork';
 
 const Stack = createNativeStackNavigator();
 
@@ -98,13 +101,18 @@ const StackNavigation = () => {
         {/* Contractor */}
         <Stack.Screen name="contractorprofile" component={ContractorProfile} />
         <Stack.Screen name="newpreworkdetails" component={NewPreworkDetails} />
+        <Stack.Screen name="postbidscreen" component={PostBidScreen} />
+        <Stack.Screen
+          name="projectapplieddetails"
+          component={ProjectAppliedDetails}
+        />
+        <Stack.Screen name="contractormywork" component={ContractorMyWork} />
 
         {/* Architect */}
 
         <Stack.Screen name="createmywork" component={CreateMyWork} />
         <Stack.Screen name="myworkdetails" component={MyWorkDetails} />
         <Stack.Screen name="architectprofile" component={Profile} />
-        
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -2,34 +2,24 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   ImageBackground,
   Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {
-  FONTSIZE,
-  HEIGHT,
-  NotoSans_Bold,
-  NotoSans_Light,
-  NotoSans_Medium,
-  WIDTH,
-} from '../../../../config/AppConst';
+import {HEIGHT, WIDTH} from '../../../../config/AppConst';
 import {useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import ApiManager from '../../API/Api';
-import {Badge} from 'react-native-paper';
-import Octicons from 'react-native-vector-icons/Octicons';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
 import ApiManager from '../../../../API/Api';
+import {useSelector} from 'react-redux';
+import Snackbar from 'react-native-snackbar';
 
 const ContractorSetting = () => {
   const navigation = useNavigation();
+  const typeSelector = useSelector(state => state.userTypee.usertype);
   const [userId, setUserId] = useState('');
   const [userImage, setuserImage] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -71,8 +61,27 @@ const ContractorSetting = () => {
     }
   };
 
-  const DeletFunction = () => {
-    console.log('delete Account');
+  const AccountDeleteAPI = () => {
+    ApiManager.DeleteAccount(typeSelector, userId)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          navigation.navigate('welcome');
+        } else {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#D1264A',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   return (
@@ -152,7 +161,7 @@ const ContractorSetting = () => {
             showModal={showDeleteModal}
             setShowModal={setDeleteShowModal}
             text="Delete Account"
-            onpress={DeletFunction()}
+            onpress={() => AccountDeleteAPI()}
           />
         ) : null}
 
@@ -213,6 +222,4 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
     elevation: 5,
   },
-
-  name: {},
 });

@@ -22,6 +22,7 @@ import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
+import HeaderWithEdit from '../../../../Component/CustomeHeader/HeaderWithEdit';
 
 const CustomerProfile = () => {
   const [data, setData] = useState([]);
@@ -136,7 +137,7 @@ const CustomerProfile = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Profile" />
+      <HeaderWithEdit name="Profile" edit={edit} setEdit={setEdit} />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -144,12 +145,6 @@ const CustomerProfile = () => {
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
           <View style={{flexDirection: 'row'}}>
-            <TouchableOpacity
-              onPress={() => setEdit(!edit)}
-              style={styles.edit}>
-              <EditIcon color="grey" />
-            </TouchableOpacity>
-
             <View
               style={{
                 paddingTop: HEIGHT(2),
@@ -280,12 +275,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 2,
-  },
-
-  edit: {
-    // position: 'absolute',
-    // top: 10,
-    right: 12,
-    padding: 10,
   },
 });

@@ -1,5 +1,11 @@
 import React, {useState} from 'react';
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import OTPImg from '../../assets/Svg/OTPImg.svg';
 import COLOR from '../../config/color.json';
 import CustomButton from '../../Component/CustomButton/CustomButton';
@@ -15,7 +21,7 @@ const OTPScreen = () => {
 
   const route = useRoute();
   const navigation = useNavigation();
-  const custNumber = route.params?.mobile_no;
+  const mobileNumber = route.params?.mobile_no;
 
   const [otp, setOtp] = useState('');
   const [isValid, setIsValid] = useState(false);
@@ -37,7 +43,7 @@ const OTPScreen = () => {
     }
 
     const params = {
-      mobile_no: custNumber,
+      mobile_no: mobileNumber,
       user_type: typeSelector,
       otp: otp,
     };
@@ -63,7 +69,26 @@ const OTPScreen = () => {
           });
         }
       })
-      .catch(err => console.log(err));
+      .catch(err =>
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        }),
+      );
+  };
+
+  const ResendOtpAPI = () => {
+    const params = {
+      mobile_no: mobileNumber,
+      user_type: typeSelector,
+    };
+
+    ApiManager.ResendOtp(params).then(res => {
+      if (res?.data?.status === 200) {
+        console.log('rotp', res?.data);
+      }
+    });
   };
 
   return (
@@ -88,8 +113,9 @@ const OTPScreen = () => {
       </View>
 
       <Text style={styles.txt}>Didn't receive OTP code?</Text>
-      <Text style={[styles.txt, {color: '#1EA35A'}]}>Resend OTP</Text>
-
+      <TouchableOpacity onPress={() => ResendOtpAPI()}>
+        <Text style={[styles.txt, {color: '#1EA35A'}]}>Resend OTP</Text>
+      </TouchableOpacity>
       <CustomButton
         name="VERIFY OTP"
         onPress={() => OTPVerifyAPI()}

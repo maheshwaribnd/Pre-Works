@@ -19,7 +19,7 @@ const WelcomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState('')
 
   const Options = [
     {id: 1, name: 'CUSTOMER', type: 'customer'},

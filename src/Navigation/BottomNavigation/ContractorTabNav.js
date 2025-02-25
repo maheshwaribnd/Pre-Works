@@ -20,15 +20,15 @@ const TabArr = [
   {
     name: 'New Pre-work',
     component: NewPrework,
-    Icon1: require('../../assets/NavIcons/IdeaRejected.png'),
-    Icon2: require('../../assets/NavIcons/IdeaRejectedUnselect.png'),
+    Icon1: require('../../assets/NavIcons/newPreworkSelect.png'),
+    Icon2: require('../../assets/NavIcons/newPreworkUnselect.png'),
   },
 
   {
     name: 'Project Applied',
     component: ProjectApplied,
-    Icon1: require('../../assets/NavIcons/IdeaRejected.png'),
-    Icon2: require('../../assets/NavIcons/IdeaRejectedUnselect.png'),
+    Icon1: require('../../assets/NavIcons/ProjectAppliedSelect.png'),
+    Icon2: require('../../assets/NavIcons/ProjectAppliedUnselect.png'),
   },
 
   {

@@ -264,7 +264,7 @@ const CreatePreWork = () => {
                   {label: 'Labour', value: 'Labour'},
                   {label: 'Labour + Material', value: 'Labour + Material'},
                 ]}
-                placeholder={{label: 'Labour', value: null}}
+                // placeholder={{label: 'Labour', value: null}}
                 style={styles.picker}
               />
             </View>

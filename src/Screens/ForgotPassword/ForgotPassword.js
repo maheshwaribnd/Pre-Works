@@ -9,22 +9,41 @@ import {
 import React, {useState} from 'react';
 import CustomButton from '../../Component/CustomButton/CustomButton';
 import COLOR from '../../config/color.json';
+import ForgotPasswordSVG from '../../assets/Svg/forgotPassword.svg';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../config/AppConst';
+import ApiManager from '../../API/Api';
+import {useSelector} from 'react-redux';
+import Snackbar from 'react-native-snackbar';
 
 const ForgotPassword = () => {
+  const typeSelector = useSelector(state => state.userTypee.usertype);
   const [number, setNumber] = useState(null);
+
+  const ForgotPasswordAPI = () => {
+    const params = {
+      mobile_no: number,
+      user_type: typeSelector,
+    };
+
+    ApiManager.forgetPassword(params)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      })
+      .catch(err => console.log(err));
+  };
 
   return (
     <ImageBackground
       source={require('../../assets/Imgs/Background.png')}
       style={styles.container}>
       <View style={{alignItems: 'center'}}>
-        <Image
-          source={require('../../assets/Imgs/forgotPw.png')}
-          height={20}
-          width={20}
-          style={{marginTop: HEIGHT(2)}}
-        />
+        <ForgotPasswordSVG height={240} width={240} />
       </View>
 
       <Text style={styles.txt}>
@@ -33,14 +52,13 @@ const ForgotPassword = () => {
 
       <TextInput
         style={styles.InputField}
-        placeholder="Mobile number"
+        placeholder="+91 Mobile number"
         keyboardType="number-pad"
         value={number}
-        // onChangeText={emailOnChange}
-        // onBlur={emailValidationFunction}
+        onChangeText={text => setNumber(text)}
       />
 
-      <CustomButton name="SEND OTP" />
+      <CustomButton name="SEND OTP" onPress={() => ForgotPasswordAPI()} />
     </ImageBackground>
   );
 };

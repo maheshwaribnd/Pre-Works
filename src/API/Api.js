@@ -49,6 +49,7 @@ const requestPath = {
   architectureRegistration: 'auth/ArchitectureRegister',
   forgetPassword: 'auth/forgot-password',
   otpVerify: 'auth/OtpVerified',
+  resendOtp: 'auth/ResendOtp',
 
   //customer
   createPrework: 'auth/createPrework',
@@ -73,6 +74,12 @@ const requestPath = {
   contractoreProfile: 'auth/contractorProfile',
   newPreworkList: 'auth/NewpreworkListing',
   newPreworkById: 'auth/NewprewokByid',
+  placeBid: 'auth/placeBid',
+  projectAppliedList: 'auth/projectApplyList',
+  projectAppliedDetail: 'auth/ProjectListingDetails',
+  appliedProjectEdit: 'auth/projectDetailsEdit',
+  contractorWork: 'auth/ContractorWork',
+  contractorWorkList: 'auth/ContractorWorklisting',
 
   // Architect
   architectProfile: 'auth/architectureProfile',
@@ -103,12 +110,24 @@ const ApiManager = {
     return requests.post(requestPath.otpVerify, params);
   },
 
+  ResendOtp: params => {
+    return requests.post(requestPath.resendOtp, params);
+  },
+
   customerRegistration: params => {
     return requests1.post(requestPath.customerRegistration, params);
   },
 
   contractorRegistration: params => {
     return requests1.post(requestPath.contractorRegistration, params);
+  },
+
+  ApplyForBid: params => {
+    return requests1.post(requestPath.placeBid, params);
+  },
+
+  ContractorWork: params => {
+    return requests1.post(requestPath.contractorWork, params);
   },
 
   architectureRegistration: params => {
@@ -168,6 +187,20 @@ const ApiManager = {
     return requests.get(`${requestPath.newPreworkById}/${preId}`);
   },
 
+  ProjectAppliedList: userId => {
+    return requests.get(`${requestPath.projectAppliedList}/${userId}`);
+  },
+
+  ProjectAppliedDetails: (preId, userId) => {
+    return requests.get(
+      `${requestPath.projectAppliedDetail}/${preId}/${userId}`,
+    );
+  },
+
+  ContractorWorkListing: userId => {
+    return requests.get(`${requestPath.contractorWorkList}/${userId}`);
+  },
+
   // Architect
 
   ArchitectProfile: ArchitectId => {
@@ -191,6 +224,13 @@ const ApiManager = {
   ContractorUpdate: (userId, formData) => {
     return requests1.post(
       `${requestPath.contractorUpdate}/${userId}`,
+      formData,
+    );
+  },
+
+  AppliedProjectEdit: (preId, userId, formData) => {
+    return requests1.post(
+      `${requestPath.appliedProjectEdit}/${preId}/${userId}`,
       formData,
     );
   },

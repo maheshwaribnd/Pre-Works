@@ -4,11 +4,7 @@ import COLOR from '../../config/color.json';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../config/AppConst';
 import LinearGradient from 'react-native-linear-gradient';
 
-const BidModal = ({showModal, setShowModal, heading}) => {
-  const handleLogout = () => {
-    setShowModal(false);
-  };
-
+const BidModal = ({showModal, setShowModal, heading, name, color, onPress}) => {
   return (
     <Modal
       transparent
@@ -26,16 +22,18 @@ const BidModal = ({showModal, setShowModal, heading}) => {
               <Text style={styles.noText}>No</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
-              {/* <LinearGradient
-                start={{x: 1, y: 0}}
-                end={{x: 0, y: 1}}
-                style={[styles.button, styles.yesButton]}
-                // onPress={handleLogout}
-                > */}
-                <Text style={styles.yesText}>Yes</Text>
-              {/* </LinearGradient> */}
-            </TouchableOpacity>
+            <LinearGradient
+              colors={color}
+              activeOpacity={0.4}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.button}>
+              <TouchableOpacity
+               onPress={() => onPress()}
+              >
+                <Text style={styles.yesText}>{name}</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
         </View>
       </View>

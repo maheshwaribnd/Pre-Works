@@ -206,10 +206,10 @@ const CreateMyWork = () => {
               <RNPickerSelect
                 onValueChange={value => setMaterialSelected(value)}
                 items={[
-                  {label: 'With Material', value: 'With Material'},
-                  {label: 'Without Material', value: 'Without Material'},
+                  {label: 'Labour', value: 'Labour'},
+                  {label: 'Labour + Material', value: 'Labour + Material'},
                 ]}
-                placeholder={{label: 'Material', value: null}}
+                // placeholder={{label: 'Material', value: null}}
                 style={styles.picker}
               />
             </View>

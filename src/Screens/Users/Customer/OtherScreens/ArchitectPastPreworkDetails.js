@@ -30,7 +30,6 @@ const ArchitectPastPreworkDetails = () => {
   const route = useRoute();
   const itemDetails = route?.params?.item;
   const itemImages = route?.params?.images;
-
   const loader = route?.params?.loader;
 
   return (

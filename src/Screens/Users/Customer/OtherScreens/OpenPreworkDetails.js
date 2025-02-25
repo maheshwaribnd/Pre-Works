@@ -7,8 +7,8 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import COLOR from '../../../../config/color.json';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
+import COLOR from '../../../../config/color.json';
 import {
   HEIGHT,
   Montserrat_bold,
@@ -29,10 +29,8 @@ import {ActivityIndicator} from 'react-native-paper';
 const OpenPreworkDetails = () => {
   const route = useRoute();
   const PreworkId = route?.params?.preworkId;
-
   const [data, setData] = useState([]);
   const [resImgs, setResImgs] = useState([]);
-
   const [loader, setLoader] = useState(false);
 
   useEffect(() => {

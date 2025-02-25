@@ -9,34 +9,28 @@ import {
   Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {
-  FONTSIZE,
-  HEIGHT,
-  NotoSans_Bold,
-  NotoSans_Light,
-  NotoSans_Medium,
-  WIDTH,
-} from '../../../../config/AppConst';
-import {useNavigation} from '@react-navigation/native';
+import {HEIGHT, NotoSans_Medium, WIDTH} from '../../../../config/AppConst';
 import COLOR from '../../../../config/color.json';
-import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import EditIcon from '../../../../assets/Svg/edit.svg';
+import AddIcon from '../../../../assets/Svg/AddIcon.svg';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
 import ApiManager from '../../../../API/Api';
-import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
+import HeaderWithEdit from '../../../../Component/CustomeHeader/HeaderWithEdit';
+import {useNavigation} from '@react-navigation/native';
 
 const ContractorProfile = () => {
+  const navigation = useNavigation();
+
   const [data, setData] = useState([]);
   const [edit, setEdit] = useState(false);
   const [userId, setUserId] = useState('');
+  const [workList, setWorkList] = useState([]);
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
-  console.log('data000', data);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,6 +43,7 @@ const ContractorProfile = () => {
   useEffect(() => {
     if (userId) {
       CustomerProfileAPI();
+      ContractorWorkListAPI();
     }
   }, [userId]);
 
@@ -88,9 +83,6 @@ const ContractorProfile = () => {
       const res = await ApiManager.ContractorUpdate(userId, formData);
 
       if (res?.data?.status === 200) {
-        console.log('contractorUpdate', res?.data);
-        // setuserImage(res.data.customer?.profile_image || '');
-
         Snackbar.show({
           text: res?.data?.message || 'Profile updated successfully!',
           backgroundColor: '#27cc5d',
@@ -106,6 +98,19 @@ const ContractorProfile = () => {
     } catch (err) {
       console.log('Update Error:', err);
     }
+  };
+
+  const ContractorWorkListAPI = () => {
+    ApiManager.ContractorWorkListing(userId)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          const list = res?.data?.contractorWorks;
+          setWorkList(list);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const selectImage = async () => {
@@ -131,92 +136,113 @@ const ContractorProfile = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Profile" />
+      <HeaderWithEdit name="Profile" edit={edit} setEdit={setEdit} />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
-        <TouchableOpacity
-          onPress={() => {
-            setEdit(!edit);
-          }}
-          style={styles.edit}>
-          <EditIcon color="grey" />
-        </TouchableOpacity>
-        <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
-          <View
-            style={{
-              paddingTop: HEIGHT(3),
-              paddingBottom: HEIGHT(1),
-              alignItems: 'center',
-            }}>
-            <Image
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
+            <View
               style={{
-                width: WIDTH(30),
-                height: WIDTH(30),
-                borderRadius: 50,
-                borderWidth: 0.5,
-              }}
-              source={{uri: userImage}} // Use selected image or default profile image
-              resizeMode="cover"
-            />
+                paddingTop: HEIGHT(3),
+                paddingBottom: HEIGHT(1),
+                alignItems: 'center',
+              }}>
+              <Image
+                style={{
+                  width: WIDTH(30),
+                  height: WIDTH(30),
+                  borderRadius: 50,
+                  borderWidth: 0.5,
+                }}
+                source={{uri: userImage}}
+                resizeMode="cover"
+              />
+              {edit ? (
+                <Badge
+                  onPress={() => selectImage()}
+                  size={32}
+                  style={styles.badge}>
+                  <Octicons size={18} name="pencil" />
+                </Badge>
+              ) : null}
+            </View>
+          </View>
+
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.name}
+            editable={edit}
+            value={data?.name}
+            onChangeText={text => onChange('name', text)}
+          />
+
+          <TextInput
+            style={styles.InputField}
+            keyboardType="number-pad"
+            placeholder={data?.mobile_no}
+            editable={edit}
+            value={data?.mobile_no}
+            onChangeText={text => onChange('mobile_no', text)}
+          />
+
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.email}
+            editable={edit}
+            value={data?.email}
+            onChangeText={text => onChange('email', text)}
+          />
+
+          <TextInput
+            style={styles.InputField}
+            placeholder={data?.address || 'Address'}
+            editable={edit}
+            value={data?.address}
+            onChangeText={text => onChange('address', text)}
+          />
+
+          <TextInput
+            style={styles.InputField}
+            keyboardType="number-pad"
+            placeholder={data?.experience}
+            editable={edit}
+            value={data?.experience}
+            onChangeText={text => onChange('experience', text)}
+          />
+
+          <View style={{paddingBottom: HEIGHT(1)}}>
+            <Text style={styles.myWorkTxt}>My Work</Text>
+            <View style={styles.btnWrap}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {workList.map((item, index) => (
+                  <View key={index} style={styles.workItem}>
+                    <Image
+                      source={{uri: item?.files}}
+                      style={styles.workImage}
+                    />
+                    <Text style={styles.workText}>{workList?.name}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                style={styles.myWorkButton}
+                onPress={() => navigation.navigate('contractormywork')}
+                activeOpacity={0.9}>
+                <View style={styles.myWorkView}>
+                  <AddIcon height={45} width={45} />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{marginBottom: HEIGHT(2)}}>
             {edit ? (
-              <Badge
-                onPress={() => selectImage()}
-                size={32}
-                style={styles.badge}>
-                <Octicons size={18} name="pencil" />
-              </Badge>
+              <CustomButton name="SAVE" onPress={() => ContractorUpdateAPI()} />
             ) : null}
           </View>
-        </View>
-
-        <TextInput
-          style={styles.InputField}
-          placeholder={data?.name}
-          editable={edit}
-          value={data?.name}
-          onChangeText={text => onChange('name', text)}
-        />
-
-        <TextInput
-          style={styles.InputField}
-          keyboardType="number-pad"
-          placeholder={data?.mobile_no}
-          editable={edit}
-          value={data?.mobile_no}
-          onChangeText={text => onChange('mobile_no', text)}
-        />
-
-        <TextInput
-          style={styles.InputField}
-          placeholder={data?.email}
-          editable={edit}
-          value={data?.email}
-          onChangeText={text => onChange('email', text)}
-        />
-
-        <TextInput
-          style={styles.InputField}
-          placeholder={data?.address || 'Address'}
-          editable={edit}
-          value={data?.address}
-          onChangeText={text => onChange('address', text)}
-        />
-
-        <TextInput
-          style={styles.InputField}
-          keyboardType="number-pad"
-          placeholder={data?.experience}
-          editable={edit}
-          value={data?.experience}
-          onChangeText={text => onChange('experience', text)}
-        />
-
-        <View style={{marginBottom: HEIGHT(2)}}>
-          {edit ? (
-            <CustomButton name="SAVE" onPress={() => ContractorUpdateAPI()} />
-          ) : null}
-        </View>
+        </ScrollView>
       </ImageBackground>
     </View>
   );
@@ -258,7 +284,72 @@ const styles = StyleSheet.create({
     right: 2,
   },
 
-  name: {},
+  btnWrap: {
+    width: '100%',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+  },
+
+  myWorkView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLOR.Gray,
+    color: COLOR.black,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
+  },
+
+  workItem: {
+    alignItems: 'center',
+    width: 100,
+    height: 100,
+    marginRight: 10,
+    backgroundColor: '#000',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+
+  myWorkButton: {
+    alignItems: 'center',
+    marginVertical: HEIGHT(1),
+    backgroundColor: '#fff',
+  },
+
+  myWorkTxt: {
+    fontFamily: NotoSans_Medium,
+    fontSize: 16,
+    color: COLOR.PrimaryDarkColor,
+    width: WIDTH(25),
+    textAlign: 'left',
+  },
+
+  workImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  workText: {
+    color: '#fff',
+    fontSize: 14,
+    paddingVertical: 5,
+  },
+  myWorkButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   edit: {
     position: 'absolute',
