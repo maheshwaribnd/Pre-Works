@@ -30,7 +30,7 @@ import ApiManager from '../../API/Api';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 const CustomerRegistraion = () => {
-
+  let isSelecting = false;
   const navigation = useNavigation();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -106,18 +106,17 @@ const CustomerRegistraion = () => {
     }));
   };
 
-  const SubmitButton = () => {
+  const SubmitButton = async () => {
     if (validateForm()) {
-      CustomerSignupAPI();
-      navigation.navigate('otpscreen', {mobile_no: userData.number});
+      const response = await CustomerSignupAPI();
+      if (response?.status === 200) {
+        navigation.navigate('otpscreen', {mobile_no: userData.number});
+      }
       console.log('Validate');
-      // navigation.navigate('customerTabs');
     } else {
       console.log('notValidate');
     }
-  };
-
-  
+  }
 
   const CustomerSignupAPI = async () => {
     const formData = new FormData();
@@ -137,56 +136,84 @@ const CustomerRegistraion = () => {
       formData.append('profile_image', undefined);
     }
 
-    await ApiManager.customerRegistration(formData)
-      .then(async res => {
+    try {
+      const res = await ApiManager.customerRegistration(formData);
+
+      if (res?.data?.status === 200) {
+        console.log('cus', res?.data);
+
         const simpleData = formData._parts.reduce((acc, [key, value]) => {
           acc[key] = value;
           return acc;
         }, {});
 
-        if (res?.data?.status === 200) {
-          await AsyncStorage.setItem(
-            'CustomerData',
-            JSON.stringify(simpleData),
-          );
+        await AsyncStorage.setItem('CustomerData', JSON.stringify(simpleData));
+        await AsyncStorage.setItem(
+          'userId',
+          JSON.stringify(res?.data?.user_id),
+        );
 
-          await AsyncStorage.setItem(
-            'userId',
-            JSON.stringify(res?.data?.user_id),
-          );
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
 
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        } else {
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#D1264A',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        }
-      })
-      .catch(err => {
-        console.log('error', err);
-      });
-  };
+        return {status: 200}; // Return status for SubmitButton to check
+      } else if (
+        res?.data?.status === 409 ||
+        res?.data?.message?.toLowerCase().includes('already registered')
+      ) {
+        Snackbar.show({
+          text: 'User already registered.',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+
+        return {status: 409}; // Return status so navigation doesn't happen
+      } else {
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+
+        return {status: res?.data?.status};
+      }
+    } catch (err) {
+      console.log('error', err);
+      // Snackbar.show({
+      //   text: 'User already registered.',
+      //   backgroundColor: '#D1264A',
+      //   duration: Snackbar.LENGTH_SHORT,
+      // });
+      return {status: 500};
+    }
+  }
 
   const selectImage = async () => {
-    launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel === true) {
-        setuserImage('');
-        setUserData(prev => ({...prev, img: ''})); // Update userData
-      } else {
-        const img = fileobj?.assets[0]?.uri || '';
-        setuserImage(img);
-        setUserData(prev => ({...prev, img})); // Update userData
-        setDocumentFile(fileobj?.assets);
-      }
-    });
-  };
+    if (isSelecting) return; // Prevent multiple triggers
+    isSelecting = true;
 
+    try {
+      launchImageLibrary({quality: 0.7, mediaType: 'photo'}, response => {
+        isSelecting = false; // Reset flag after execution
+
+        if (response.didCancel) {
+          setuserImage('');
+          setUserData(prev => ({...prev, img: ''}));
+        } else if (response.assets && response.assets.length > 0) {
+          const img = response.assets[0].uri;
+          setuserImage(img);
+          setUserData(prev => ({...prev, img}));
+          setDocumentFile(response.assets);
+        }
+      });
+    } catch (error) {
+      isSelecting = false;
+      console.error('Image selection error:', error);
+    }
+  };
 
   // useEffect(() => {
   //   getToken();

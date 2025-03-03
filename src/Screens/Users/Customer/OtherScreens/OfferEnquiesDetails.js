@@ -20,38 +20,57 @@ import {
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import Swiper from 'react-native-swiper';
-import CalenderIcon from '../../../../assets/Svg/Calander.svg';
+import Time from '../../../../assets/Svg/Time.svg';
+import Experience from '../../../../assets/Svg/Experience.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
+import Currency from '../../../../assets/Svg/currency.svg';
+import Mobile from '../../../../assets/Svg/Mobile.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import LinearGradient from 'react-native-linear-gradient';
 import BidModal from '../../../../Component/BidModal/BidModal';
 
-const NewPreworkDetails = () => {
-  const navigation = useNavigation();
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const OfferEnquiesDetails = () => {
   const route = useRoute();
-  const preId = route?.params?.preworkId;
-  const [details, setDetails] = useState([]);
+  const contractorID = route?.params?.contractorID;
+  console.log('contractorIDcontractorID', contractorID);
+
+  const [cusId, setCusId] = useState('');
+  const [contractorDetails, setContractorDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
-  const [bid, setBid] = useState(false);
-  const [cancel, setCancel] = useState(false);
+
+  const [Accept, setAccept] = useState(false);
+  const [Reject, setReject] = useState(false);
+  console.log('1230el', contractorDetails);
 
   useEffect(() => {
-    PreworkDetailAPI();
+    const fetchUser = async () => {
+      const userID = await AsyncStorage.getItem('userId');
+      if (userID) setCusId(userID);
+    };
+    fetchUser();
   }, []);
 
-  const PreworkDetailAPI = () => {
-    ApiManager.NewPreworkById(preId)
+  useEffect(() => {
+    if (cusId) {
+      EnquiresListAPI();
+    }
+  }, [cusId]);
+
+  const EnquiresListAPI = () => {
+    ApiManager.EnquiryDetailsById(contractorID)
       .then(res => {
         if (res?.data?.status === 200) {
-          const prework = res?.data?.prework;
-          const preworkFiles = res?.data?.preworkfiles;
-          setDetails(prework);
-          setResImgs(preworkFiles);
+          const response = res?.data?.contractorDetail;
+          const images = res?.data?.contractorImage;
+          setContractorDetails(response);
+          setResImgs(images);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const GradientButton = ({text, colors, onPress}) => {
@@ -71,7 +90,7 @@ const NewPreworkDetails = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="New Pre-Works Project" />
+      <CustomHeader name="Offer Enquiries" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -89,36 +108,51 @@ const NewPreworkDetails = () => {
                 </View>
               ))}
             </Swiper>
+
             <View style={styles.contentWrapper}>
-              <Text style={styles.title}>{details?.name}</Text>
+              <Text style={styles.title}>
+                {contractorDetails?.contractor_name}
+              </Text>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>{details?.last_date}</Text>
+                  <Mobile />
+                  <Text style={styles.detailText}>
+                    {contractorDetails?.contractor_mobile}
+                  </Text>
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>{details?.material}</Text>
+                  <Text style={styles.detailText}>
+                    {contractorDetails?.contractor_material}
+                  </Text>
                 </View>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>{details?.budget_range}</Text>
+                  <Time />
+                  <Text style={styles.detailText}>
+                    {contractorDetails?.contractor_time}
+                  </Text>
                 </View>
                 <View style={styles.row}>
-                  <LocationIcon />
-                  <Text style={styles.detailText}>{details?.address}</Text>
+                  <Currency />
+                  <Text style={styles.detailText}>
+                    {contractorDetails?.contractor_price}
+                  </Text>
                 </View>
-                {/* <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>{details?.custombid}</Text>
-                </View> */}
+              </View>
+              <View style={styles.row}>
+                <LocationIcon />
+                <Text style={styles.detailText}>
+                  {contractorDetails?.contractor_worklocation}
+                </Text>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>{details?.description}</Text>
+                <Text style={styles.description}>
+                  {contractorDetails?.description}
+                </Text>
               </View>
 
               <View
@@ -128,41 +162,41 @@ const NewPreworkDetails = () => {
                   alignItems: 'center',
                 }}>
                 <GradientButton
-                  text="CANCEL"
+                  text="REJECT"
                   colors={['#CF310A', '#F68740']}
-                  onPress={() => setCancel(true)}
+                  onPress={() => setReject(true)}
                 />
 
                 <GradientButton
-                  text="BID NOW"
+                  text="ACCEPT"
                   colors={['#029A49', '#0BDB8D']}
-                  onPress={() => setBid(true)}
+                  onPress={() => setAccept(true)}
                 />
               </View>
-              {cancel ? (
+              {Reject ? (
                 <BidModal
-                  heading="Are you Sure, cancle to here?"
-                  showModal={cancel}
+                  heading="Are you Sure, cancle to here"
+                  showModal={Reject}
                   setShowModal={setCancel}
-                  name="Yes"
+                  name="REJECT"
                   color={['#F78941', '#D2390F']}
-                  onPress={() => setCancel(!cancel)}
+                  onPress={() => setReject(!cancel)}
                 />
               ) : null}
 
-              {bid ? (
+              {Accept ? (
                 <BidModal
-                  heading="Are you Sure, do you want to go with this bid now?"
-                  showModal={bid}
-                  setShowModal={setBid}
-                  name="Bid"
+                  heading="Are you Sure, do you want to go with this bid now"
+                  showModal={Accept}
+                  setShowModal={setReject}
+                  name="ACCEPT"
                   color={['#0AD788', '#03A151']}
-                  onPress={() =>
-                    navigation.navigate('postbidscreen', {
-                      preId: preId,
-                      customerId: details?.customer_id,
-                    })
-                  }
+                  //   onPress={() =>
+                  //     navigation.navigate('postbidscreen', {
+                  //       preId: preId,
+                  //       customerId: details?.customer_id,
+                  //     })
+                  //   }
                 />
               ) : null}
             </View>
@@ -173,7 +207,7 @@ const NewPreworkDetails = () => {
   );
 };
 
-export default NewPreworkDetails;
+export default OfferEnquiesDetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -183,13 +217,12 @@ const styles = StyleSheet.create({
   },
 
   cardWrapper: {
-    backgroundColor: COLOR.White,
+    // backgroundColor: COLOR.White,
+    // elevation: 5,
     borderRadius: 16,
-    elevation: 5,
     marginVertical: HEIGHT(3),
     marginHorizontal: HEIGHT(1),
-
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   imageSlider: {
     height: 240,
@@ -205,13 +238,13 @@ const styles = StyleSheet.create({
     borderRadius: 9,
   },
   contentWrapper: {
-    padding: WIDTH(4),
+    paddingVertical: WIDTH(2),
   },
   title: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
     color: COLOR.Black,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: HEIGHT(2),
   },
   detailsWrapper: {

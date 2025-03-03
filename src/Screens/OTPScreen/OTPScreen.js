@@ -47,19 +47,24 @@ const OTPScreen = () => {
       user_type: typeSelector,
       otp: otp,
     };
+    // console.log('12302', params);
 
     ApiManager.otpVerify(params)
       .then(res => {
+        // console.log('ooo333o', res?.data);
+
         if (res?.data?.status === 200) {
+          // console.log('oooo', res?.data);
+
           if (typeSelector === 'customer') {
             console.log('Navigating to customerTabs');
-            navigation.navigate('customerTabs');
+            navigation.replace('customerTabs');
           } else if (typeSelector === 'contractor') {
             console.log('Navigating to contractorTabs');
-            navigation.navigate('contractorTabs');
+            navigation.replace('contractorTabs');
           } else if (typeSelector === 'architect') {
             console.log('Navigating to architectTabs');
-            navigation.navigate('architectTabs');
+            navigation.replace('architectTabs');
           }
 
           Snackbar.show({
@@ -69,7 +74,9 @@ const OTPScreen = () => {
           });
         }
       })
-      .catch(err =>
+      .catch(
+        err => console.log(err),
+
         Snackbar.show({
           text: res?.data?.message,
           backgroundColor: '#D1264A',

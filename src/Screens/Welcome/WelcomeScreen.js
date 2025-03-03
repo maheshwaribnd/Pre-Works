@@ -13,13 +13,14 @@ import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {userTypeFunction} from '../../Redux/Reducers/userType';
+import PreworkLogo2 from '../../assets/Svg/Preworkslogo2.svg';
 import ApiManager from '../../API/Api';
 
 const WelcomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const [userId, setUserId] = useState('')
+  const [userId, setUserId] = useState('');
 
   const Options = [
     {id: 1, name: 'CUSTOMER', type: 'customer'},
@@ -53,18 +54,18 @@ const WelcomeScreen = () => {
         console.log('successStatus', successStatus);
 
         if (getCustomerData || successStatus === true) {
-          navigation.navigate('customerTabs');
+          navigation.replace('customerTabs');
         } else if (getContractorData || successStatus === true) {
-          navigation.navigate('contractorTabs');
+          navigation.replace('contractorTabs');
         } else if (getArchitechData || successStatus === true) {
-          navigation.navigate('architectTabs');
+          navigation.replace('architectTabs');
         }
       } catch (error) {
         console.error('Error fetching AsyncStorage data:', error);
       }
     };
 
-    setTimeout(checkStoredData, 200);
+    setTimeout(checkStoredData, 100);
   }, []);
 
   const SelectUserFunction = async item => {
@@ -77,10 +78,7 @@ const WelcomeScreen = () => {
     <ImageBackground
       source={require('../../assets/Imgs/Background.png')}
       style={styles.container}>
-      <Image
-        source={require('../../assets/Imgs/logo.png')}
-        style={{height: 120, width: 150}}
-      />
+      <PreworkLogo2 height={140} width={175} />
 
       <Text style={styles.welcomeTxt}>Welcome!</Text>
 

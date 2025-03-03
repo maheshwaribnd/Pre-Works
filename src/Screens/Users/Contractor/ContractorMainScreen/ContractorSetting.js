@@ -6,10 +6,12 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Alert,
+  BackHandler,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
@@ -24,6 +26,30 @@ const ContractorSetting = () => {
   const [userImage, setuserImage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setDeleteShowModal] = useState(false);
+
+   useFocusEffect(
+      useCallback(() => {
+        const onBackPress = () => {
+          // Check if the dashboard is the only screen in the stack
+          if (navigation.canGoBack()) {
+            return false; // Allow default back behavior
+          }
+  
+          Alert.alert('Exit App', 'Do you want to exit?', [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ]);
+  
+          return true; // Prevent going back
+        };
+  
+        BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+        // return () => {
+        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        // };
+      }, [navigation]),
+    );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,7 +81,10 @@ const ContractorSetting = () => {
     try {
       await AsyncStorage.clear();
       console.log('AsyncStorage cleared');
-      navigation.navigate('welcome');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'welcome'}],
+      });
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
     }
@@ -70,7 +99,11 @@ const ContractorSetting = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          navigation.navigate('welcome');
+          // navigation.navigate('welcome')
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'welcome'}],
+          });
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -92,7 +125,7 @@ const ContractorSetting = () => {
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}>
         <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
-          <Image
+          {/* <Image
             style={{
               width: WIDTH(30),
               height: WIDTH(30),
@@ -101,7 +134,7 @@ const ContractorSetting = () => {
             }}
             source={{uri: userImage}}
             resizeMode="cover"
-          />
+          /> */}
         </View>
 
         <TouchableOpacity

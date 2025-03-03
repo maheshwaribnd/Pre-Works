@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   FlatList,
   Image,
   ImageBackground,
@@ -8,12 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import COLOR from '../../../../config/color.json';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../../../config/AppConst';
 import AddWorkIcon from '../../../../assets/Svg/AddIcon.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiManager from '../../../../API/Api';
 import CreateBtn from '../../../../assets/Svg/createBtn.svg';
@@ -24,6 +26,30 @@ const MyWork = () => {
   const navigation = useNavigation();
   const [archiId, setArchiId] = useState(null);
   const [listData, setListData] = useState([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Check if the dashboard is the only screen in the stack
+        if (navigation.canGoBack()) {
+          return false; // Allow default back behavior
+        }
+
+        Alert.alert('Exit App', 'Do you want to exit?', [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Exit', onPress: () => BackHandler.exitApp()},
+        ]);
+
+        return true; // Prevent going back
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     getUser();

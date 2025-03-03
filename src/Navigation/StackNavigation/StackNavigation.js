@@ -28,6 +28,10 @@ import NewPreworkDetails from '../../Screens/Users/Contractor/OtherScreens/NewPr
 import PostBidScreen from '../../Screens/Users/Contractor/OtherScreens/PostBidScreen';
 import ProjectAppliedDetails from '../../Screens/Users/Contractor/OtherScreens/ProjectAppliedDetails';
 import ContractorMyWork from '../../Screens/Users/Contractor/OtherScreens/ContractorMyWork';
+import OfferEnquires from '../../Screens/Users/Customer/OtherScreens/OfferEnquires';
+import OfferEnquiesDetails from '../../Screens/Users/Customer/OtherScreens/OfferEnquiesDetails';
+import ContractorWorkDetails from '../../Screens/Users/Contractor/OtherScreens/ContractorWorkDetails';
+import CreatePassword from '../../Screens/CreatePassword/CreatePassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,6 +60,7 @@ const StackNavigation = () => {
         <Stack.Screen name="splash" component={SplashScreen} />
         <Stack.Screen name="welcome" component={WelcomeScreen} />
         <Stack.Screen name="otpscreen" component={OTPScreen} />
+        <Stack.Screen name="createpassword" component={CreatePassword} />
         <Stack.Screen name="login" component={Login} />
         <Stack.Screen name="customersignup" component={CustomerRegistraion} />
         <Stack.Screen
@@ -89,6 +94,11 @@ const StackNavigation = () => {
           name="openpreworkdeatils"
           component={OpenPreworkDeatils}
         />
+
+        <Stack.Screen name="offerenquires" component={OfferEnquires} />
+
+        <Stack.Screen name='offerenquiesdetails' component={OfferEnquiesDetails} />
+
         <Stack.Screen
           name="closedpreworkdetails"
           component={ClosedPreworkDetails}
@@ -107,6 +117,7 @@ const StackNavigation = () => {
           component={ProjectAppliedDetails}
         />
         <Stack.Screen name="contractormywork" component={ContractorMyWork} />
+        <Stack.Screen name='contractorworldetails' component={ContractorWorkDetails} />
 
         {/* Architect */}
 

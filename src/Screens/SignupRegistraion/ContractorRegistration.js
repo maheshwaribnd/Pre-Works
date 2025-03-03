@@ -111,6 +111,8 @@ const ContractorRegistration = () => {
         }, {});
 
         if (res?.data?.status == 200) {
+          console.log('contractres', res?.data);
+          
           await AsyncStorage.setItem(
             'ContractorData',
             JSON.stringify(simpleData),

@@ -11,6 +11,7 @@ import {
 } from '../../config/AppConst';
 import COLOR from '../../config/color.json';
 import {useNavigation} from '@react-navigation/native';
+import PreworkLogo1 from '../../assets/Svg/Preworkslogo1.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
@@ -19,7 +20,7 @@ const SplashScreen = () => {
   useEffect(() => {
     const navigateUser = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Get user data
         const userData = await AsyncStorage.getItem('userData');
@@ -33,20 +34,20 @@ const SplashScreen = () => {
 
         if (data) {
           if (type === 'customer') {
-            navigation.navigate('customerTabs');
+            navigation.replace('customerTabs');
           } else if (type === 'contractor') {
-            navigation.navigate('contractorTabs');
+            navigation.replace('contractorTabs');
           } else if (type === 'architect') {
-            navigation.navigate('architectTabs');
+            navigation.replace('architectTabs');
           } else {
-            navigation.navigate('welcome');
+            navigation.replace('welcome');
           }
         } else {
-          navigation.navigate('welcome');
+          navigation.replace('welcome');
         }
       } catch (error) {
         console.error('Error in getting user data:', error);
-        navigation.navigate('welcome');
+        navigation.replace('welcome');
       }
     };
 
@@ -57,12 +58,7 @@ const SplashScreen = () => {
     <ImageBackground
       source={require('../../assets/Imgs/Background.png')}
       style={styles.container}>
-      <Image
-        source={require('../../assets/Imgs/logo.png')}
-        height={20}
-        width={20}
-        style={{marginTop: HEIGHT(2)}}
-      />
+      <PreworkLogo1 height={240} width={250} />
     </ImageBackground>
   );
 };

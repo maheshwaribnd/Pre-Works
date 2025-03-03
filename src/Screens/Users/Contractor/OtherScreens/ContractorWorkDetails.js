@@ -5,10 +5,10 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
+import COLOR from '../../../../config/color.json';
 import {
   HEIGHT,
   Montserrat_bold,
@@ -16,36 +16,39 @@ import {
   NotoSans_Medium,
   WIDTH,
 } from '../../../../config/AppConst';
-import COLOR from '../../../../config/color.json';
-import Swiper from 'react-native-swiper';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import ApiManager from '../../../../API/Api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNPickerSelect from 'react-native-picker-select';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import MoneyIcon from '../../../../assets/Svg/Money.svg';
+import Time from '../../../../assets/Svg/Time.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
-import Snackbar from 'react-native-snackbar';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import RNPickerSelect from 'react-native-picker-select';
+import ApiManager from '../../../../API/Api';
+import Swiper from 'react-native-swiper';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Snackbar from 'react-native-snackbar';
 import HeaderWithEdit from '../../../../Component/CustomeHeader/HeaderWithEdit';
 
-const ProjectAppliedDetails = () => {
+const ContractorWorkDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const preId = route?.params?.PreId;
-
-  const [edit, setEdit] = useState(false);
-  const [userId, setUserId] = useState('');
-  const [appliedDetails, setAppliedDetails] = useState([]);
-
+  const workId = route?.params?.workId;
+  const [details, setDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
+  const [edit, setEdit] = useState(false);
   const [materialSelected, setMaterialSelected] = useState('');
+  const [userId, setUserId] = useState(null);
   const [createData, setCreateData] = useState({
     price: '',
     time: '',
   });
+  console.log('WD', details);
+
+  useEffect(() => {
+    ContractorWorkDetailAPI();
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,42 +58,36 @@ const ProjectAppliedDetails = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (userId) {
-      ProjectAppliedDetailAPI();
-    }
-  }, [userId]);
-
-  const ProjectAppliedDetailAPI = () => {
-    ApiManager.ProjectAppliedDetails(preId, userId).then(res => {
-      if (res?.data?.status === 200) {
-        const appliedResponse = res?.data?.contractor;
-        const imgResponse = res?.data?.preworkFiles;
-        setCreateData(appliedResponse);
-        setAppliedDetails(appliedResponse);
-        setResImgs(imgResponse);
-      }
-    });
+  const ContractorWorkDetailAPI = () => {
+    ApiManager.ContractorParticularWork(workId)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          const contractorwork = res?.data?.contractorwork;
+          const workFiles = res?.data?.images;
+          setDetails(contractorwork);
+          setResImgs(workFiles);
+        }
+      })
+      .catch(err => console.log(err));
   };
 
-  const AppliedProjectEditAPI = () => {
+  const UpdateCustomerWork = () => {
     const formData = new FormData();
 
+    formData.append('contractor_id', userId);
     formData.append('time', createData.time);
     formData.append('material', materialSelected);
     formData.append('price', createData.price);
-    console.log('preId, userId, formData', preId, userId, formData);
 
-    ApiManager.AppliedProjectEdit(preId, userId, formData)
+    ApiManager.ContractorWorUpdate(workId, formData)
       .then(res => {
         if (res?.data?.status === 200) {
           Snackbar.show({
-            text: res?.data?.success,
+            text: res?.data?.message,
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          setEdit(false);
-          navigation.navigate('contractorTabs');
+          navigation.navigate('contractorprofile');
         }
       })
       .catch(err => {
@@ -106,13 +103,17 @@ const ProjectAppliedDetails = () => {
   };
 
   return (
-    <View style={{flex: 1}}>
-      <HeaderWithEdit name="Project Applied" edit={edit} setEdit={setEdit} />
+    <View style={{flex: 1, backgroundColor: COLOR.White}}>
+      <HeaderWithEdit
+        name="New Pre-Works Project"
+        edit={edit}
+        setEdit={setEdit}
+      />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.cardWrapper}>
+          <View style={styles.contentWrapper}>
             <Swiper
               autoplay
               loop
@@ -125,71 +126,49 @@ const ProjectAppliedDetails = () => {
                 </View>
               ))}
             </Swiper>
-            <View style={styles.contentWrapper}>
-              <Text style={styles.title}>{appliedDetails?.name}</Text>
+            <View>
+              <Text style={styles.title}>{details?.name}</Text>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.last_date}
-                  </Text>
+                  <Time />
+                  <Text style={styles.detailText}>{details?.time}</Text>
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.material}
-                  </Text>
+                  <Text style={styles.detailText}>{details?.material}</Text>
                 </View>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <MoneyIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.budget_range}
-                  </Text>
+                  <Text style={styles.detailText}>{details?.price}</Text>
                 </View>
                 <View style={styles.row}>
                   <LocationIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.address}
-                  </Text>
+                  <Text style={styles.detailText}>{details?.address}</Text>
                 </View>
-                {/* <View style={styles.row}>
-                <BiddingIcon />
-                <Text style={styles.detailText}>{appliedDetails?.custombid}</Text>
-              </View> */}
               </View>
-
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>
-                  {appliedDetails?.description}
-                </Text>
-              </View>
-
-              <Text style={styles.sectionTitle}>My Bid Info</Text>
 
               <TextInput
                 style={styles.InputField}
-                placeholder={String(createData?.price ?? '')}
+                placeholder="Price"
                 placeholderTextColor="gray"
                 keyboardType="numeric"
                 editable={edit}
-                value={String(createData?.price ?? '')}
+                value={createData.price}
                 onChangeText={text => onChange('price', text)}
               />
 
               <TextInput
                 style={styles.InputField}
-                value={createData?.time}
-                placeholder={createData?.time}
+                placeholder="Time"
                 placeholderTextColor="gray"
-                editable={edit}
                 keyboardType="default"
+                editable={edit}
+                value={createData.time}
                 onChangeText={text => onChange('time', text)}
               />
 
-              {/* For Material Select */}
               <View
                 style={[
                   styles.InputField,
@@ -197,27 +176,22 @@ const ProjectAppliedDetails = () => {
                 ]}>
                 <RNPickerSelect
                   onValueChange={value => setMaterialSelected(value)}
+                  editable={edit}
                   items={[
                     {label: 'Labour', value: 'Labour'},
                     {label: 'Labour + Material', value: 'Labour + Material'},
                   ]}
-                  placeholder={{
-                    label: appliedDetails?.material,
-                    value: appliedDetails?.material,
-                  }}
                   style={styles.picker}
-                  disabled={!edit}
-                  dropdownItemStyle={{color: 'black'}}
                 />
               </View>
-
-              {edit ? (
-                <CustomButton
-                  name="Update"
-                  onPress={() => AppliedProjectEditAPI()}
-                />
-              ) : null}
             </View>
+
+            {edit ? (
+              <CustomButton
+                name="Update"
+                onPress={() => UpdateCustomerWork()}
+              />
+            ) : null}
           </View>
         </ScrollView>
       </ImageBackground>
@@ -225,24 +199,19 @@ const ProjectAppliedDetails = () => {
   );
 };
 
-export default ProjectAppliedDetails;
+export default ContractorWorkDetails;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.White,
-    paddingHorizontal: WIDTH(4),
+    paddingHorizontal: WIDTH(1),
   },
 
-  cardWrapper: {
-    backgroundColor: COLOR.White,
-    borderRadius: 16,
-    elevation: 5,
-    marginVertical: HEIGHT(3),
-    marginHorizontal: HEIGHT(1),
-
-    overflow: 'hidden',
+  contentWrapper: {
+    padding: WIDTH(2),
   },
+
   imageSlider: {
     height: 240,
   },
@@ -263,7 +232,7 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_bold,
     fontSize: 22,
     color: COLOR.Black,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: HEIGHT(2),
   },
   detailsWrapper: {
@@ -316,7 +285,7 @@ const styles = StyleSheet.create({
   },
 
   InputField: {
-    width: WIDTH(81),
+    width: WIDTH(91.5),
     height: HEIGHT(7.5),
     marginVertical: HEIGHT(1.5),
     borderRadius: 10,

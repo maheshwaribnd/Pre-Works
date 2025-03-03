@@ -15,6 +15,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import CustomButton from '../../Component/CustomButton/CustomButton';
 import ApiManager from '../../API/Api';
 import Snackbar from 'react-native-snackbar';
+import PreworkLogo2 from '../../assets/Svg/Preworkslogo2.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
@@ -47,6 +48,8 @@ const Login = () => {
 
     ApiManager.userLogin(params)
       .then(async res => {
+        console.log('loginres?.data111', res?.data);
+
         if (res?.data?.status === 200) {
           console.log('loginres?.data', res?.data);
 
@@ -57,7 +60,7 @@ const Login = () => {
           await AsyncStorage.setItem(
             'userId',
             JSON.stringify(res?.data?.user_id),
-          );
+          )
 
           if (userType === 'customer') {
             navigation.navigate('customerTabs');
@@ -74,6 +77,8 @@ const Login = () => {
         }
       })
       .catch(err => {
+        console.log('err', err);
+        
         Snackbar.show({
           text: 'Invalid Credentials',
           backgroundColor: '#D1264A',
@@ -118,12 +123,7 @@ const Login = () => {
       source={require('../../assets/Imgs/Background.png')}
       style={styles.container}>
       <View style={{alignItems: 'center'}}>
-        <Image
-          source={require('../../assets/Imgs/logo.png')}
-          height={20}
-          width={20}
-          style={{marginTop: HEIGHT(2)}}
-        />
+        <PreworkLogo2 height={140} width={175} />
       </View>
       <Text style={styles.welcomeTxt}>Welcome</Text>
 
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: NotoSans_Medium,
     color: COLOR.TextColor,
-    marginTop: HEIGHT(2),
+    // marginTop: HEIGHT(2),
     textAlign: 'center',
   },
 

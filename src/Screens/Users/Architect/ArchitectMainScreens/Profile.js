@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   Image,
   ImageBackground,
   ScrollView,
@@ -7,14 +9,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import COLOR from '../../../../config/color.json';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {useRoute} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -31,6 +33,30 @@ const Profile = () => {
   const [userImage, setuserImage] = useState('');
   const [backgdDocumentFile, setbackgdDocumentFile] = useState(null);
   const [userBackImg, setUserBackImg] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Check if the dashboard is the only screen in the stack
+        if (navigation.canGoBack()) {
+          return false; // Allow default back behavior
+        }
+
+        Alert.alert('Exit App', 'Do you want to exit?', [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Exit', onPress: () => BackHandler.exitApp()},
+        ]);
+
+        return true; // Prevent going back
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -94,7 +120,7 @@ const Profile = () => {
         uri: backgdDocumentFile[0].uri,
         type: backgdDocumentFile[0].type,
         name: backgdDocumentFile[0].fileName,
-      })
+      });
     }
 
     try {
@@ -106,7 +132,7 @@ const Profile = () => {
           text: res?.data?.message,
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
-        })
+        });
         // setData({
         //   name: res.data.customer?.name || '',
         //   email: res.data.customer?.email || '',

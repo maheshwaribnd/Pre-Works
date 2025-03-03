@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   Image,
   ImageBackground,
   ScrollView,
@@ -7,9 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
@@ -28,6 +30,30 @@ const ArchitectSetting = () => {
   const [userId, setUserId] = useState('');
   const [edit, setEdit] = useState(true);
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Check if the dashboard is the only screen in the stack
+        if (navigation.canGoBack()) {
+          return false; // Allow default back behavior
+        }
+
+        Alert.alert('Exit App', 'Do you want to exit?', [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Exit', onPress: () => BackHandler.exitApp()},
+        ]);
+
+        return true; // Prevent going back
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
+
   useEffect(() => {
     const fetchUser = async () => {
       const userID = await AsyncStorage.getItem('userId');
@@ -45,7 +71,11 @@ const ArchitectSetting = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          navigation.navigate('welcome');
+          // navigation.navigate('welcome')
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'welcome'}],
+          });
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -63,7 +93,10 @@ const ArchitectSetting = () => {
     try {
       await AsyncStorage.clear();
       console.log('AsyncStorage cleared');
-      navigation.navigate('welcome');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'welcome'}],
+      });
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
     }

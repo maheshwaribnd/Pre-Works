@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   FlatList,
   Image,
   ImageBackground,
@@ -8,17 +10,43 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import COLOR from '../../../../config/color.json';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../../../config/AppConst';
 import ManWithLaptop from '../../../../assets/Svg/ManWithLaptop.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const NewPrework = () => {
   const navigation = useNavigation();
   const [listResponse, setListResponse] = useState([]);
+console.log('listResponse',listResponse);
+
+   useFocusEffect(
+      useCallback(() => {
+        const onBackPress = () => {
+          // Check if the dashboard is the only screen in the stack
+          if (navigation.canGoBack()) {
+            return false; // Allow default back behavior
+          }
+  
+          Alert.alert('Exit App', 'Do you want to exit?', [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ]);
+  
+          return true; // Prevent going back
+        };
+  
+        BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+        // return () => {
+        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        // };
+      }, [navigation]),
+    )
+
   useEffect(() => {
     NewPreworkListingAPI();
   }, []);

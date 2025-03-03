@@ -1,10 +1,13 @@
 import {
   Image,
   ImageBackground,
+  Keyboard,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
@@ -15,6 +18,7 @@ import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
 import ApiManager from '../../../../API/Api';
 import Snackbar from 'react-native-snackbar';
+import RNPickerSelect from 'react-native-picker-select';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
@@ -23,12 +27,26 @@ const ContractorMyWork = () => {
   const [userId, setUserId] = useState('');
   const [uploadImgs, setUploadImgs] = useState([]);
   const [documentFiles, setDocumentFiles] = useState([]);
+  const [materialSelected, setMaterialSelected] = useState('');
   const [createWork, setCreateWork] = useState({
     name: '',
     address: '',
     price: '',
     time: '',
   });
+
+  const pickerSelectStyles = {
+    inputIOS: {
+      fontSize: 16,
+      padding: 10,
+      color: 'black',
+    },
+    inputAndroid: {
+      fontSize: 16,
+      paddingLeft: 10,
+      color: 'black',
+    },
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,18 +71,24 @@ const ContractorMyWork = () => {
     formData.append('price', createWork?.price);
     formData.append('time', createWork?.time);
     formData.append('contractor_id', userId);
+    formData.append('material', materialSelected);
 
     if (documentFiles?.length > 0) {
-      formData.append('images', {
+      formData.append('image', {
         uri: documentFiles[0].uri,
         type: documentFiles[0].type,
         name: documentFiles[0].fileName,
       });
     }
+    console.log('formData', formData);
 
     ApiManager.ContractorWork(formData)
       .then(res => {
+        console.log('res?.PCW', res?.data);
+
         if (res?.data?.status === 200) {
+          console.log('res?.dataPCW', res?.data);
+
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
@@ -82,15 +106,21 @@ const ContractorMyWork = () => {
     launchImageLibrary(
       {
         quality: 0.7,
-        selectionLimit: 0, // Allows multiple images
-        mediaType: 'photo', // Ensures only images are selected
+        selectionLimit: 5, // Ensure at least one image is selected
+        mediaType: 'photo',
+        includeBase64: false,
       },
-      fileobj => {
-        if (fileobj?.didCancel) {
+      response => {
+        console.log('Response:', response);
+        if (response?.didCancel) {
+          console.log('User cancelled image selection');
           setUploadImgs([]);
+        } else if (response?.assets?.length > 0) {
+          const newImages = response.assets;
+          console.log('Selected images:', newImages); // Debugging
+          setUploadImgs(prevImgs => [...prevImgs, ...newImages]);
         } else {
-          const newImages = fileobj?.assets || [];
-          setUploadImgs(prevImgs => [...prevImgs, ...newImages]); // Append new images
+          console.log('Error selecting image');
         }
       },
     );
@@ -102,60 +132,97 @@ const ContractorMyWork = () => {
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
-        <View style={{paddingVertical: HEIGHT(2), paddingHorizontal: WIDTH(4)}}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={
-                uploadImgs.length > 0
-                  ? {uri: uploadImgs[0].uri} // Corrected reference
-                  : require('../../../../assets/Imgs/HouseImg.jpg')
-              }
-              style={styles.image}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View
+            style={{paddingVertical: HEIGHT(2), paddingHorizontal: WIDTH(4)}}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={
+                  uploadImgs.length > 0 && uploadImgs[0]?.uri
+                    ? {uri: uploadImgs[0].uri}
+                    : require('../../../../assets/Imgs/HouseImg.jpg')
+                }
+                style={styles.image}
+              />
+
+              <TouchableOpacity
+                style={styles.addPhotoButton}
+                onPress={() => handleUpload()}>
+                <Text style={styles.addPhotoText}>Add Photo+</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              style={styles.InputField}
+              keyboardType="default"
+              placeholder="Site Name"
+              value={createWork?.name}
+              onChangeText={text => onChange('name', text)}
             />
 
-            <TouchableOpacity
-              style={styles.addPhotoButton}
-              onPress={() => handleUpload()}>
-              <Text style={styles.addPhotoText}>Add Photo+</Text>
-            </TouchableOpacity>
+            <TextInput
+              style={styles.InputField}
+              placeholder="Address"
+              keyboardType="default"
+              value={createWork?.address}
+              onChangeText={text => onChange('address', text)}
+            />
+
+            <TextInput
+              style={styles.InputField}
+              placeholder="Price"
+              keyboardType="number-pad"
+              value={createWork?.price}
+              onChangeText={text => onChange('price', text)}
+            />
+
+            <TextInput
+              style={styles.InputField}
+              placeholder="Time"
+              keyboardType="default"
+              value={createWork.time}
+              onChangeText={text => onChange('time', text)}
+            />
+
+            <View style={styles.InputField}>
+              <RNPickerSelect
+                onValueChange={value => setMaterialSelected(value)}
+                items={[
+                  {label: 'Labour', value: 'Labour'},
+                  {label: 'Labour + Material', value: 'Labour + Material'},
+                ]}
+                placeholder={{label: 'Select Material', value: null}}
+                value={materialSelected} // Ensure selected value is shown
+                style={{
+                  inputIOS: styles.pickerInput,
+                  inputAndroid: styles.pickerInput,
+                }}
+                useNativeAndroidPickerStyle={false}
+              />
+            </View>
+
+            {/* <View
+              style={[
+                styles.InputField,
+                {alignItems: 'center', justifyContent: 'flex-end'},
+              ]}>
+              <RNPickerSelect
+                onValueChange={value => setMaterialSelected(value)}
+                items={[
+                  {label: 'Labour', value: 'Labour'},
+                  {label: 'Labour + Material', value: 'Labour + Material'},
+                ]}
+                placeholder={{label: 'Labour', value: 'Labour'}}
+                style={styles.picker}
+                useNativeAndroidPickerStyle={false}
+              />
+            </View> */}
+
+            <View style={styles.button}>
+              <CustomButton name="SAVE" onPress={() => ContractorWorkAPI()} />
+            </View>
           </View>
-
-          <TextInput
-            style={styles.InputField}
-            keyboardType="default"
-            placeholder="Site Name"
-            value={createWork?.name}
-            onChangeText={text => onChange('name', text)}
-          />
-
-          <TextInput
-            style={styles.InputField}
-            placeholder="Address"
-            keyboardType="default"
-            value={createWork?.address}
-            onChangeText={text => onChange('address', text)}
-          />
-
-          <TextInput
-            style={styles.InputField}
-            placeholder="Price"
-            keyboardType="number-pad"
-            value={createWork?.price}
-            onChangeText={text => onChange('price', text)}
-          />
-
-          <TextInput
-            style={styles.InputField}
-            placeholder="Time"
-            keyboardType="default"
-            value={createWork.time}
-            onChangeText={text => onChange('time', text)}
-          />
-
-          <View style={styles.button}>
-            <CustomButton name="SAVE" onPress={() => ContractorWorkAPI()} />
-          </View>
-        </View>
+        </ScrollView>
       </ImageBackground>
     </View>
   );
@@ -219,6 +286,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+  },
+
+  pickerContainer: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: COLOR.Gray,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+  pickerInput: {
+    fontSize: 16,
+    color: 'black',
+  },
+
+  picker: {
+    inputIOS: {
+      fontSize: 16,
+      padding: 10,
+      color: 'gray',
+    },
+    inputAndroid: {
+      fontSize: 16,
+      paddingLeft: 3,
+      color: 'gray',
+    },
   },
 
   button: {

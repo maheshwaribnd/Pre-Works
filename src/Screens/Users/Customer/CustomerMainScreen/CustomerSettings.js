@@ -7,8 +7,10 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Alert,
+  BackHandler,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   FONTSIZE,
   HEIGHT,
@@ -17,7 +19,7 @@ import {
   NotoSans_Medium,
   WIDTH,
 } from '../../../../config/AppConst';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
@@ -37,6 +39,27 @@ const CustomerSettings = () => {
   const [showDeleteModal, setDeleteShowModal] = useState(false);
   const [cusId, setCusId] = useState('');
   const [userImage, setuserImage] = useState('');
+
+  useFocusEffect(
+     useCallback(() => {
+       const onBackPress = () => {
+         if (navigation.isFocused()) {
+           Alert.alert('Exit App', 'Do you want to exit?', [
+             {text: 'Cancel', style: 'cancel'},
+             {text: 'Exit', onPress: () => BackHandler.exitApp()},
+           ]);
+           return true; // Prevent default back action
+         }
+         return false; // Allow default behavior
+       };
+ 
+       BackHandler.addEventListener('hardwareBackPress', onBackPress);
+ 
+       // return () => {
+       //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+       // };
+     }, [navigation]),
+   );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -67,7 +90,11 @@ const CustomerSettings = () => {
   const LogoutFunction = async () => {
     try {
       await AsyncStorage.clear();
-      navigation.navigate('welcome');
+      // navigation.navigate('welcome');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'welcome'}],
+      });
       console.log('AsyncStorage cleared');
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
@@ -83,7 +110,11 @@ const CustomerSettings = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          navigation.navigate('welcome');
+          // navigation.navigate('welcome');
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'welcome'}],
+          });
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -106,12 +137,12 @@ const CustomerSettings = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
-          <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
-            <Image
+          <View style={{paddingTop: HEIGHT(2), alignItems: 'center'}}>
+            {/* <Image
               style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
               source={{uri: userImage}}
               resizeMode="cover"
-            />
+            /> */}
           </View>
 
           <TouchableOpacity

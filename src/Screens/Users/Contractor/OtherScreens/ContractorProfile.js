@@ -54,7 +54,6 @@ const ContractorProfile = () => {
       if (res?.data?.status === 200) {
         console.log('res?.data000', res?.data);
         setData(res?.data?.['contractors ']);
-
         setuserImage(res?.data?.['contractors ']?.profile_image || '');
       }
     } catch (err) {
@@ -104,7 +103,7 @@ const ContractorProfile = () => {
     ApiManager.ContractorWorkListing(userId)
       .then(res => {
         if (res?.data?.status === 200) {
-          const list = res?.data?.contractorWorks;
+          const list = res?.data?.data;
           setWorkList(list);
         }
       })
@@ -144,7 +143,7 @@ const ContractorProfile = () => {
           <View style={{paddingTop: HEIGHT(3), alignItems: 'center'}}>
             <View
               style={{
-                paddingTop: HEIGHT(3),
+                // paddingTop: HEIGHT(3),
                 paddingBottom: HEIGHT(1),
                 alignItems: 'center',
               }}>
@@ -211,31 +210,42 @@ const ContractorProfile = () => {
             onChangeText={text => onChange('experience', text)}
           />
 
-          <View style={{paddingBottom: HEIGHT(1)}}>
-            <Text style={styles.myWorkTxt}>My Work</Text>
-            <View style={styles.btnWrap}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {workList.map((item, index) => (
-                  <View key={index} style={styles.workItem}>
-                    <Image
-                      source={{uri: item?.files}}
-                      style={styles.workImage}
-                    />
-                    <Text style={styles.workText}>{workList?.name}</Text>
-                  </View>
-                ))}
-              </ScrollView>
+          {edit ? (
+            <View style={{paddingBottom: HEIGHT(1)}}>
+              <Text style={styles.myWorkTxt}>My Work</Text>
+              <View style={styles.btnWrap}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {workList.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() =>
+                        navigation.navigate('contractorworldetails', {
+                          workId: item?.id,
+                        })
+                      }
+                      style={styles.workItem}>
+                      <Image
+                        source={{uri: item?.images[0]?.files}}
+                        style={styles.workImage}
+                      />
+                      <Text style={styles.workText}>
+                        {item.name || 'No Name'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
 
-              <TouchableOpacity
-                style={styles.myWorkButton}
-                onPress={() => navigation.navigate('contractormywork')}
-                activeOpacity={0.9}>
-                <View style={styles.myWorkView}>
-                  <AddIcon height={45} width={45} />
-                </View>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.myWorkButton}
+                  onPress={() => navigation.navigate('contractormywork')}
+                  activeOpacity={0.9}>
+                  <View style={styles.myWorkView}>
+                    <AddIcon height={45} width={45} />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          ) : null}
 
           <View style={{marginBottom: HEIGHT(2)}}>
             {edit ? (
@@ -321,6 +331,20 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
+  workImage: {
+    width: 100,
+    height: 80,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderWidth: 1,
+  },
+
+  workText: {
+    color: '#fff',
+    fontSize: 14,
+    // paddingVertical: 5,
+  },
+
   myWorkButton: {
     alignItems: 'center',
     marginVertical: HEIGHT(1),
@@ -335,17 +359,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
 
-  workImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  workText: {
-    color: '#fff',
-    fontSize: 14,
-    paddingVertical: 5,
-  },
   myWorkButton: {
     alignItems: 'center',
     justifyContent: 'center',

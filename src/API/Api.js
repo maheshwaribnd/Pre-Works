@@ -47,9 +47,10 @@ const requestPath = {
   customerRegistration: 'auth/CustomerRegister',
   contractorRegistration: 'auth/ContractorRegister',
   architectureRegistration: 'auth/ArchitectureRegister',
-  forgetPassword: 'auth/forgot-password',
+  forgetPassword: 'auth/forgotpassword',
   otpVerify: 'auth/OtpVerified',
   resendOtp: 'auth/ResendOtp',
+  createPassword: 'auth/createPassword',
 
   //customer
   createPrework: 'auth/createPrework',
@@ -69,6 +70,8 @@ const requestPath = {
   closedPreworkById: 'auth/ClosePrework',
   architectList: 'auth/ArchitectureList',
   architectListById: 'auth/getArchitectureById',
+  enquiesList: 'auth/Enquirieslist',
+  enquiryDetailsById: 'auth/EnquiriesDetailByid',
 
   // Contractor
   contractoreProfile: 'auth/contractorProfile',
@@ -78,8 +81,9 @@ const requestPath = {
   projectAppliedList: 'auth/projectApplyList',
   projectAppliedDetail: 'auth/ProjectListingDetails',
   appliedProjectEdit: 'auth/projectDetailsEdit',
-  contractorWork: 'auth/ContractorWork',
+  contractorWork: 'auth/creatework',
   contractorWorkList: 'auth/ContractorWorklisting',
+  contractorParticularWork: 'auth/showWork',
 
   // Architect
   architectProfile: 'auth/architectureProfile',
@@ -90,6 +94,7 @@ const requestPath = {
 
   customerUpdate: 'auth/updateCustomerProfile',
   contractorUpdate: 'auth/updateContractorProfile',
+  contractorWorUpdate: 'auth/updateWork',
   architectUpdate: 'auth/updateArchitechProfile',
 
   // Delete Request
@@ -112,6 +117,10 @@ const ApiManager = {
 
   ResendOtp: params => {
     return requests.post(requestPath.resendOtp, params);
+  },
+
+  CreatePassword: params => {
+    return requests.post(requestPath.createPassword, params);
   },
 
   customerRegistration: params => {
@@ -155,6 +164,14 @@ const ApiManager = {
 
   OpenPreworkById: preworkId => {
     return requests.get(`${requestPath.openPreworkById}/${preworkId}`);
+  },
+
+  ListOfEnquires: userId => {
+    return requests.get(`${requestPath.enquiesList}/${userId}`);
+  },
+
+  EnquiryDetailsById: userId => {
+    return requests.get(`${requestPath.enquiryDetailsById}/${userId}`);
   },
 
   ClosedPrework: userId => {
@@ -201,6 +218,10 @@ const ApiManager = {
     return requests.get(`${requestPath.contractorWorkList}/${userId}`);
   },
 
+  ContractorParticularWork: workId => {
+    return requests.get(`${requestPath.contractorParticularWork}/${workId}`);
+  },
+
   // Architect
 
   ArchitectProfile: ArchitectId => {
@@ -221,9 +242,16 @@ const ApiManager = {
     return requests1.post(`${requestPath.customerUpdate}/${userId}`, formData);
   },
 
-  ContractorUpdate: (userId, formData) => {
+  ContractorUpdate: (workId, formData) => {
     return requests1.post(
-      `${requestPath.contractorUpdate}/${userId}`,
+      `${requestPath.contractorUpdate}/${workId}`,
+      formData,
+    );
+  },
+
+  ContractorWorUpdate: (userId, formData) => {
+    return requests1.post(
+      `${requestPath.contractorWorUpdate}/${userId}`,
       formData,
     );
   },

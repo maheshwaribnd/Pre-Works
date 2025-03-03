@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   FlatList,
   Image,
   ImageBackground,
@@ -7,11 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../../../config/AppConst';
 import COLOR from '../../../../config/color.json';
 import NoData from '../../../../assets/Svg/noData.svg';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import CreateBtn from '../../../../assets/Svg/createBtn.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,6 +30,28 @@ const OpenPrework = () => {
   const [preworkList, setPreworkList] = useState([]);
   const [preworkImgs, setPreworkImgs] = useState([]);
   const [cusId, setCusId] = useState(null);
+  console.log('cusId', cusId);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.isFocused()) {
+          Alert.alert('Exit App', 'Do you want to exit?', [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ]);
+          return true; // Prevent default back action
+        }
+        return false; // Allow default behavior
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     getUser();
@@ -151,7 +175,7 @@ const OpenPrework = () => {
           <View style={styles.empty}>
             <NoData height={360} width={360} />
             <Text style={styles.txt}>
-              You currently do not have any Open Pre-Work requirement to create
+              You currently do not have any Open Pre-Work requirement. To create
               a Pre-Work requirement, kindly select the + button shown in the
               bottom
             </Text>

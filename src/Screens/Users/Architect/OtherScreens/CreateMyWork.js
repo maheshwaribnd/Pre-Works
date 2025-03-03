@@ -141,6 +141,12 @@ const CreateMyWork = () => {
     }
   };
 
+  // Function to remove an image
+  const handleRemoveImage = index => {
+    setUploadImgs(prevImages => prevImages.filter((_, i) => i !== index));
+    setDocumentFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
   return (
     <View style={{flex: 1}}>
       <CustomHeader name="Add My Work" />
@@ -229,11 +235,17 @@ const CreateMyWork = () => {
 
               <ScrollView horizontal style={{marginTop: 10}}>
                 {uploadImgs.map((img, index) => (
-                  <Image
-                    key={index}
-                    source={{uri: img}}
-                    style={{width: 60, height: 60, marginRight: 10}}
-                  />
+                  <View key={index} style={styles.imageContainer}>
+                    <Image source={{uri: img}} style={styles.image} />
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => handleRemoveImage(index)}>
+                      <Image
+                        source={require('../../../../assets/Icons/cross.png')}
+                        style={styles.closeIcon}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 ))}
               </ScrollView>
             </View>
@@ -369,5 +381,33 @@ const styles = StyleSheet.create({
       paddingLeft: 3,
       color: 'gray',
     },
+  },
+
+  imageContainer: {
+    position: 'relative',
+    marginRight: 10,
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -1,
+    right: -1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLOR.White,
+    width: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  closeIcon: {
+    width: 15, // Adjust the size of the cross icon
+    height: 15,
+    tintColor: 'white', // Change color if needed
   },
 });

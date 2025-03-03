@@ -28,9 +28,7 @@ const BidModal = ({showModal, setShowModal, heading, name, color, onPress}) => {
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}
               style={styles.button}>
-              <TouchableOpacity
-               onPress={() => onPress()}
-              >
+              <TouchableOpacity onPress={() => onPress()}>
                 <Text style={styles.yesText}>{name}</Text>
               </TouchableOpacity>
             </LinearGradient>
@@ -51,7 +49,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalWrap: {
-    padding: WIDTH(5),
+    padding: WIDTH(4),
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',

@@ -118,11 +118,9 @@ const CustomerProfile = () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
       if (fileobj?.didCancel === true) {
         setuserImage('');
-        // setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
-        // setUserData(prev => ({...prev, img})); // Update userData
         setDocumentFile(fileobj?.assets);
       }
     });
@@ -144,29 +142,27 @@ const CustomerProfile = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}>
-          <View style={{flexDirection: 'row'}}>
-            <View
-              style={{
-                paddingTop: HEIGHT(2),
-                paddingBottom: HEIGHT(1),
-                marginLeft: WIDTH(19),
-                alignItems: 'center',
-              }}>
-              <Image
-                style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
-                source={{uri: userImage}}
-                resizeMode="cover"
-              />
+          <View
+            style={{
+              paddingTop: HEIGHT(2),
+              paddingBottom: 6,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Image
+              style={{width: WIDTH(30), height: WIDTH(30), borderRadius: 50}}
+              source={{uri: userImage}}
+              resizeMode="cover"
+            />
 
-              {edit ? (
-                <Badge
-                  onPress={() => selectImage()}
-                  size={32}
-                  style={styles.badge}>
-                  <Octicons size={18} name="pencil" />
-                </Badge>
-              ) : null}
-            </View>
+            {edit ? (
+              <Badge
+                onPress={() => selectImage()}
+                size={32}
+                style={styles.badge}>
+                <Octicons size={18} name="pencil" />
+              </Badge>
+            ) : null}
           </View>
 
           <TextInput
@@ -254,7 +250,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: WIDTH(91.5),
     height: HEIGHT(7.5),
-    marginVertical: HEIGHT(1.5),
+    marginVertical: HEIGHT(1),
     borderRadius: 10,
     borderWidth: 1,
     paddingLeft: 12,
@@ -274,6 +270,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLOR.Gray,
     position: 'absolute',
     bottom: 0,
-    right: 2,
+    right: 112,
   },
 });

@@ -1,4 +1,6 @@
 import {
+  Alert,
+  BackHandler,
   FlatList,
   Image,
   ImageBackground,
@@ -7,11 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../../../config/AppConst';
 import COLOR from '../../../../config/color.json';
 import NoData from '../../../../assets/Svg/noData.svg';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import CreateBtn from '../../../../assets/Svg/createBtn.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
@@ -21,6 +23,27 @@ const ClosedPrework = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [cusId, setCusId] = useState(null);
+
+   useFocusEffect(
+      useCallback(() => {
+        const onBackPress = () => {
+          if (navigation.isFocused()) {
+            Alert.alert('Exit App', 'Do you want to exit?', [
+              {text: 'Cancel', style: 'cancel'},
+              {text: 'Exit', onPress: () => BackHandler.exitApp()},
+            ]);
+            return true; // Prevent default back action
+          }
+          return false; // Allow default behavior
+        };
+  
+        BackHandler.addEventListener('hardwareBackPress', onBackPress);
+  
+        // return () => {
+        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        // };
+      }, [navigation]),
+    );
 
   useEffect(() => {
     getUser();
