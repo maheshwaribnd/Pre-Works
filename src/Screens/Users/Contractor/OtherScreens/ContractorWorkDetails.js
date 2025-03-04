@@ -44,7 +44,6 @@ const ContractorWorkDetails = () => {
     price: '',
     time: '',
   });
-  console.log('WD', details);
 
   useEffect(() => {
     ContractorWorkDetailAPI();

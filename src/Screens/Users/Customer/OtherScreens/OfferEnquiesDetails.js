@@ -43,7 +43,6 @@ const OfferEnquiesDetails = () => {
 
   const [Accept, setAccept] = useState(false);
   const [Reject, setReject] = useState(false);
-  console.log('contractorDetails', contractorDetails);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -63,8 +62,6 @@ const OfferEnquiesDetails = () => {
     ApiManager.EnquiryDetailsById(contractorID)
       .then(res => {
         if (res?.data?.status === 200) {
-          console.log('oe110', res?.data);
-
           const response = res?.data?.contractorDetail;
           const images = res?.data?.contractorImage;
           setContractorDetails(response);

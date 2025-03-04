@@ -35,19 +35,6 @@ const ContractorMyWork = () => {
     time: '',
   });
 
-  const pickerSelectStyles = {
-    inputIOS: {
-      fontSize: 16,
-      padding: 10,
-      color: 'black',
-    },
-    inputAndroid: {
-      fontSize: 16,
-      paddingLeft: 10,
-      color: 'black',
-    },
-  };
-
   useEffect(() => {
     const fetchUser = async () => {
       const userID = await AsyncStorage.getItem('userId');
@@ -73,22 +60,23 @@ const ContractorMyWork = () => {
     formData.append('contractor_id', userId);
     formData.append('material', materialSelected);
 
-    if (documentFiles?.length > 0) {
-      formData.append('image', {
-        uri: documentFiles[0].uri,
-        type: documentFiles[0].type,
-        name: documentFiles[0].fileName,
+    if (documentFiles && documentFiles.length > 0) {
+      documentFiles.forEach((file, index) => {
+        const formattedUri = file.uri.startsWith('file://')
+          ? file.uri
+          : `file://${file.uri}`;
+        formData.append(`image[]`, {
+          uri: formattedUri,
+          type: file.type ? file.type : 'image/jpeg',
+
+          name: file.fileName || `image_${index}.jpg`,
+        });
       });
     }
-    console.log('formData', formData);
 
     ApiManager.ContractorWork(formData)
       .then(res => {
-        console.log('res?.PCW', res?.data);
-
         if (res?.data?.status === 200) {
-          console.log('res?.dataPCW', res?.data);
-
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
@@ -103,27 +91,37 @@ const ContractorMyWork = () => {
   };
 
   const handleUpload = async () => {
-    launchImageLibrary(
-      {
-        quality: 0.7,
-        selectionLimit: 5, // Ensure at least one image is selected
-        mediaType: 'photo',
-        includeBase64: false,
-      },
-      response => {
-        console.log('Response:', response);
-        if (response?.didCancel) {
-          console.log('User cancelled image selection');
-          setUploadImgs([]);
-        } else if (response?.assets?.length > 0) {
-          const newImages = response.assets;
-          console.log('Selected images:', newImages); // Debugging
-          setUploadImgs(prevImgs => [...prevImgs, ...newImages]);
-        } else {
-          console.log('Error selecting image');
-        }
-      },
-    );
+    try {
+      launchImageLibrary(
+        {
+          quality: 0.7,
+          selectionLimit: 5,
+          mediaType: 'photo',
+        },
+        response => {
+          if (!response || !response.assets || response.assets.length === 0) {
+            return;
+          }
+
+          // Ensure correct URI format
+          const newImages = response.assets.map(asset =>
+            asset.uri.startsWith('file://') ? asset.uri : `file://${asset.uri}`,
+          );
+
+          // Update state without duplicates
+          setUploadImgs(prevImages => [
+            ...new Set([...prevImages, ...newImages]),
+          ]);
+          setDocumentFiles(prevFiles => [
+            ...new Set([...prevFiles, ...response.assets]),
+          ]);
+
+          console.log('Selected Images:', newImages);
+        },
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong while selecting images.');
+    }
   };
 
   return (

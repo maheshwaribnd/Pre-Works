@@ -264,7 +264,11 @@ const ContractorRegistration = () => {
 
   const SubmitButton = async () => {
     if (validateForm()) {
-      navigation.navigate('otpscreen', {mobile_no: userData.number});
+      const response = await ContractorSignupAPI();
+      if (response?.status === 200) {
+        navigation.navigate('otpscreen', {mobile_no: userData.number});
+      }
+
       console.log('Validate');
     } else {
       console.log('notValidate');

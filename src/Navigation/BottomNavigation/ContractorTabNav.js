@@ -10,6 +10,7 @@ import {
   HEIGHT,
   NotoSans_Bold,
   NotoSans_Light,
+  NotoSans_Medium,
   WIDTH,
 } from '../../config/AppConst';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -78,14 +79,13 @@ const ContractorTabNav = () => {
               tabBarInactiveTintColor: COLOR.BottomTabTxt,
               //   #FBD8B4
               tabBarLabelStyle: {
-                fontSize: 14,
-                fontWeight: '500',
+                fontSize: 13,
+                fontWeight: '400',
                 marginBottom: 5,
-                lineHeight: 13.02,
-                fontFamily: NotoSans_Light,
+                fontFamily: NotoSans_Medium,
                 textAlign: 'center',
               },
-              tabBarStyle: {height: 75, paddingBottom: 5, paddingTop: 10},
+              tabBarStyle: {height: 75, paddingBottom: 5, paddingTop: 5},
             }}
           />
         );

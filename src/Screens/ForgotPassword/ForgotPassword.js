@@ -71,7 +71,6 @@ const ForgotPassword = () => {
       mobile_no: number,
       user_type: typeSelector,
     };
-    console.log('fogotparams', params);
 
     try {
       const res = await ApiManager.forgetPassword(params);
@@ -93,8 +92,6 @@ const ForgotPassword = () => {
         });
       }
     } catch (error) {
-      console.log('Forgot Password API Error:', error);
-
       if (error.response) {
         console.log('Error Data:', error.response.data);
         console.log('Error Status:', error.response.status);
@@ -134,7 +131,6 @@ const ForgotPassword = () => {
     ApiManager.ResendOtp(params).then(res => {
       if (res?.data?.status === 200) {
         setUserOTP(res?.data?.otp);
-        console.log('resend', res?.data);
         Snackbar.show({
           text: 'OTP sent successfully. ',
           fontFamily: NotoSans_Medium,

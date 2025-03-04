@@ -16,13 +16,18 @@ import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Snackbar from 'react-native-snackbar';
 
 const Profile = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const edit = route?.params?.edit;
   const setEdit = route?.params?.setEdit;
@@ -33,6 +38,10 @@ const Profile = () => {
   const [userImage, setuserImage] = useState('');
   const [backgdDocumentFile, setbackgdDocumentFile] = useState(null);
   const [userBackImg, setUserBackImg] = useState('');
+  const [errors, setErrors] = useState({
+    whatsAppError: '',
+    instagramError: '',
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -72,6 +81,39 @@ const Profile = () => {
     }
   }, [userId]);
 
+  const validateWhatsApp = text => {
+    // Allow numbers and require between 10 to 15 digits
+    const regex = /^[0-9]{10,15}$/;
+    if (text && !regex.test(text)) {
+      setErrors(prevState => ({
+        ...prevState,
+        whatsAppError: 'Please enter a valid WhatsApp number (10-15 digits).',
+      }));
+    } else {
+      setErrors(prevState => ({
+        ...prevState,
+        whatsAppError: '',
+      }));
+    }
+  };
+
+  // Instagram URL validation regex
+  const validateInstagramLink = text => {
+    // Ensure it's a valid Instagram URL
+    const regex = /^(https:\/\/www\.instagram\.com\/[a-zA-Z0-9_.]+\/?)$/;
+    if (text && !regex.test(text)) {
+      setErrors(prevState => ({
+        ...prevState,
+        instagramError: 'Please enter a valid Instagram URL.',
+      }));
+    } else {
+      setErrors(prevState => ({
+        ...prevState,
+        instagramError: '',
+      }));
+    }
+  };
+
   const ArchitectProfileAPI = async () => {
     if (!userId) return;
     try {
@@ -98,6 +140,13 @@ const Profile = () => {
   };
 
   const ArchitectUpdateAPI = async () => {
+    // const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
+    // const isInstagramValid = validateInstagramLink(data?.instagram_link);
+
+    // If any validation fails, don't proceed with API call
+    // if (!isWhatsAppValid || !isInstagramValid) {
+    //   return;
+    // }
     const formData = new FormData();
     formData.append('name', data?.name);
     formData.append('mobile_no', data?.mobile_no);
@@ -127,12 +176,12 @@ const Profile = () => {
       const res = await ApiManager.ArchitectUpdate(userId, formData);
       if (res?.data?.status === 200) {
         setEdit(false);
-
         Snackbar.show({
           text: res?.data?.message,
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
+        navigation.navigate('architectTabs');
         // setData({
         //   name: res.data.customer?.name || '',
         //   email: res.data.customer?.email || '',
@@ -144,10 +193,10 @@ const Profile = () => {
         //   profile_image: res.data.customer?.profile_image || '',
         // });
         // setuserImage(res.data.customer?.profile_image || '');
-        // await AsyncStorage.setItem(
-        //   'customerData',
-        //   JSON.stringify(res.data.customer),
-        // );
+        await AsyncStorage.setItem(
+          'ArchitechData',
+          JSON.stringify(res.data.customer),
+        );
 
         Snackbar.show({
           text: res?.data?.message || 'Profile updated successfully!',
@@ -170,11 +219,9 @@ const Profile = () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
       if (fileobj?.didCancel === true) {
         setuserImage('');
-        // setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setuserImage(img);
-        // setUserData(prev => ({...prev, img})); // Update userData
         setDocumentFile(fileobj?.assets);
       }
     });
@@ -238,6 +285,7 @@ const Profile = () => {
               style={styles.InputField}
               placeholder={data?.name}
               editable={edit}
+              placeholderTextColor="gray"
               value={data?.name}
               onChangeText={text => onChange('name', text)}
             />
@@ -247,6 +295,7 @@ const Profile = () => {
               keyboardType="number-pad"
               placeholder={data?.mobile_no}
               editable={edit}
+              placeholderTextColor="gray"
               value={data?.mobile_no}
               onChangeText={text => onChange('mobile_no', text)}
             />
@@ -256,6 +305,7 @@ const Profile = () => {
               placeholder={data?.email}
               keyboardType="decimal-pad"
               editable={edit}
+              placeholderTextColor="gray"
               value={data?.email}
               onChangeText={text => onChange('email', text)}
             />
@@ -264,6 +314,7 @@ const Profile = () => {
               style={styles.InputField}
               placeholder={data?.address || 'Address'}
               editable={edit}
+              placeholderTextColor="gray"
               keyboardType="decimal-pad"
               value={data?.address}
               onChangeText={text => onChange('address', text)}
@@ -273,6 +324,7 @@ const Profile = () => {
               style={styles.InputField}
               placeholder={data?.experience || 'Experience'}
               keyboardType="number-pad"
+              placeholderTextColor="gray"
               editable={edit}
               value={data?.experience}
               onChangeText={text => onChange('experience', text)}
@@ -282,34 +334,51 @@ const Profile = () => {
               style={styles.InputField}
               placeholder={data?.whatsup_no || 'WhatsApp No'}
               editable={edit}
+              placeholderTextColor="gray"
               keyboardType="number-pad"
               value={data?.whatsup_no}
-              onChangeText={text => onChange('whatsup_no', text)}
+              onChangeText={text => {
+                onChange('whatsup_no', text);
+                validateWhatsApp(text); // Validate WhatsApp number
+              }}
             />
+
+            {/* {errors.whatsAppError && (
+              <Text style={styles.errorText}>{errors.whatsAppError}</Text>
+            )} */}
 
             <TextInput
               style={styles.InputField}
               placeholder={data?.instagram_link || 'Instagram'}
               editable={edit}
+              placeholderTextColor="gray"
               keyboardType="default"
               value={data?.instagram_link}
-              onChangeText={text => onChange('instagram_link', text)}
+              onChangeText={text => {
+                onChange('instagram_link', text);
+                validateInstagramLink(text); // Validate Instagram URL
+              }}
             />
+
+            {/* {errors.instagramError && (
+              <Text style={styles.errorText}>{errors.instagramError}</Text>
+            )} */}
 
             <TextInput
               style={[
                 styles.InputField,
-                {height: HEIGHT(25), textAlign: 'justify'},
+                {height: HEIGHT(16), textAlign: 'left'},
               ]}
               placeholder={data?.about_us || 'About Us'}
               editable={edit}
               keyboardType="default"
+              placeholderTextColor="gray"
               value={data?.about_us}
               onChangeText={text => onChange('about_us', text)}
             />
 
             <View style={{marginBottom: HEIGHT(2)}}>
-              {!edit ? (
+              {edit ? (
                 <CustomButton
                   name="SAVE"
                   onPress={() => ArchitectUpdateAPI()}
@@ -357,6 +426,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: COLOR.White,
   },
+
   profileInfo: {
     marginLeft: WIDTH(6),
     marginTop: HEIGHT(7),
@@ -394,5 +464,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 25,
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'left',
   },
 });

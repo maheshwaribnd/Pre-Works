@@ -107,7 +107,6 @@ const OTPScreen = () => {
     ApiManager.ResendOtp(params).then(res => {
       if (res?.data?.status === 200) {
         // setUserOTP(res?.data?.otp);
-        console.log('resend', res?.data);
         Snackbar.show({
           text: 'OTP sent successfully. ',
           fontFamily: NotoSans_Medium,

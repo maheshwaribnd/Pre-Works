@@ -48,11 +48,7 @@ const Login = () => {
 
     ApiManager.userLogin(params)
       .then(async res => {
-        console.log('loginres?.data111', res?.data);
-
         if (res?.data?.status === 200) {
-          console.log('loginres?.data', res?.data);
-
           await AsyncStorage.setItem(
             'successStatus',
             JSON.stringify(res?.data?.success),

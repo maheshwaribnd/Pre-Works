@@ -39,7 +39,7 @@ const CreateMyWork = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userID = await AsyncStorage.getItem('ArchitectId');
+        const userID = await AsyncStorage.getItem('userId');
         setArchiId(userID);
       } catch (error) {
         console.error('Error in fetching data:', error);
@@ -55,7 +55,78 @@ const CreateMyWork = () => {
     }));
   };
 
+  const validateInputs = () => {
+    if (!createData.siteName.trim()) {
+      Snackbar.show({
+        text: 'Please enter SiteName',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.address.trim()) {
+      Snackbar.show({
+        text: 'Please enter Address',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.budget.trim()) {
+      Snackbar.show({
+        text: 'Please enter Budget',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.bid.trim()) {
+      Snackbar.show({
+        text: 'Please enter Bid',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!materialSelected) {
+      Snackbar.show({
+        text: 'Please select Material item',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.time.trim()) {
+      Snackbar.show({
+        text: 'Please enter Time',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!createData.description.trim()) {
+      Snackbar.show({
+        text: 'Please enter Description',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (documentFiles.length === 0) {
+      Snackbar.show({
+        text: 'Please upload at least one image',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    return true; // If all validations pass
+  };
+
   const CreateWorkAPI = () => {
+    if (!validateInputs()) return;
     const formData = new FormData();
 
     formData.append('site_name', createData.siteName);
@@ -69,13 +140,18 @@ const CreateMyWork = () => {
 
     if (documentFiles && documentFiles.length > 0) {
       documentFiles.forEach((file, index) => {
-        formData.append(`image[${index}]`, {
-          uri: file.uri,
-          type: file.type,
-          name: file.fileName,
+        const formattedUri = file.uri.startsWith('file://')
+          ? file.uri
+          : `file://${file.uri}`;
+        formData.append(`image[]`, {
+          uri: formattedUri,
+          type: file.type ? file.type : 'image/jpeg',
+
+          name: file.fileName || `image_${index}.jpg`,
         });
       });
     }
+
     ApiManager.architectMyworkCreate(formData)
       .then(res => {
         if (res?.data?.status === 200) {
@@ -121,19 +197,28 @@ const CreateMyWork = () => {
       launchImageLibrary(
         {
           quality: 0.7,
-          selectionLimit: 5, // Allow selecting multiple images
+          selectionLimit: 5,
           mediaType: 'photo',
         },
-        fileobj => {
-          if (fileobj?.didCancel) {
+        response => {
+          if (!response || !response.assets || response.assets.length === 0) {
             return;
           }
-          const newImages = fileobj?.assets?.map(asset => asset.uri) || [];
-          setUploadImgs(prevImages => [...prevImages, ...newImages]); // Append new images
-          setDocumentFiles(prevFiles => [
-            ...prevFiles,
-            ...(fileobj?.assets || []),
+
+          // Ensure correct URI format
+          const newImages = response.assets.map(asset =>
+            asset.uri.startsWith('file://') ? asset.uri : `file://${asset.uri}`,
+          );
+
+          // Update state without duplicates
+          setUploadImgs(prevImages => [
+            ...new Set([...prevImages, ...newImages]),
           ]);
+          setDocumentFiles(prevFiles => [
+            ...new Set([...prevFiles, ...response.assets]),
+          ]);
+
+          console.log('Selected Images:', newImages);
         },
       );
     } catch (error) {
@@ -162,7 +247,7 @@ const CreateMyWork = () => {
               placeholder="Site Name"
               placeholderTextColor="gray"
               keyboardType="default"
-              value={createData.name}
+              value={createData.siteName}
               onChangeText={text => onChange('siteName', text)}
             />
 
@@ -171,7 +256,7 @@ const CreateMyWork = () => {
               placeholder="Address"
               placeholderTextColor="gray"
               keyboardType="default"
-              value={createData.siteAddress}
+              value={createData.address}
               onChangeText={text => onChange('address', text)}
             />
 
@@ -181,7 +266,7 @@ const CreateMyWork = () => {
                 placeholder="Budget"
                 placeholderTextColor="gray"
                 keyboardType="numeric"
-                value={createData.city}
+                value={createData.budget}
                 onChangeText={text => onChange('budget', text)}
               />
               <TextInput
@@ -189,7 +274,7 @@ const CreateMyWork = () => {
                 placeholder="Bid"
                 placeholderTextColor="gray"
                 keyboardType="numeric"
-                value={createData.pincode}
+                value={createData.bid}
                 onChangeText={text => onChange('bid', text)}
               />
             </View>
@@ -199,7 +284,7 @@ const CreateMyWork = () => {
               placeholder="Time"
               placeholderTextColor="gray"
               keyboardType="default"
-              value={createData.siteArea}
+              value={createData.time}
               onChangeText={text => onChange('time', text)}
             />
 
@@ -394,11 +479,11 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: -1,
+    top: 0,
     right: -1,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: COLOR.White,
+    borderColor: 'red',
     width: 16,
     height: 16,
     justifyContent: 'center',
@@ -408,6 +493,6 @@ const styles = StyleSheet.create({
   closeIcon: {
     width: 15, // Adjust the size of the cross icon
     height: 15,
-    tintColor: 'white', // Change color if needed
+    tintColor: 'red', // Change color if needed
   },
 });

@@ -88,9 +88,7 @@ const CustomerProfile = () => {
     try {
       setEdit(false);
       const res = await ApiManager.CustomerUpdate(cusId, formData);
-
       if (res?.data?.status === 200) {
-        console.log('cusUpdate', res?.data);
         setuserImage(res.data.customer?.profile_image || '');
         await AsyncStorage.setItem(
           'customerData',

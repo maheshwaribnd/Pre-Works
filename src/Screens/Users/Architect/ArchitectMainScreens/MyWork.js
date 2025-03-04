@@ -70,7 +70,6 @@ const MyWork = () => {
     ApiManager.ArchitectMyWorkList(archiId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.data;
-        console.log('response', response);
 
         setListData(response);
       } else {
@@ -93,12 +92,13 @@ const MyWork = () => {
       <TouchableOpacity
         style={styles.ListBox}
         onPress={() => openParticularWork(item)}>
-        <View>
+        {item?.item?.images?.length > 0 && (
           <Image
-            source={{uri: item?.item?.files}}
+            source={{uri: encodeURI(item?.item?.images[0]?.files)}}
             style={{width: 100, height: 100, borderRadius: 6}}
+            resizeMode="cover"
           />
-        </View>
+        )}
         <View style={styles.listView}>
           <View>
             <Text style={styles.name}>{item?.item?.site_name}</Text>
@@ -117,7 +117,7 @@ const MyWork = () => {
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         {listData && listData.length > 0 ? (
-          <View>
+          <View style={{flex: 1}}>
             <FlatList
               data={listData}
               keyExtractor={item => item.id}
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
 
   create: {
     position: 'absolute',
-    bottom: 0,
-    right: 9,
+    bottom: 10,
+    right: 10,
   },
 
   empty: {

@@ -26,7 +26,6 @@ const CreatePassword = () => {
   const mobileNo = route?.params?.mobileNo;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  console.log('mobileNomobileNo', mobileNo);
 
   const [user, setUser] = useState({
     password: '',
@@ -40,7 +39,7 @@ const CreatePassword = () => {
 
   const CreateFunction = async () => {
     if (validateForm()) {
-      CreatePasswordAPI()
+      CreatePasswordAPI();
       navigation.navigate('login', {userType: typeSelector});
       console.log('Vali');
     } else {
@@ -55,7 +54,6 @@ const CreatePassword = () => {
       password: user.password,
       password_confirmation: user.confirmPassword,
     };
-    console.log('ccrete', params);
 
     ApiManager.CreatePassword(params)
       .then(res => {

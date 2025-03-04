@@ -97,46 +97,65 @@ const ArchitectRegistration = () => {
       formData.append('background_img', undefined);
     }
 
-    await ApiManager.architectureRegistration(formData)
-      .then(async res => {
+    try {
+      const res = await ApiManager.architectureRegistration(formData);
+      if (res?.data?.status === 200) {
         const simpleData = formData._parts.reduce((acc, [key, value]) => {
           acc[key] = value;
           return acc;
         }, {});
 
-        if (res?.data?.status == 200) {
-          await AsyncStorage.setItem(
-            'ArchitechData',
-            JSON.stringify(simpleData),
-          );
-          await AsyncStorage.setItem(
-            'userId',
-            JSON.stringify(res?.data?.user_id),
-          );
+        await AsyncStorage.setItem('ArchitechData', JSON.stringify(simpleData));
+        await AsyncStorage.setItem(
+          'userId',
+          JSON.stringify(res?.data?.user_id),
+        );
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return {status: 200};
+      } else if (
+        res?.data?.status === 409 ||
+        res?.data?.message?.toLowerCase().includes('already registered')
+      ) {
+        Snackbar.show({
+          text: 'User already registered.',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
 
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        } else {
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#D1264A',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        }
-      })
-      .catch(err => {
-        console.log('error', err);
+        return {status: 409}; // Return status so navigation doesn't happen
+      } else {
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+
+        return {status: res?.data?.status};
+      }
+    } catch (error) {
+      console.log('error.response', error.response?.data?.message);
+      Snackbar.show({
+        text: error.response?.data?.message, // Show the first error for email
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
       });
+
+      return {status: 500};
+    }
   };
 
-  const SubmitButton = () => {
+  const SubmitButton = async () => {
     if (validateForm()) {
-      ArchitectSignupAPI();
-      console.log('Validate');
-      navigation.navigate('otpscreen', {mobile_no: userData.number});
+      const response = await ArchitectSignupAPI();
+      if (response?.status === 200) {
+        navigation.navigate('otpscreen', {mobile_no: userData.number});
+        console.log('Validate');
+      }
+
       // navigation.navigate('architectTabs');
     } else {
       console.log('notValidate');
@@ -167,6 +186,35 @@ const ArchitectRegistration = () => {
       newErrors.confirmPw = 'Passwords do not match';
     }
 
+    // Address validation
+    if (!userData.address.trim()) {
+      newErrors.address = 'Address is required';
+    }
+
+    // City validation
+    if (!userData.city.trim()) {
+      newErrors.city = 'City is required';
+    }
+
+    // State validation
+    if (!userData.state.trim()) {
+      newErrors.state = 'State is required';
+    }
+
+    // Pincode validation (6 digits)
+    if (!/^\d{6}$/.test(userData.pincode)) {
+      newErrors.pincode = 'Enter a valid pincode';
+    }
+
+    // Experience validation (should be a number and non-negative)
+    if (
+      !/^\d+$/.test(userData.experience) ||
+      parseInt(userData.experience, 10) < 0
+    ) {
+      newErrors.experience = 'Enter experience in years';
+    }
+
+    // Image validation
     if (!userImage) {
       Snackbar.show({
         text: 'Upload Img',
@@ -174,6 +222,16 @@ const ArchitectRegistration = () => {
         duration: Snackbar.LENGTH_SHORT,
       });
       newErrors.img = 'Upload Img';
+    }
+
+    // Background image validation
+    if (!backgddocumentFile) {
+      Snackbar.show({
+        text: 'Upload Background Img',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      newErrors.bgImg = 'Upload Background Img';
     }
 
     setError(newErrors);
@@ -388,6 +446,16 @@ const ArchitectRegistration = () => {
           />
         </View>
 
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {error.city ? (
+            <Text style={{color: 'red', width: WIDTH(43)}}>{error.city}</Text>
+          ) : null}
+
+          {error.state ? (
+            <Text style={styles.errorTxt}>{error.state}</Text>
+          ) : null}
+        </View>
+
         <View style={styles.experienceView}>
           <TextInput
             style={[styles.InputField, {width: WIDTH(44)}]}
@@ -407,7 +475,19 @@ const ArchitectRegistration = () => {
           />
         </View>
 
-        <View style={{marginTop: HEIGHT(1), justifyContent: 'center'}}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {error.pincode ? (
+            <Text style={{color: 'red', width: WIDTH(43)}}>
+              {error.pincode}
+            </Text>
+          ) : null}
+
+          {error.experience ? (
+            <Text style={styles.errorTxt}>{error.experience}</Text>
+          ) : null}
+        </View>
+
+        <View style={{marginTop: HEIGHT(3), justifyContent: 'center'}}>
           <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>
             <Text
               style={{
@@ -689,5 +769,12 @@ const styles = StyleSheet.create({
   profileInfo: {
     marginLeft: WIDTH(6),
     marginTop: HEIGHT(7),
+  },
+
+  errorTxt: {
+    color: 'red',
+    position: 'absolute',
+    right: 5,
+    width: WIDTH(43),
   },
 });

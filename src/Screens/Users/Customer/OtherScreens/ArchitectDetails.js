@@ -72,8 +72,6 @@ const ArchitectDetails = () => {
   const handleGmail = () => openURL(`mailto:${email}`);
 
   const RenderWorkList = item => {
-    console.log('item', item);
-
     const PastPreworkFunction = () => {
       navigation.navigate('architectpastpreworkdetails', {
         item: item?.item,

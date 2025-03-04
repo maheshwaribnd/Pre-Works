@@ -52,7 +52,6 @@ const ContractorProfile = () => {
     try {
       const res = await ApiManager.ContractorProfile(userId);
       if (res?.data?.status === 200) {
-        console.log('res?.data000', res?.data);
         setData(res?.data?.['contractors ']);
         setuserImage(res?.data?.['contractors ']?.profile_image || '');
       }

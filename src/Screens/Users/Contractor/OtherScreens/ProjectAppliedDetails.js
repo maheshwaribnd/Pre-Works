@@ -79,7 +79,6 @@ const ProjectAppliedDetails = () => {
     formData.append('time', createData.time);
     formData.append('material', materialSelected);
     formData.append('price', createData.price);
-    console.log('preId, userId, formData', preId, userId, formData);
 
     ApiManager.AppliedProjectEdit(preId, userId, formData)
       .then(res => {
