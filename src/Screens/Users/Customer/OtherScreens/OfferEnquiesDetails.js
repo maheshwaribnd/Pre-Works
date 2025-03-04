@@ -30,6 +30,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import BidModal from '../../../../Component/BidModal/BidModal';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Snackbar from 'react-native-snackbar';
 
 const OfferEnquiesDetails = () => {
   const route = useRoute();
@@ -42,7 +43,7 @@ const OfferEnquiesDetails = () => {
 
   const [Accept, setAccept] = useState(false);
   const [Reject, setReject] = useState(false);
-  console.log('1230el', contractorDetails);
+  console.log('contractorDetails', contractorDetails);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -62,6 +63,8 @@ const OfferEnquiesDetails = () => {
     ApiManager.EnquiryDetailsById(contractorID)
       .then(res => {
         if (res?.data?.status === 200) {
+          console.log('oe110', res?.data);
+
           const response = res?.data?.contractorDetail;
           const images = res?.data?.contractorImage;
           setContractorDetails(response);
@@ -177,10 +180,17 @@ const OfferEnquiesDetails = () => {
                 <BidModal
                   heading="Are you Sure, cancle to here"
                   showModal={Reject}
-                  setShowModal={setCancel}
+                  setShowModal={setReject}
                   name="REJECT"
                   color={['#F78941', '#D2390F']}
-                  onPress={() => setReject(!cancel)}
+                  onPress={() => {
+                    Snackbar.show({
+                      text: 'Bid Rejected',
+                      backgroundColor: '#D1264A',
+                      duration: Snackbar.LENGTH_SHORT,
+                    });
+                    // setReject(!Reject)
+                  }}
                 />
               ) : null}
 
@@ -188,15 +198,16 @@ const OfferEnquiesDetails = () => {
                 <BidModal
                   heading="Are you Sure, do you want to go with this bid now"
                   showModal={Accept}
-                  setShowModal={setReject}
+                  setShowModal={setAccept}
                   name="ACCEPT"
                   color={['#0AD788', '#03A151']}
-                  //   onPress={() =>
-                  //     navigation.navigate('postbidscreen', {
-                  //       preId: preId,
-                  //       customerId: details?.customer_id,
-                  //     })
-                  //   }
+                  onPress={() => {
+                    Snackbar.show({
+                      text: 'Bid Accepted',
+                      backgroundColor: '#27cc5d',
+                      duration: Snackbar.LENGTH_SHORT,
+                    });
+                  }}
                 />
               ) : null}
             </View>

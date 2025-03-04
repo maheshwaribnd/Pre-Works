@@ -229,10 +229,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     borderRadius: 10,
   },
-  pagination: {
-    position: 'absolute',
-    bottom: 10,
-  },
+
   noImageText: {
     textAlign: 'center',
     fontSize: 16,

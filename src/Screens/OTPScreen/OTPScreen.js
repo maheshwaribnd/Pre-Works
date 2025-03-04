@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ImageBackground,
   StyleSheet,
@@ -24,7 +24,22 @@ const OTPScreen = () => {
   const mobileNumber = route.params?.mobile_no;
 
   const [otp, setOtp] = useState('');
+
   const [isValid, setIsValid] = useState(false);
+  const [timer, setTimer] = useState(59);
+
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => prevTimer - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const onChangeOTP = otpValue => {
     if (/^\d{0,5}$/.test(otpValue)) {
@@ -40,6 +55,7 @@ const OTPScreen = () => {
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
+      return; // Stop execution if OTP is invalid
     }
 
     const params = {
@@ -47,42 +63,39 @@ const OTPScreen = () => {
       user_type: typeSelector,
       otp: otp,
     };
-    // console.log('12302', params);
 
-    ApiManager.otpVerify(params)
-      .then(res => {
-        // console.log('ooo333o', res?.data);
+    try {
+      const res = await ApiManager.otpVerify(params);
 
-        if (res?.data?.status === 200) {
-          // console.log('oooo', res?.data);
-
-          if (typeSelector === 'customer') {
-            console.log('Navigating to customerTabs');
-            navigation.replace('customerTabs');
-          } else if (typeSelector === 'contractor') {
-            console.log('Navigating to contractorTabs');
-            navigation.replace('contractorTabs');
-          } else if (typeSelector === 'architect') {
-            console.log('Navigating to architectTabs');
-            navigation.replace('architectTabs');
-          }
-
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        }
-      })
-      .catch(
-        err => console.log(err),
-
+      if (res?.data?.status === 200) {
         Snackbar.show({
           text: res?.data?.message,
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+
+        // Navigate based on user type
+        if (typeSelector === 'customer') {
+          navigation.replace('customerTabs');
+        } else if (typeSelector === 'contractor') {
+          navigation.replace('contractorTabs');
+        } else if (typeSelector === 'architect') {
+          navigation.replace('architectTabs');
+        }
+      } else {
+        Snackbar.show({
+          text: res?.data?.message || 'Invalid OTP',
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
-        }),
-      );
+        });
+      }
+    } catch (err) {
+      Snackbar.show({
+        text: err?.response?.data?.message || 'Something went wrong',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
   };
 
   const ResendOtpAPI = () => {
@@ -93,9 +106,17 @@ const OTPScreen = () => {
 
     ApiManager.ResendOtp(params).then(res => {
       if (res?.data?.status === 200) {
-        console.log('rotp', res?.data);
+        // setUserOTP(res?.data?.otp);
+        console.log('resend', res?.data);
+        Snackbar.show({
+          text: 'OTP sent successfully. ',
+          fontFamily: NotoSans_Medium,
+          backgroundColor: '#19cf55',
+          duration: Snackbar.LENGTH_SHORT,
+        });
       }
     });
+    setTimer(30);
   };
 
   return (
@@ -120,9 +141,16 @@ const OTPScreen = () => {
       </View>
 
       <Text style={styles.txt}>Didn't receive OTP code?</Text>
-      <TouchableOpacity onPress={() => ResendOtpAPI()}>
-        <Text style={[styles.txt, {color: '#1EA35A'}]}>Resend OTP</Text>
-      </TouchableOpacity>
+      <View style={styles.recentText}>
+        {timer > 0 ? (
+          <Text style={{color: '#1EA35A'}}>Resend OTP in: {timer} seconds</Text>
+        ) : (
+          <TouchableOpacity onPress={() => ResendOtpAPI()}>
+            <Text style={[styles.txt, {color: '#1EA35A'}]}>Resend OTP</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <CustomButton
         name="VERIFY OTP"
         onPress={() => OTPVerifyAPI()}
@@ -158,5 +186,12 @@ const styles = StyleSheet.create({
     borderColor: COLOR.Gray,
     width: WIDTH(15),
     height: HEIGHT(8),
+  },
+
+  recentText: {
+    alignItems: 'center',
+    width: WIDTH(90),
+    // marginTop: HEIGHT(4),
+    marginVertical: 10,
   },
 });

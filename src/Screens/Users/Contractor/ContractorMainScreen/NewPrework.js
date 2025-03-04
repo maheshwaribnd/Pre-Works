@@ -21,31 +21,31 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 const NewPrework = () => {
   const navigation = useNavigation();
   const [listResponse, setListResponse] = useState([]);
-console.log('listResponse',listResponse);
+  console.log('listResponse', listResponse);
 
-   useFocusEffect(
-      useCallback(() => {
-        const onBackPress = () => {
-          // Check if the dashboard is the only screen in the stack
-          if (navigation.canGoBack()) {
-            return false; // Allow default back behavior
-          }
-  
-          Alert.alert('Exit App', 'Do you want to exit?', [
-            {text: 'Cancel', style: 'cancel'},
-            {text: 'Exit', onPress: () => BackHandler.exitApp()},
-          ]);
-  
-          return true; // Prevent going back
-        };
-  
-        BackHandler.addEventListener('hardwareBackPress', onBackPress);
-  
-        // return () => {
-        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-        // };
-      }, [navigation]),
-    )
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Check if the dashboard is the only screen in the stack
+        if (navigation.canGoBack()) {
+          return false; // Allow default back behavior
+        }
+
+        Alert.alert('Exit App', 'Do you want to exit?', [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Exit', onPress: () => BackHandler.exitApp()},
+        ]);
+
+        return true; // Prevent going back
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     NewPreworkListingAPI();
@@ -72,10 +72,11 @@ console.log('listResponse',listResponse);
       <TouchableOpacity
         style={styles.card}
         onPress={() => openParticularPrework(item)}>
-        {listResponse[0]?.files?.length > 0 && (
+        {item?.item?.files?.length > 0 && (
           <Image
-            source={{uri: listResponse[0].files[0].files}}
+            source={{uri: encodeURI(item?.item?.files[0]?.files)}}
             style={styles.image}
+            resizeMode="cover"
           />
         )}
 

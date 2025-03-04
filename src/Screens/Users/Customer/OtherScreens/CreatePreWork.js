@@ -80,7 +80,85 @@ const CreatePreWork = () => {
     return date.toLocaleDateString('en-GB'); // Formats as DD/MM/YYYY
   };
 
+  const Validate = () => {
+    if (!createData.name.trim()) {
+      Snackbar.show({
+        text: 'Please enter Name',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.siteAddress.trim()) {
+      Snackbar.show({
+        text: 'Please enter Site Address',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.city.trim()) {
+      Snackbar.show({
+        text: 'Please enter City',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.pincode.trim()) {
+      Snackbar.show({
+        text: 'Please enter Pincode',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!materialSelected) {
+      Snackbar.show({
+        text: 'Please select Material item',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.budgetRange.trim()) {
+      Snackbar.show({
+        text: 'Please enter Budget Range',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!selectedDate) {
+      Snackbar.show({
+        text: 'Please select Last Date for Bidding',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (!createData.description.trim()) {
+      Snackbar.show({
+        text: 'Please enter Description',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    if (documentFiles.length === 0) {
+      Snackbar.show({
+        text: 'Please upload at least one image',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+    return true; // If all validations pass
+  };
+
   const CreatePewWorkAPI = async () => {
+    if (!Validate()) return;
     const formData = new FormData();
 
     formData.append('name', createData.name);
@@ -98,19 +176,15 @@ const CreatePreWork = () => {
 
     if (documentFiles && documentFiles.length > 0) {
       documentFiles.forEach((file, index) => {
-        formData.append(
-          file.type === 'application/pdf'
-            ? `upload_pdf[${index}]`
-            : `upload_image[${index}]`,
-          {
-            uri:
-              Platform.OS === 'ios'
-                ? file.uri.replace('file://', '')
-                : file.uri,
-            type: file.type,
-            name: file.name || `file_${index}.${file.type.split('/')[1]}`, // Fallback name
-          },
-        );
+        const formattedUri = file.uri.startsWith('file://')
+          ? file.uri
+          : `file://${file.uri}`;
+        formData.append(`upload_image[]`, {
+          uri: formattedUri,
+          type: file.type ? file.type : 'image/jpeg',
+
+          name: file.fileName || `image_${index}.jpg`,
+        });
       });
     }
 
@@ -164,31 +238,28 @@ const CreatePreWork = () => {
       launchImageLibrary(
         {
           quality: 0.7,
-          selectionLimit: 5, // Allow selecting multiple images
+          selectionLimit: 5,
           mediaType: 'photo',
-          includeBase64: true, // Add this to get base64 encoding
         },
         response => {
-          if (response?.didCancel) {
+          if (!response || !response.assets || response.assets.length === 0) {
             return;
           }
 
-          // Extract URIs and base64 images
-          const newImages = response?.assets?.map(asset => asset.uri) || [];
-          const base64Images =
-            response?.assets?.map(
-              asset => `data:image/jpeg;base64,${asset.base64}`,
-            ) || [];
+          // Ensure correct URI format
+          const newImages = response.assets.map(asset =>
+            asset.uri.startsWith('file://') ? asset.uri : `file://${asset.uri}`,
+          );
 
-          // Append new images to state
-          setUploadImgs(prevImages => [...prevImages, ...newImages]);
+          // Update state without duplicates
+          setUploadImgs(prevImages => [
+            ...new Set([...prevImages, ...newImages]),
+          ]);
           setDocumentFiles(prevFiles => [
-            ...prevFiles,
-            ...(response?.assets || []),
+            ...new Set([...prevFiles, ...response.assets]),
           ]);
 
-          // Log base64 images (for debugging)
-          console.log('Base64 Images:', base64Images);
+          console.log('Selected Images:', newImages);
         },
       );
     } catch (error) {

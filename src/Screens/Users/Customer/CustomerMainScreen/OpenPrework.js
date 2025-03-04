@@ -30,7 +30,6 @@ const OpenPrework = () => {
   const [preworkList, setPreworkList] = useState([]);
   const [preworkImgs, setPreworkImgs] = useState([]);
   const [cusId, setCusId] = useState(null);
-  console.log('cusId', cusId);
 
   useFocusEffect(
     useCallback(() => {
@@ -101,10 +100,11 @@ const OpenPrework = () => {
       <TouchableOpacity
         style={styles.card}
         onPress={() => openParticularPrework(item)}>
-        {preworkList[0]?.files?.length > 0 && (
+        {item?.item?.files?.length > 0 && (
           <Image
-            source={{uri: preworkList[0].files[0].files}}
+            source={{uri: encodeURI(item?.item?.files[0]?.files)}}
             style={styles.image}
+            resizeMode="cover"
           />
         )}
 
@@ -167,7 +167,7 @@ const OpenPrework = () => {
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('createprework')}
-              style={styles.create}>
+              style={styles.createC}>
               <CreateBtn />
             </TouchableOpacity>
           </View>
@@ -212,8 +212,14 @@ const styles = StyleSheet.create({
 
   create: {
     position: 'absolute',
-    bottom: 6,
-    right: 10,
+    bottom: 9,
+    right: 26,
+  },
+
+  createC: {
+    position: 'absolute',
+    bottom: 9,
+    right: 6,
   },
 
   empty: {

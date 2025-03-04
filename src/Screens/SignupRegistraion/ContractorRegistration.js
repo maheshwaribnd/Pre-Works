@@ -32,7 +32,7 @@ import ApiManager from '../../API/Api';
 
 const ContractorRegistration = () => {
   const navigation = useNavigation();
-
+  let isSelecting = false;
   const [userImage, setuserImage] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
   // const [uploadImg, setUploadImg] = useState('');
@@ -103,41 +103,72 @@ const ContractorRegistration = () => {
     // }
     console.log('ContractorformData', formData);
 
-    await ApiManager.contractorRegistration(formData)
-      .then(async res => {
+    try {
+      const res = await ApiManager.contractorRegistration(formData);
+      if (res?.data?.status === 200) {
         const simpleData = formData._parts.reduce((acc, [key, value]) => {
           acc[key] = value;
           return acc;
         }, {});
+        console.log('contr', res?.data);
+        await AsyncStorage.setItem(
+          'ContractorData',
+          JSON.stringify(simpleData),
+        );
+        await AsyncStorage.setItem(
+          'userId',
+          JSON.stringify(res?.data?.user_id),
+        );
 
-        if (res?.data?.status == 200) {
-          console.log('contractres', res?.data);
-          
-          await AsyncStorage.setItem(
-            'ContractorData',
-            JSON.stringify(simpleData),
-          );
-          await AsyncStorage.setItem(
-            'userId',
-            JSON.stringify(res?.data?.user_id),
-          );
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#27cc5d',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return {status: 200};
+      } else if (
+        res?.data?.status === 409 ||
+        res?.data?.message?.toLowerCase().includes('already registered')
+      ) {
+        Snackbar.show({
+          text: 'User already registered.',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
 
+        return {status: 409}; // Return status so navigation doesn't happen
+      } else {
+        Snackbar.show({
+          text: res?.data?.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+
+        return {status: res?.data?.status};
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.data?.errors?.email) {
           Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
+            text: error.response.data.errors.email[0], // Show the first error for email
+            backgroundColor: '#D1264A',
             duration: Snackbar.LENGTH_SHORT,
           });
-        } else {
+        } else if (error.response.data?.errors?.mobile_no) {
           Snackbar.show({
-            text: res?.data?.message,
+            text: error.response.data.errors.mobile_no[0], // Show the first error for mobile_no
             backgroundColor: '#D1264A',
             duration: Snackbar.LENGTH_SHORT,
           });
         }
-      })
-      .catch(err => {
-        console.log('error', err);
-      });
+      } else if (error.request) {
+        console.log('No Response:', error.request);
+      } else {
+        console.log('Error Message:', error.message);
+      }
+
+      return {status: 500};
+    }
   };
 
   const validateForm = () => {
@@ -200,7 +231,7 @@ const ContractorRegistration = () => {
 
     // Pincode validation (6 digits)
     if (!/^\d{6}$/.test(userData.pincode)) {
-      newErrors.pincode = 'Enter a valid 6-digit pincode';
+      newErrors.pincode = 'Enter a valid pincode';
     } else {
       newErrors.pincode = '';
     }
@@ -210,7 +241,7 @@ const ContractorRegistration = () => {
       !/^\d+$/.test(userData.experience) ||
       parseInt(userData.experience, 10) < 0
     ) {
-      newErrors.experience = 'Enter a valid experience in years';
+      newErrors.experience = 'Enter experience in years';
     } else {
       newErrors.experience = '';
     }
@@ -231,12 +262,10 @@ const ContractorRegistration = () => {
     return Object.values(newErrors).every(error => error === '');
   };
 
-  const SubmitButton = () => {
+  const SubmitButton = async () => {
     if (validateForm()) {
-      ContractorSignupAPI();
-      console.log('Validate');
       navigation.navigate('otpscreen', {mobile_no: userData.number});
-      // navigation.navigate('contractorTabs');
+      console.log('Validate');
     } else {
       console.log('notValidate');
     }
@@ -276,17 +305,27 @@ const ContractorRegistration = () => {
   // };
 
   const selectImage = async () => {
-    launchImageLibrary({quality: 0.7}, fileobj => {
-      if (fileobj?.didCancel === true) {
-        setuserImage('');
-        setUserData(prev => ({...prev, img: ''})); // Update userData
-      } else {
-        const img = fileobj?.assets[0]?.uri || '';
-        setuserImage(img);
-        setUserData(prev => ({...prev, img})); // Update userData
-        setDocumentFile(fileobj?.assets);
-      }
-    });
+    if (isSelecting) return; // Prevent multiple triggers
+    isSelecting = true;
+
+    try {
+      launchImageLibrary({quality: 0.7, mediaType: 'photo'}, response => {
+        isSelecting = false; // Reset flag after execution
+
+        if (response.didCancel) {
+          setuserImage('');
+          setUserData(prev => ({...prev, img: ''}));
+        } else if (response.assets && response.assets.length > 0) {
+          const img = response.assets[0].uri;
+          setuserImage(img);
+          setUserData(prev => ({...prev, img}));
+          setDocumentFile(response.assets);
+        }
+      });
+    } catch (error) {
+      isSelecting = false;
+      console.error('Image selection error:', error);
+    }
   };
 
   const showPasswordFunction = () => {
@@ -419,6 +458,7 @@ const ContractorRegistration = () => {
             value={userData.city}
             onChangeText={text => onChange('city', text)}
           />
+
           <TextInput
             style={[styles.InputField, {width: WIDTH(44)}]}
             placeholder="State"
@@ -428,7 +468,15 @@ const ContractorRegistration = () => {
             onChangeText={text => onChange('state', text)}
           />
         </View>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {error.city ? (
+            <Text style={{color: 'red', width: WIDTH(43)}}>{error.city}</Text>
+          ) : null}
 
+          {error.state ? (
+            <Text style={styles.errorTxt}>{error.state}</Text>
+          ) : null}
+        </View>
         <View style={styles.experienceView}>
           <TextInput
             style={[styles.InputField, {width: WIDTH(44)}]}
@@ -447,7 +495,17 @@ const ContractorRegistration = () => {
             onChangeText={text => onChange('experience', text)}
           />
         </View>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {error.pincode ? (
+            <Text style={{color: 'red', width: WIDTH(43)}}>
+              {error.pincode}
+            </Text>
+          ) : null}
 
+          {error.experience ? (
+            <Text style={styles.errorTxt}>{error.experience}</Text>
+          ) : null}
+        </View>
         {/* <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <TouchableOpacity
             style={{
@@ -473,7 +531,7 @@ const ContractorRegistration = () => {
           </View>
         </View> */}
 
-        <View style={{marginTop: HEIGHT(1), justifyContent: 'center'}}>
+        <View style={{marginTop: HEIGHT(3), justifyContent: 'center'}}>
           <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>
             <Text
               style={{
@@ -663,5 +721,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
+  },
+
+  errorTxt: {
+    color: 'red',
+    position: 'absolute',
+    right: 5,
+    width: WIDTH(43),
   },
 });

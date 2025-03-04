@@ -25,8 +25,8 @@ const ForgotPassword = () => {
   const typeSelector = useSelector(state => state.userTypee.usertype);
   const [number, setNumber] = useState(null);
   const [currentOTP, setCurrentOTP] = useState('');
-  const [showModal, setShowModal] = useState(false);
   const [userOTP, setUserOTP] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const [DeviceToken, setDeviceToken] = useState('');
   const [timer, setTimer] = useState(59);
 
@@ -71,12 +71,12 @@ const ForgotPassword = () => {
       mobile_no: number,
       user_type: typeSelector,
     };
+    console.log('fogotparams', params);
 
     try {
       const res = await ApiManager.forgetPassword(params);
 
       if (res?.data?.status === 200) {
-        console.log('Successforgot:', res?.data);
         setUserOTP(res?.data?.otp);
         Snackbar.show({
           text: res?.data?.message,
@@ -130,7 +130,6 @@ const ForgotPassword = () => {
       mobile_no: number,
       user_type: typeSelector,
     };
-    console.log('paramsresnd', params);
     setCurrentOTP('');
     ApiManager.ResendOtp(params).then(res => {
       if (res?.data?.status === 200) {
@@ -155,7 +154,7 @@ const ForgotPassword = () => {
         backgroundColor: '#19cf55',
         duration: Snackbar.LENGTH_SHORT,
       });
-      navigation.navigate('createpassword', {mobileNo: number})
+      navigation.navigate('createpassword', {mobileNo: number});
     } else {
       Snackbar.show({
         text: 'Incorrect OTP. Please enter the correct OTP. ',
@@ -203,12 +202,12 @@ const ForgotPassword = () => {
 
               <View style={styles.recentText}>
                 {timer > 0 ? (
-                  <Text style={{color: 'orange'}}>
+                  <Text style={{color: '#1EA35A'}}>
                     Resend OTP in: {timer} seconds
                   </Text>
                 ) : (
                   <TouchableOpacity onPress={() => handleResendOTP()}>
-                    <Text style={{color: 'orange'}}>Resend OTP</Text>
+                    <Text style={{color: '#1EA35A'}}>Resend OTP</Text>
                   </TouchableOpacity>
                 )}
               </View>

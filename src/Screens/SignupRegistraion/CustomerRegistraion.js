@@ -116,7 +116,7 @@ const CustomerRegistraion = () => {
     } else {
       console.log('notValidate');
     }
-  }
+  };
 
   const CustomerSignupAPI = async () => {
     const formData = new FormData();
@@ -180,16 +180,45 @@ const CustomerRegistraion = () => {
 
         return {status: res?.data?.status};
       }
-    } catch (err) {
-      console.log('error', err);
-      // Snackbar.show({
-      //   text: 'User already registered.',
-      //   backgroundColor: '#D1264A',
-      //   duration: Snackbar.LENGTH_SHORT,
-      // });
+    } catch (error) {
+      if (error.response) {
+        if (error.response.data?.errors) {
+          // Check for email error
+          if (error.response.data.errors.email) {
+            Snackbar.show({
+              text: error.response.data.errors.email[0], // Show the first error for email
+              backgroundColor: '#D1264A',
+              duration: Snackbar.LENGTH_SHORT,
+            });
+          }
+          // Check for mobile number error
+          else if (error.response.data.errors.mobile_no) {
+            Snackbar.show({
+              text: error.response.data.errors.mobile_no[0], // Show the first error for mobile_no
+              backgroundColor: '#D1264A',
+              duration: Snackbar.LENGTH_SHORT,
+            });
+          }
+        }
+      } else if (error.request) {
+        // If no response was received from the server
+        Snackbar.show({
+          text: 'No response received from the server.',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      } else {
+        // Any other errors (e.g., network issues, code errors)
+        Snackbar.show({
+          text: 'An unexpected error occurred.',
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+
       return {status: 500};
     }
-  }
+  };
 
   const selectImage = async () => {
     if (isSelecting) return; // Prevent multiple triggers
@@ -214,15 +243,6 @@ const CustomerRegistraion = () => {
       console.error('Image selection error:', error);
     }
   };
-
-  // useEffect(() => {
-  //   getToken();
-  // }, []);
-
-  // const getToken = async () => {
-  //   let token = await messaging().getToken();
-  //   setDeviceToken(token);
-  //};
 
   const showPasswordFunction = () => {
     setShowPassword(!showPassword);

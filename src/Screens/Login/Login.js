@@ -60,7 +60,7 @@ const Login = () => {
           await AsyncStorage.setItem(
             'userId',
             JSON.stringify(res?.data?.user_id),
-          )
+          );
 
           if (userType === 'customer') {
             navigation.navigate('customerTabs');
@@ -74,11 +74,17 @@ const Login = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
+        } else {
+          // If status is not 200, show validation error
+          setError(prev => ({
+            ...prev,
+            password: 'Invalid password. Please try again.',
+          }));
         }
       })
       .catch(err => {
         console.log('err', err);
-        
+        // setError(prev => ({...prev, password: 'Invalid Credentials'}));
         Snackbar.show({
           text: 'Invalid Credentials',
           backgroundColor: '#D1264A',
@@ -110,7 +116,7 @@ const Login = () => {
     }
 
     if (userData.password.length < 6) {
-      newErrors.password = 'Passwords do not match';
+      newErrors.password = 'Enter Valid Passwords.';
     }
 
     setError(newErrors);
@@ -147,6 +153,7 @@ const Login = () => {
           keyboardType="name-phone-pad"
           value={userData.password}
           onChangeText={text => onChange('password', text)}
+          secureTextEntry={!showPassword}
         />
 
         <Entypo

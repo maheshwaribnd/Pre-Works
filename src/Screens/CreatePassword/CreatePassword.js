@@ -23,9 +23,10 @@ const CreatePassword = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const typeSelector = useSelector(state => state.userTypee.usertype);
-  const mobileNo = route?.path?.mobileNo;
+  const mobileNo = route?.params?.mobileNo;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  console.log('mobileNomobileNo', mobileNo);
 
   const [user, setUser] = useState({
     password: '',
@@ -39,10 +40,8 @@ const CreatePassword = () => {
 
   const CreateFunction = async () => {
     if (validateForm()) {
-      const response = await CreatePasswordAPI();
-      if (response?.status === 200) {
-        navigation.navigate('login');
-      }
+      CreatePasswordAPI()
+      navigation.navigate('login', {userType: typeSelector});
       console.log('Vali');
     } else {
       console.log('notVali');
@@ -56,11 +55,18 @@ const CreatePassword = () => {
       password: user.password,
       password_confirmation: user.confirmPassword,
     };
+    console.log('ccrete', params);
 
     ApiManager.CreatePassword(params)
       .then(res => {
         if (res?.data?.status === 200) {
           console.log('createresponse', res?.data);
+          Snackbar.show({
+            text: res?.data?.message,
+            fontFamily: NotoSans_Medium,
+            backgroundColor: '#19cf55',
+            duration: Snackbar.LENGTH_SHORT,
+          });
         }
       })
       .catch(err => console.log(err));
