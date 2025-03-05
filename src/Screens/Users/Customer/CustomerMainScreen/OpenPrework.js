@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -29,6 +30,7 @@ const OpenPrework = () => {
   const navigation = useNavigation();
   const [preworkList, setPreworkList] = useState([]);
   const [preworkImgs, setPreworkImgs] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const [cusId, setCusId] = useState(null);
 
   useFocusEffect(
@@ -78,6 +80,7 @@ const OpenPrework = () => {
           const imgsResponse = res?.data;
           setPreworkList(response || []);
           setPreworkImgs(imgsResponse);
+          setRefreshing(false);
         } else {
           setPreworkList([]);
           Snackbar.show({
@@ -88,6 +91,10 @@ const OpenPrework = () => {
         }
       })
       .catch(err => console.log('err', err));
+  };
+
+  const onRefresh = () => {
+    PreworkListAPI();
   };
 
   const ProjectCard = item => {
@@ -164,6 +171,9 @@ const OpenPrework = () => {
               renderItem={({item}) => <ProjectCard item={item} />}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.list}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('createprework')}

@@ -105,9 +105,9 @@ const CreatePreWork = () => {
       });
       return false;
     }
-    if (!createData.pincode.trim()) {
+    if (!/^\d{6}$/.test(createData.pincode.trim())) {
       Snackbar.show({
-        text: 'Please enter Pincode',
+        text: 'Please enter a valid 6-digit Pincode',
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });

@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,6 +22,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 const NewPrework = () => {
   const navigation = useNavigation();
   const [listResponse, setListResponse] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   console.log('listResponse', listResponse);
 
   useFocusEffect(
@@ -57,9 +59,51 @@ const NewPrework = () => {
         if (res?.data?.status === 200) {
           const response = res?.data?.preworks;
           setListResponse(response);
+          setRefreshing(false);
         }
       })
       .catch(err => console.log(err));
+  };
+
+  const onRefresh = () => {
+    NewPreworkListingAPI();
+  };
+
+  const getTag = prework => {
+    console.log('preworkprework', prework);
+
+    let isNew;
+    let now = new Date();
+    now.setHours(0, 0, 0, 0); // Reset time to compare dates correctly
+
+    // Create Prework Date
+    const createdAtStr = prework?.created_at;
+    if (createdAtStr) {
+      const [cday, cmonth, cyear] = createdAtStr.split('/').map(Number);
+      const createdAt = new Date(cyear, cmonth - 1, cday);
+      createdAt.setHours(0, 0, 0, 0);
+      isNew = createdAt.getTime() === now.getTime();
+    }
+
+    // End Prework Date
+    const endDateStr = prework?.last_date;
+    if (!endDateStr) return null; // Handle missing date case
+    const [eday, emonth, eyear] = endDateStr.split('/').map(Number);
+    const endDate = new Date(eyear, emonth - 1, eday);
+    endDate.setHours(0, 0, 0, 0); // Reset time for accurate comparison
+
+    // Check if Ending Soon
+    const isEndingSoon =
+      (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24) <= 3;
+
+    // Check if Expired
+    const isExpired = endDate.getTime() < now.getTime();
+
+    if (isNew) return {label: 'NEW', color: '#0484E4'};
+    if (isExpired) return {label: 'EXPIRED', color: '#085CBB'}; // Expired should take priority
+    if (isEndingSoon) return {label: 'ENDING SOON', color: '#DB2E18'};
+    if (prework?.status === 'bid') return {label: 'APPLIED', color: '#0ACE7A'};
+    return null;
   };
 
   const ProjectCard = item => {
@@ -67,6 +111,8 @@ const NewPrework = () => {
       const PreID = item?.item?.id;
       navigation.navigate('newpreworkdetails', {preworkId: PreID});
     };
+
+    const tag = getTag(item?.item);
 
     return (
       <TouchableOpacity
@@ -80,11 +126,12 @@ const NewPrework = () => {
           />
         )}
 
-        {/* {item.isNew && (
-            <View style={styles.newBid}>
-              <Text style={styles.newBidText}>NEW BID</Text>
-            </View>
-          )} */}
+        {tag && (
+          <View style={[styles.tagBadge, {backgroundColor: tag.color}]}>
+            <Text style={styles.tagText}>{tag.label}</Text>
+          </View>
+        )}
+
         <View style={styles.cardContent}>
           <Text style={styles.title}>{item?.item?.name}</Text>
           <View style={styles.row}>
@@ -111,6 +158,12 @@ const NewPrework = () => {
                 renderItem={({item}) => <ProjectCard item={item} />}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.list}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
               />
             </View>
           ) : (
@@ -136,10 +189,9 @@ const styles = StyleSheet.create({
   card: {
     width: WIDTH(90),
     backgroundColor: '#fff',
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
+    borderTopRightRadius: 26,
+    borderTopLeftRadius: 26,
     marginBottom: HEIGHT(2.5),
-    overflow: 'hidden',
     elevation: 4, // Shadow for Android
     shadowColor: '#000', // Shadow for iOS
     shadowOffset: {width: 0, height: 2},
@@ -200,5 +252,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: WIDTH(4),
+  },
+
+  tagBadge: {
+    position: 'absolute',
+    right: 0,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+
+  tagText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

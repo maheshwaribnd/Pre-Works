@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,27 +24,28 @@ const ClosedPrework = () => {
   const navigation = useNavigation();
   const [data, setData] = useState([]);
   const [cusId, setCusId] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-   useFocusEffect(
-      useCallback(() => {
-        const onBackPress = () => {
-          if (navigation.isFocused()) {
-            Alert.alert('Exit App', 'Do you want to exit?', [
-              {text: 'Cancel', style: 'cancel'},
-              {text: 'Exit', onPress: () => BackHandler.exitApp()},
-            ]);
-            return true; // Prevent default back action
-          }
-          return false; // Allow default behavior
-        };
-  
-        BackHandler.addEventListener('hardwareBackPress', onBackPress);
-  
-        // return () => {
-        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-        // };
-      }, [navigation]),
-    );
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.isFocused()) {
+          Alert.alert('Exit App', 'Do you want to exit?', [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ]);
+          return true; // Prevent default back action
+        }
+        return false; // Allow default behavior
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     getUser();
@@ -64,11 +66,14 @@ const ClosedPrework = () => {
     ApiManager.ClosedPrework(cusId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.preworks;
-        console.log('responseclosed', response);
-
+        setRefreshing(false);
         setData(response);
       }
     });
+  };
+
+  const onRefresh = () => {
+    ClosedPreworkAPI();
   };
 
   const ProjectCard = item => {
@@ -111,6 +116,9 @@ const ClosedPrework = () => {
             renderItem={({item}) => <ProjectCard item={item} />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.list}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           />
         </View>
       </ImageBackground>

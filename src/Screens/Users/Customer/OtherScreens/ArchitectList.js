@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 const ArchitectList = () => {
   const navigation = useNavigation();
   const [list, setList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     ArchitectListAPI();
@@ -29,11 +31,16 @@ const ArchitectList = () => {
         if (res?.data?.status === 200) {
           const response = res?.data?.architectures;
           setList(response);
+          setRefreshing(false);
         }
       })
       .catch(err => {
         console.log(err);
       });
+  };
+
+  const onRefresh = () => {
+    ArchitectListAPI();
   };
 
   const RenderList = ({item}) => {
@@ -73,6 +80,9 @@ const ArchitectList = () => {
           data={list}
           renderItem={item => <RenderList item={item} />}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       </ImageBackground>
     </View>

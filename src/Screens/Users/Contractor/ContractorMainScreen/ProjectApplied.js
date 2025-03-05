@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,6 +24,7 @@ const ProjectApplied = () => {
   const navigation = useNavigation();
   const [userId, setUserId] = useState('');
   const [projectAplliedList, setProjectAplliedList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,8 +69,13 @@ const ProjectApplied = () => {
       if (res?.data?.status === 200) {
         const response = res?.data?.preworks;
         setProjectAplliedList(response);
+        setRefreshing(false);
       }
     });
+  };
+
+  const onRefresh = () => {
+    ProjectAppliedListAPI();
   };
 
   const RenderList = ({item}) => {
@@ -108,6 +115,9 @@ const ProjectApplied = () => {
           data={projectAplliedList}
           renderItem={item => <RenderList item={item} />}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       </ImageBackground>
     </View>

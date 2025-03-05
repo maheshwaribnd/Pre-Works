@@ -175,7 +175,7 @@ const ContractorRegistration = () => {
     let newErrors = {}; // Preserve existing structure
 
     // Name validation
-    if (!/^[A-Za-z\s]{3,}$/.test(userData.name.trim())) {
+    if (!/^[A-Za-z][A-Za-z\s]{2,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 

@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,6 +27,7 @@ const MyWork = () => {
   const navigation = useNavigation();
   const [archiId, setArchiId] = useState(null);
   const [listData, setListData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,8 +72,8 @@ const MyWork = () => {
     ApiManager.ArchitectMyWorkList(archiId).then(res => {
       if (res?.data?.status === 200) {
         const response = res?.data?.data;
-
         setListData(response);
+        setRefreshing(false);
       } else {
         Snackbar.show({
           text: res?.data?.message,
@@ -80,6 +82,10 @@ const MyWork = () => {
         });
       }
     });
+  };
+
+  const onRefresh = () => {
+    ArchitectWorkListAPI();
   };
 
   const ProjectCard = item => {
@@ -124,6 +130,9 @@ const MyWork = () => {
               renderItem={({item}) => <ProjectCard item={item} />}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.list}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
             <TouchableOpacity
               onPress={() => navigation.navigate('createmywork')}
