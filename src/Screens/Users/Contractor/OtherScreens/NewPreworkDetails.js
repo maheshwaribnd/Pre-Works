@@ -141,12 +141,14 @@ const NewPreworkDetails = () => {
               </View>
               {cancel ? (
                 <BidModal
-                  heading="Are you Sure, cancle to here?"
+                  heading="Are you Sure, you want to cancel?"
                   showModal={cancel}
                   setShowModal={setCancel}
                   name="Yes"
                   color={['#F78941', '#D2390F']}
-                  onPress={() => setCancel(!cancel)}
+                  onPress={() => {
+                    setCancel(!cancel), navigation.goBack();
+                  }}
                 />
               ) : null}
 

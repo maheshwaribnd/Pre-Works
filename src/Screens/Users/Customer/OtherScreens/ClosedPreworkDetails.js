@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_bold,
     fontSize: 22,
     color: COLOR.Black,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: HEIGHT(2),
   },
   detailsWrapper: {

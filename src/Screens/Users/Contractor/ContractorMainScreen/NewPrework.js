@@ -70,14 +70,12 @@ const NewPrework = () => {
   };
 
   const getTag = prework => {
-    console.log('preworkprework', prework);
-
-    let isNew;
     let now = new Date();
-    now.setHours(0, 0, 0, 0); // Reset time to compare dates correctly
+    now.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
 
     // Create Prework Date
     const createdAtStr = prework?.created_at;
+    let isNew = false;
     if (createdAtStr) {
       const [cday, cmonth, cyear] = createdAtStr.split('/').map(Number);
       const createdAt = new Date(cyear, cmonth - 1, cday);
@@ -99,10 +97,12 @@ const NewPrework = () => {
     // Check if Expired
     const isExpired = endDate.getTime() < now.getTime();
 
+    // **Prioritize 'APPLIED' first**
+    if (prework?.status === 'bid') return {label: 'APPLIED', color: '#0ACE7A'};
     if (isNew) return {label: 'NEW', color: '#0484E4'};
     if (isExpired) return {label: 'EXPIRED', color: '#085CBB'}; // Expired should take priority
     if (isEndingSoon) return {label: 'ENDING SOON', color: '#DB2E18'};
-    if (prework?.status === 'bid') return {label: 'APPLIED', color: '#0ACE7A'};
+
     return null;
   };
 

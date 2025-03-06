@@ -27,29 +27,29 @@ const ContractorSetting = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setDeleteShowModal] = useState(false);
 
-   useFocusEffect(
-      useCallback(() => {
-        const onBackPress = () => {
-          // Check if the dashboard is the only screen in the stack
-          if (navigation.canGoBack()) {
-            return false; // Allow default back behavior
-          }
-  
-          Alert.alert('Exit App', 'Do you want to exit?', [
-            {text: 'Cancel', style: 'cancel'},
-            {text: 'Exit', onPress: () => BackHandler.exitApp()},
-          ]);
-  
-          return true; // Prevent going back
-        };
-  
-        BackHandler.addEventListener('hardwareBackPress', onBackPress);
-  
-        // return () => {
-        //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-        // };
-      }, [navigation]),
-    );
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Check if the dashboard is the only screen in the stack
+        if (navigation.canGoBack()) {
+          return false; // Allow default back behavior
+        }
+
+        Alert.alert('Exit App', 'Do you want to exit?', [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Exit', onPress: () => BackHandler.exitApp()},
+        ]);
+
+        return true; // Prevent going back
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     const fetchUser = async () => {

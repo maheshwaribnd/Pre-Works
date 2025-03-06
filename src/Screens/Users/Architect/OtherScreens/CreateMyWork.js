@@ -31,7 +31,7 @@ const CreateMyWork = () => {
     siteName: '',
     address: '',
     budget: '',
-    bid: '',
+    // bid: '',
     time: '',
     description: '',
   });
@@ -80,14 +80,14 @@ const CreateMyWork = () => {
       });
       return false;
     }
-    if (!createData.bid.trim()) {
-      Snackbar.show({
-        text: 'Please enter Bid',
-        backgroundColor: '#D1264A',
-        duration: Snackbar.LENGTH_SHORT,
-      });
-      return false;
-    }
+    // if (!createData.bid.trim()) {
+    //   Snackbar.show({
+    //     text: 'Please enter Bid',
+    //     backgroundColor: '#D1264A',
+    //     duration: Snackbar.LENGTH_SHORT,
+    //   });
+    //   return false;
+    // }
 
     if (!materialSelected) {
       Snackbar.show({
@@ -132,7 +132,7 @@ const CreateMyWork = () => {
     formData.append('site_name', createData.siteName);
     formData.append('address', createData.address);
     formData.append('budget', createData.budget);
-    formData.append('bid', createData.bid);
+    // formData.append('bid', createData.bid);
     formData.append('time', createData.time);
     formData.append('material', materialSelected);
     formData.append('description', createData.description);
@@ -166,7 +166,7 @@ const CreateMyWork = () => {
             siteName: '',
             address: '',
             budget: '',
-            bid: '',
+            // bid: '',
             time: '',
             description: '',
           });
@@ -189,6 +189,11 @@ const CreateMyWork = () => {
       })
       .catch(err => {
         console.log('API Error:', err.response?.data || err.message);
+        Snackbar.show({
+          text: err.response?.data?.message || err.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
       });
   };
 
@@ -260,24 +265,24 @@ const CreateMyWork = () => {
               onChangeText={text => onChange('address', text)}
             />
 
-            <View style={styles.experienceView}>
-              <TextInput
-                style={[styles.InputField, {width: WIDTH(44)}]}
-                placeholder="Budget"
-                placeholderTextColor="gray"
-                keyboardType="numeric"
-                value={createData.budget}
-                onChangeText={text => onChange('budget', text)}
-              />
-              <TextInput
+            {/* <View style={styles.experienceView}> */}
+            <TextInput
+              style={styles.InputField}
+              placeholder="Budget"
+              placeholderTextColor="gray"
+              keyboardType="numeric"
+              value={createData.budget}
+              onChangeText={text => onChange('budget', text)}
+            />
+            {/* <TextInput
                 style={[styles.InputField, {width: WIDTH(44)}]}
                 placeholder="Bid"
                 placeholderTextColor="gray"
                 keyboardType="numeric"
                 value={createData.bid}
                 onChangeText={text => onChange('bid', text)}
-              />
-            </View>
+              /> */}
+            {/* </View> */}
 
             <TextInput
               style={styles.InputField}

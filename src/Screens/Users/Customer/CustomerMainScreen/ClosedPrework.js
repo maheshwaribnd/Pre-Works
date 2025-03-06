@@ -85,14 +85,12 @@ const ClosedPrework = () => {
       <TouchableOpacity
         style={styles.card}
         onPress={() => ParticularClosePrework(item)}>
-        {data[0]?.files?.length > 0 && (
-          <Image source={{uri: data[0].files[0].files}} style={styles.image} />
+        {item?.item?.files?.length > 0 && (
+          <Image
+            source={{uri: item?.item?.files[0].files}}
+            style={styles.image}
+          />
         )}
-        {/* {item.isNew && (
-            <View style={styles.newBid}>
-              <Text style={styles.newBidText}>NEW BID</Text>
-            </View>
-          )} */}
         <View style={styles.cardContent}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={styles.title}>{item?.item?.name}</Text>

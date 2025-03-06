@@ -102,11 +102,17 @@ const OfferEnquiesDetails = () => {
               showsPagination
               paginationStyle={{bottom: 0}}
               style={styles.imageSlider}>
-              {resImgs?.map((item, index) => (
-                <View key={index} style={styles.imageContainer}>
-                  <Image source={{uri: item?.files}} style={styles.image} />
+              {resImgs && resImgs.length > 0 ? (
+                resImgs.map((item, index) => (
+                  <View key={index} style={styles.imageContainer}>
+                    <Image source={{uri: item?.files}} style={styles.image} />
+                  </View>
+                ))
+              ) : (
+                <View style={styles.imageContainer}>
+                  <Text>No images available</Text>
                 </View>
-              ))}
+              )}
             </Swiper>
 
             <View style={styles.contentWrapper}>
@@ -175,7 +181,7 @@ const OfferEnquiesDetails = () => {
               </View>
               {Reject ? (
                 <BidModal
-                  heading="Are you Sure, cancle to here"
+                  heading="Are you Sure, you want to cancel?"
                   showModal={Reject}
                   setShowModal={setReject}
                   name="REJECT"
@@ -193,7 +199,7 @@ const OfferEnquiesDetails = () => {
 
               {Accept ? (
                 <BidModal
-                  heading="Are you Sure, do you want to go with this bid now"
+                  heading="Are you Sure, do you want to go with this bid now?"
                   showModal={Accept}
                   setShowModal={setAccept}
                   name="ACCEPT"

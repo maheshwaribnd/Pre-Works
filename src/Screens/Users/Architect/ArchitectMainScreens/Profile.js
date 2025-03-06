@@ -231,11 +231,9 @@ const Profile = () => {
     launchImageLibrary({quality: 0.7}, fileobj => {
       if (fileobj?.didCancel === true) {
         setUserBackImg('');
-        // setUserData(prev => ({...prev, img: ''})); // Update userData
       } else {
         const img = fileobj?.assets[0]?.uri || '';
         setUserBackImg(img);
-        // setUserData(prev => ({...prev, img})); // Update userData
         setbackgdDocumentFile(fileobj?.assets);
       }
     });

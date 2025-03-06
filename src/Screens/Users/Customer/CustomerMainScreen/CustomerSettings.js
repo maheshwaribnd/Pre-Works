@@ -11,22 +11,12 @@ import {
   BackHandler,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-  FONTSIZE,
-  HEIGHT,
-  NotoSans_Bold,
-  NotoSans_Light,
-  NotoSans_Medium,
-  WIDTH,
-} from '../../../../config/AppConst';
+import {HEIGHT, WIDTH} from '../../../../config/AppConst';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
-import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import ApiManager from '../../API/Api';
-import {Badge} from 'react-native-paper';
-import Octicons from 'react-native-vector-icons/Octicons';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
 import ApiManager from '../../../../API/Api';
@@ -41,25 +31,25 @@ const CustomerSettings = () => {
   const [userImage, setuserImage] = useState('');
 
   useFocusEffect(
-     useCallback(() => {
-       const onBackPress = () => {
-         if (navigation.isFocused()) {
-           Alert.alert('Exit App', 'Do you want to exit?', [
-             {text: 'Cancel', style: 'cancel'},
-             {text: 'Exit', onPress: () => BackHandler.exitApp()},
-           ]);
-           return true; // Prevent default back action
-         }
-         return false; // Allow default behavior
-       };
- 
-       BackHandler.addEventListener('hardwareBackPress', onBackPress);
- 
-       // return () => {
-       //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-       // };
-     }, [navigation]),
-   );
+    useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.isFocused()) {
+          Alert.alert('Exit App', 'Do you want to exit?', [
+            {text: 'Cancel', style: 'cancel'},
+            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+          ]);
+          return true; // Prevent default back action
+        }
+        return false; // Allow default behavior
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      // return () => {
+      //   BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      // };
+    }, [navigation]),
+  );
 
   useEffect(() => {
     const fetchUser = async () => {

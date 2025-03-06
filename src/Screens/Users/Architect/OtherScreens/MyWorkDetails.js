@@ -34,13 +34,13 @@ const MyWorkDetails = () => {
   const [data, setData] = useState([]);
   const [resImgs, setResImgs] = useState([]);
   const [loader, setLoader] = useState(false);
+  console.log('data', data);
 
   useEffect(() => {
     ArchitectMyWorkByIdAPI();
   }, []);
 
   const ArchitectMyWorkByIdAPI = async () => {
-    setLoader(true);
     ApiManager.ArchitectMyWorkById(ID)
       .then(res => {
         if (res?.data?.status === 200) {
@@ -57,7 +57,7 @@ const MyWorkDetails = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name="Open Pre-Works" />
+      <CustomHeader name={data[0]?.site_name} />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -67,7 +67,7 @@ const MyWorkDetails = () => {
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
               <ActivityIndicator />
             </View>
-          ) : data?.length > 0 ? (
+          ) : (
             <View style={styles.contentWrapper}>
               <Swiper
                 autoplay
@@ -88,7 +88,7 @@ const MyWorkDetails = () => {
                 ))}
               </Swiper>
 
-              <Text style={styles.nametitle}>{data[0]?.name}</Text>
+              <Text style={styles.nametitle}>{data[0]?.site_name}</Text>
 
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
@@ -102,20 +102,18 @@ const MyWorkDetails = () => {
               </View>
 
               <View style={styles.detailsContainer}>
+                <View>
+                  <View style={styles.row}>
+                    <LocationIcon />
+                    <Text style={[styles.detailText, {width: WIDTH(35)}]}>
+                      {data[0]?.address}
+                    </Text>
+                  </View>
+                </View>
+
                 <View style={styles.row}>
                   <MoneyIcon />
                   <Text style={styles.detailText}>{data[0]?.budget}</Text>
-                </View>
-                <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>{data[0]?.bid}</Text>
-                </View>
-              </View>
-
-              <View style={styles.detailsContainer}>
-                <View style={styles.row}>
-                  <LocationIcon />
-                  <Text style={styles.detailText}>{data[0]?.address}</Text>
                 </View>
               </View>
 
@@ -124,8 +122,6 @@ const MyWorkDetails = () => {
                 <Text style={styles.description}>{data[0]?.description}</Text>
               </View>
             </View>
-          ) : (
-            <Text>No Data</Text>
           )}
         </ScrollView>
       </ImageBackground>
@@ -169,9 +165,10 @@ const styles = StyleSheet.create({
   nametitle: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
-    textAlign: 'center',
+    textAlign: 'left',
     color: COLOR.Black,
     marginVertical: HEIGHT(2),
+    marginHorizontal: HEIGHT(2),
   },
   detailsContainer: {
     flexDirection: 'row',

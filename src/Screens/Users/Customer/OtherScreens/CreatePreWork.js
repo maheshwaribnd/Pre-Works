@@ -230,6 +230,11 @@ const CreatePreWork = () => {
       })
       .catch(err => {
         console.log('API Error:', err.response?.data || err.message);
+        Snackbar.show({
+          text: err.response?.data?.message || err.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
       });
   };
 

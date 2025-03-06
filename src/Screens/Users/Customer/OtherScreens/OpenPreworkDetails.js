@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   nametitle: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
-    textAlign: 'center',
+    textAlign: 'left',
     color: COLOR.Black,
     marginVertical: HEIGHT(2),
   },

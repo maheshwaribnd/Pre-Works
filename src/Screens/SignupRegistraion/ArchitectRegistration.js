@@ -449,7 +449,9 @@ const ArchitectRegistration = () => {
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           {error.city ? (
             <Text style={{color: 'red', width: WIDTH(43)}}>{error.city}</Text>
-          ) : null}
+          ) : (
+            <View style={{width: WIDTH(43)}} />
+          )}
 
           {error.state ? (
             <Text style={styles.errorTxt}>{error.state}</Text>
@@ -480,7 +482,9 @@ const ArchitectRegistration = () => {
             <Text style={{color: 'red', width: WIDTH(43)}}>
               {error.pincode}
             </Text>
-          ) : null}
+          ) : (
+            <View style={{width: WIDTH(43)}} />
+          )}
 
           {error.experience ? (
             <Text style={styles.errorTxt}>{error.experience}</Text>
@@ -773,8 +777,6 @@ const styles = StyleSheet.create({
 
   errorTxt: {
     color: 'red',
-    position: 'absolute',
-    right: 5,
     width: WIDTH(43),
   },
 });
