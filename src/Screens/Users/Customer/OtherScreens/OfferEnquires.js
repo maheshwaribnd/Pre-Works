@@ -17,12 +17,13 @@ import Experience from '../../../../assets/Svg/Experience.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import Currency from '../../../../assets/Svg/currency.svg';
 import Mobile from '../../../../assets/Svg/Mobile.svg';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OfferEnquires = () => {
   const navigation = useNavigation();
-
+  const route = useRoute();
+  const PreworkId = route?.params?.PreworkId;
   const [cusId, setCusId] = useState('');
   const [contractorList, setContractorList] = useState([]);
 
@@ -41,7 +42,7 @@ const OfferEnquires = () => {
   }, [cusId]);
 
   const EnquiresListAPI = () => {
-    ApiManager.ListOfEnquires(cusId)
+    ApiManager.ListOfEnquires(PreworkId)
       .then(res => {
         if (res?.data?.status === 200) {
           const response = res?.data?.enquiries;

@@ -18,12 +18,13 @@ import ManWithLaptop from '../../../../assets/Svg/ManWithLaptop.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NewPrework = () => {
   const navigation = useNavigation();
   const [listResponse, setListResponse] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  console.log('listResponse', listResponse);
+  const [cusId, setCusId] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -50,8 +51,19 @@ const NewPrework = () => {
   );
 
   useEffect(() => {
-    NewPreworkListingAPI();
+    getUser();
   }, []);
+
+  useEffect(() => {
+    if (cusId) {
+      NewPreworkListingAPI();
+    }
+  }, [cusId]);
+
+  const getUser = async () => {
+    const UserID = await AsyncStorage.getItem('userId');
+    setCusId(UserID);
+  };
 
   const NewPreworkListingAPI = () => {
     ApiManager.NewPreworkList()
@@ -109,7 +121,12 @@ const NewPrework = () => {
   const ProjectCard = item => {
     const openParticularPrework = item => {
       const PreID = item?.item?.id;
-      navigation.navigate('newpreworkdetails', {preworkId: PreID});
+      const isExpired = tag?.label === 'EXPIRED';
+
+      navigation.navigate('newpreworkdetails', {
+        preworkId: PreID,
+        expired: isExpired,
+      });
     };
 
     const tag = getTag(item?.item);

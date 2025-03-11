@@ -72,6 +72,7 @@ const requestPath = {
   architectListById: 'auth/getArchitectureById',
   enquiesList: 'auth/Enquirieslist',
   enquiryDetailsById: 'auth/EnquiriesDetailByid',
+  bidAccepted: 'auth/Accept',
 
   // Contractor
   contractoreProfile: 'auth/contractorProfile',
@@ -240,6 +241,10 @@ const ApiManager = {
 
   CustomerUpdate: (userId, formData) => {
     return requests1.post(`${requestPath.customerUpdate}/${userId}`, formData);
+  },
+
+  BidAccepted: params => {
+    return requests.post(requestPath.bidAccepted, params);
   },
 
   ContractorUpdate: (workId, formData) => {

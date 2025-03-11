@@ -35,7 +35,6 @@ import Snackbar from 'react-native-snackbar';
 const OfferEnquiesDetails = () => {
   const route = useRoute();
   const contractorID = route?.params?.contractorID;
-  console.log('contractorIDcontractorID', contractorID);
 
   const [cusId, setCusId] = useState('');
   const [contractorDetails, setContractorDetails] = useState([]);
@@ -73,6 +72,29 @@ const OfferEnquiesDetails = () => {
       });
   };
 
+  const BidAcceptedAPI = () => {
+    const params = {
+      customer_id: cusId,
+      prework_id: 1,
+      contractor_id: contractorID,
+    };
+    ApiManager.BidAccepted(params)
+      .then(res => {
+        if (res?.data?.status === 200) {
+          console.log('BA', res?.data);
+          Snackbar.show({
+            text: 'Bid Accepted',
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          setAccept(false);
+        }
+      })
+      .catch(err => {
+        console.log(err?.response);
+      });
+  };
+
   const GradientButton = ({text, colors, onPress}) => {
     return (
       <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
@@ -96,24 +118,11 @@ const OfferEnquiesDetails = () => {
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
-            <Swiper
-              autoplay
-              loop
-              showsPagination
-              paginationStyle={{bottom: 0}}
-              style={styles.imageSlider}>
-              {resImgs && resImgs.length > 0 ? (
-                resImgs.map((item, index) => (
-                  <View key={index} style={styles.imageContainer}>
-                    <Image source={{uri: item?.files}} style={styles.image} />
-                  </View>
-                ))
-              ) : (
-                <View style={styles.imageContainer}>
-                  <Text>No images available</Text>
-                </View>
-              )}
-            </Swiper>
+            <Image
+              source={{uri: contractorDetails?.profile_image}}
+              style={styles.profileImg}
+              resizeMethod="resize"
+            />
 
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>
@@ -128,7 +137,7 @@ const OfferEnquiesDetails = () => {
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>
+                  <Text style={[styles.detailText, {width: WIDTH(20)}]}>
                     {contractorDetails?.contractor_material}
                   </Text>
                 </View>
@@ -157,29 +166,22 @@ const OfferEnquiesDetails = () => {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
                 <Text style={styles.description}>
-                  {contractorDetails?.description}
+                  {contractorDetails?.prework_description}
                 </Text>
               </View>
 
               <View
                 style={{
-                  flexDirection: 'row',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
                 <GradientButton
-                  text="REJECT"
-                  colors={['#CF310A', '#F68740']}
-                  onPress={() => setReject(true)}
-                />
-
-                <GradientButton
-                  text="ACCEPT"
+                  text="CONTRACTOR UPLOADED QUOTATION"
                   colors={['#029A49', '#0BDB8D']}
                   onPress={() => setAccept(true)}
                 />
               </View>
-              {Reject ? (
+              {/* {Reject ? (
                 <BidModal
                   heading="Are you Sure, you want to cancel?"
                   showModal={Reject}
@@ -195,24 +197,18 @@ const OfferEnquiesDetails = () => {
                     // setReject(!Reject)
                   }}
                 />
-              ) : null}
+              ) : null} */}
 
-              {Accept ? (
+              {/* {Accept ? (
                 <BidModal
                   heading="Are you Sure, do you want to go with this bid now?"
                   showModal={Accept}
                   setShowModal={setAccept}
                   name="ACCEPT"
                   color={['#0AD788', '#03A151']}
-                  onPress={() => {
-                    Snackbar.show({
-                      text: 'Bid Accepted',
-                      backgroundColor: '#27cc5d',
-                      duration: Snackbar.LENGTH_SHORT,
-                    });
-                  }}
+                  onPress={() => BidAcceptedAPI()}
                 />
-              ) : null}
+              ) : null} */}
             </View>
           </View>
         </ScrollView>
@@ -228,6 +224,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLOR.White,
     paddingHorizontal: WIDTH(4),
+  },
+
+  profileImg: {
+    height: HEIGHT(25),
+    width: WIDTH(88),
+    borderRadius: 6,
   },
 
   cardWrapper: {
@@ -259,7 +261,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: COLOR.Black,
     textAlign: 'left',
-    marginBottom: HEIGHT(2),
+    marginVertical: HEIGHT(2),
   },
   detailsWrapper: {
     flexDirection: 'row',
@@ -293,11 +295,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   buttonContainer: {
-    margin: 10,
+    position: 'absolute',
+    top: 65,
   },
+
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 30,
+    width: WIDTH(90),
+    paddingVertical: 14,
+    paddingHorizontal: 4,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',

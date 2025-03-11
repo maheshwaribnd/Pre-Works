@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import LogoutComp from '../../../../Component/LogoutComp/LogoutComp';
 import ApiManager from '../../../../API/Api';
+import Architect from '../../../../assets/Svg/architect.svg';
 import {useSelector} from 'react-redux';
 
 const CustomerSettings = () => {
@@ -80,11 +81,11 @@ const CustomerSettings = () => {
   const LogoutFunction = async () => {
     try {
       await AsyncStorage.clear();
-      // navigation.navigate('welcome');
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'welcome'}],
-      });
+      navigation.replace('welcome');
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{name: 'welcome'}],
+      // });
       console.log('AsyncStorage cleared');
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
@@ -93,18 +94,19 @@ const CustomerSettings = () => {
 
   const AccountDeleteAPI = () => {
     ApiManager.DeleteAccount(typeSelector, cusId)
-      .then(res => {
+      .then(async res => {
         if (res?.data?.status === 200) {
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          // navigation.navigate('welcome');
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'welcome'}],
-          });
+          navigation.replace('welcome');
+          await AsyncStorage.clear();
+          // navigation.reset({
+          //   index: 0,
+          //   routes: [{name: 'welcome'}],
+          // });
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -114,7 +116,7 @@ const CustomerSettings = () => {
         }
       })
       .catch(err => {
-        console.log(err);
+        console.log(err?.response);
       });
   };
 
@@ -137,6 +139,21 @@ const CustomerSettings = () => {
 
           <TouchableOpacity
             style={styles.InputField}
+            onPress={() => navigation.navigate('architectlist')}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+              <Architect />
+              {/* <Image
+              source={require('../../../../assets/settingsIcon/user.png')}
+              height={5}
+              width={5}
+              resizeMode="contain"
+            /> */}
+              <Text style={styles.name}>Explore Architect</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.InputField}
             onPress={() => navigation.navigate('customerprofilescreen')}>
             <View style={{flexDirection: 'row', gap: 6}}>
               <Image
@@ -146,20 +163,6 @@ const CustomerSettings = () => {
                 resizeMode="contain"
               />
               <Text style={styles.name}>Profile</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.InputField}
-            onPress={() => navigation.navigate('architectlist')}>
-            <View style={{flexDirection: 'row', gap: 6}}>
-              {/* <Image
-              source={require('../../../../assets/settingsIcon/user.png')}
-              height={5}
-              width={5}
-              resizeMode="contain"
-            /> */}
-              <Text style={styles.name}>Architect List</Text>
             </View>
           </TouchableOpacity>
 
@@ -184,18 +187,6 @@ const CustomerSettings = () => {
                 resizeMode="contain"
               />
               <Text style={styles.name}>Privacy Policy</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.InputField}>
-            <View style={{flexDirection: 'row', gap: 6}}>
-              {/* <Image
-              source={require('../../../../assets/settingsIcon/user.png')}
-              height={5}
-              width={5}
-              resizeMode="contain"
-            /> */}
-              <Text style={styles.name}>Notifications</Text>
             </View>
           </TouchableOpacity>
 

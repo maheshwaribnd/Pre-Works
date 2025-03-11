@@ -22,8 +22,6 @@ import ApiManager from '../../../../API/Api';
 import {ActivityIndicator} from 'react-native-paper';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 
 const OpenPrework = () => {
@@ -121,20 +119,12 @@ const OpenPrework = () => {
           </View>
         )} */}
         <View style={styles.cardContent}>
-          <View style={{flexDirection: 'row'}}>
-            <Text style={styles.title}>{item?.item?.name}</Text>
+          <Text style={styles.title}>{item?.item?.name}</Text>
+          <View style={styles.row}>
             <View style={styles.row}>
               <CalenderIcon />
               <Text style={styles.text}>{item?.item?.last_date}</Text>
             </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={styles.row}>
-              <BiddingIcon />
-              <Text style={styles.text}>{item?.item?.budget_range}</Text>
-            </View>
-
             <View style={styles.row}>
               <MaterialIcon />
               <Text style={styles.text}>{item?.item?.material}</Text>
@@ -144,13 +134,10 @@ const OpenPrework = () => {
           <View style={styles.row}>
             <View style={styles.row}>
               <LocationIcon />
-              <Text style={styles.text}>{item?.item?.address}</Text>
+              <Text style={[styles.text, {width: WIDTH(32)}]}>
+                {item?.item?.address}
+              </Text>
             </View>
-
-            {/* <View style={styles.row}>
-              <MoneyIcon />
-              <Text style={styles.text}>{item?.item?.custombid}</Text>
-            </View> */}
           </View>
         </View>
       </TouchableOpacity>
@@ -272,12 +259,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: NotoSans_Medium,
     color: '#333',
-    flex: 1,
+    // flex: 1,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginVertical: 2,
   },
   text: {
     fontSize: 14,

@@ -72,24 +72,26 @@ const ClosedPreworkDetails = () => {
                   <CalenderIcon />
                   <Text style={styles.detailText}>{data?.last_date}</Text>
                 </View>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>{data?.material}</Text>
-                </View>
-              </View>
-              <View style={styles.detailsWrapper}>
+
                 <View style={styles.row}>
                   <MoneyIcon />
                   <Text style={styles.detailText}>{data?.budget_range}</Text>
                 </View>
-                <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>{data?.custombid}</Text>
-                </View>
               </View>
-              <View style={styles.row}>
-                <LocationIcon />
-                <Text style={styles.detailText}>{data?.address}</Text>
+              <View style={styles.detailsWrapper}>
+                <View style={styles.row}>
+                  <MaterialIcon />
+                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
+                    {data?.material}
+                  </Text>
+                </View>
+
+                <View style={styles.row}>
+                  <LocationIcon />
+                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
+                    {data?.address}
+                  </Text>
+                </View>
               </View>
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>

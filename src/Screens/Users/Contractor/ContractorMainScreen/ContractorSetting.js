@@ -21,7 +21,7 @@ import Snackbar from 'react-native-snackbar';
 
 const ContractorSetting = () => {
   const navigation = useNavigation();
-  const typeSelector = useSelector(state => state.userTypee.usertype);
+  const typeSelector = useSelector(state => state?.userTypee?.usertype);
   const [userId, setUserId] = useState('');
   const [userImage, setuserImage] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -92,18 +92,19 @@ const ContractorSetting = () => {
 
   const AccountDeleteAPI = () => {
     ApiManager.DeleteAccount(typeSelector, userId)
-      .then(res => {
+      .then(async res => {
         if (res?.data?.status === 200) {
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          // navigation.navigate('welcome')
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'welcome'}],
-          });
+          navigation.replace('welcome');
+          await AsyncStorage.clear();
+          // navigation.reset({
+          //   index: 0,
+          //   routes: [{name: 'welcome'}],
+          // });
         } else {
           Snackbar.show({
             text: res?.data?.message,
@@ -113,7 +114,7 @@ const ContractorSetting = () => {
         }
       })
       .catch(err => {
-        console.log(err);
+        console.log(err?.response);
       });
   };
 

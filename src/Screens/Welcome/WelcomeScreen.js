@@ -33,6 +33,12 @@ const WelcomeScreen = () => {
       try {
         const userID = await AsyncStorage.getItem('userId');
         setUserId(userID);
+
+        if (!userID) {
+          await AsyncStorage.clear();
+          // navigation.replace('welcome');
+          return;
+        }
       } catch (error) {
         console.error('Error in fetching data:', error);
       }

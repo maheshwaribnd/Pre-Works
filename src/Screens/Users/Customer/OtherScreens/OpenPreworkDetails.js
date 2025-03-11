@@ -37,7 +37,6 @@ const OpenPreworkDetails = () => {
   const [cusId, setCusId] = useState('');
   const [resImgs, setResImgs] = useState([]);
   const [loader, setLoader] = useState(false);
-
   const [contractorList, setContractorList] = useState([]);
 
   useEffect(() => {
@@ -56,7 +55,7 @@ const OpenPreworkDetails = () => {
   }, [cusId]);
 
   const EnquiresListAPI = () => {
-    ApiManager.ListOfEnquires(cusId)
+    ApiManager.ListOfEnquires(PreworkId)
       .then(res => {
         if (res?.data?.status === 200) {
           const response = res?.data?.enquiries;
@@ -132,27 +131,32 @@ const OpenPreworkDetails = () => {
               {/* Details Section */}
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>{data?.last_date}</Text>
-                </View>
-                <View style={styles.row}>
                   <MaterialIcon />
                   <Text style={styles.detailText}>{data?.material}</Text>
                 </View>
               </View>
 
-              <View style={styles.detailsContainer}>
+              <View style={{paddingLeft: WIDTH(4)}}>
                 <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>{data?.budget_range}</Text>
+                  <CalenderIcon />
+                  <Text style={styles.detailText}>
+                    StartDate: {data?.expected_date}
+                  </Text>
                 </View>
                 <View style={styles.row}>
+                  <CalenderIcon />
+                  <Text style={styles.detailText}>
+                    EndDate: {data?.last_date}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.detailsContainer}>
+                <View style={[styles.row, {marginVertical: HEIGHT(0)}]}>
                   <LocationIcon />
-                  <Text style={[styles.detailText, {width: WIDTH(35)}]}>
+                  <Text style={[styles.detailText, {width: WIDTH(85)}]}>
                     {data?.address}
                   </Text>
-                  {/* <BiddingIcon />
-                  <Text style={styles.detailText}>{data?.custombid}</Text> */}
                 </View>
               </View>
 
@@ -187,7 +191,11 @@ const OpenPreworkDetails = () => {
                   </ScrollView>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('offerenquires')}
+                    onPress={() =>
+                      navigation.navigate('offerenquires', {
+                        PreworkId: PreworkId,
+                      })
+                    }
                     style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Text style={styles.linkText}>
                       Click here to more enquiries
@@ -242,6 +250,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: COLOR.Black,
     marginVertical: HEIGHT(2),
+    marginLeft: WIDTH(4),
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -263,8 +272,8 @@ const styles = StyleSheet.create({
     color: COLOR.Gray,
   },
   section: {
-    marginVertical: HEIGHT(2),
-    marginHorizontal: WIDTH(4),
+    marginVertical: HEIGHT(1),
+    marginHorizontal: WIDTH(5),
   },
   sectionTitle: {
     fontSize: 18,

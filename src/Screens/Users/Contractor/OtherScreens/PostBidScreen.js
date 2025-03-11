@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
@@ -13,9 +14,9 @@ import {
   HEIGHT,
   Montserrat_bold,
   Montserrat_Medium,
+  NotoSans_Light,
   NotoSans_Medium,
   WIDTH,
-  windowWidth,
 } from '../../../../config/AppConst';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
@@ -24,7 +25,8 @@ import MoneyIcon from '../../../../assets/Svg/Money.svg';
 import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import RNPickerSelect from 'react-native-picker-select';
+import DocumentPicker from 'react-native-document-picker';
+import Pdf from 'react-native-pdf';
 import ApiManager from '../../../../API/Api';
 import Swiper from 'react-native-swiper';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
@@ -38,10 +40,10 @@ const PostBidScreen = () => {
   const customerId = route?.params?.customerId;
   const [details, setDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
-  const [materialSelected, setMaterialSelected] = useState('');
   const [userId, setUserId] = useState(null);
+  const [PdfFiles, setPdfFiles] = useState([]);
+  const [documentpdf, setDocumentPdf] = useState([]);
   const [createData, setCreateData] = useState({
-    price: '',
     time: '',
   });
 
@@ -77,8 +79,20 @@ const PostBidScreen = () => {
     formData.append('prework_id', preId);
     formData.append('customer_id', customerId);
     formData.append('time', createData.time);
-    formData.append('material', materialSelected);
-    formData.append('price', createData.price);
+    //for PDF's
+    if (documentpdf && documentpdf.length > 0) {
+      documentpdf.forEach((file, index) => {
+        const formattedUri = file.uri.startsWith('file://')
+          ? file.uri
+          : `file://${file.uri}`;
+
+        formData.append(`upload_file[]`, {
+          uri: formattedUri,
+          type: file.type || 'application/pdf', // Ensure it's set to PDF
+          name: file.fileName || `document_${index}.pdf`, // Ensure correct file extension
+        });
+      });
+    }
 
     ApiManager.ApplyForBid(formData)
       .then(res => {
@@ -92,7 +106,12 @@ const PostBidScreen = () => {
         }
       })
       .catch(err => {
-        console.log('API Error:', err.response?.data || err.message);
+        console.log('API Error:', err.response?.data);
+        Snackbar.show({
+          text: err.response?.data?.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
       });
   };
 
@@ -101,6 +120,38 @@ const PostBidScreen = () => {
       ...prev,
       [key]: value,
     }));
+  };
+
+  const handleUploadPDF = async () => {
+    try {
+      const response = await DocumentPicker.pick({
+        type: [DocumentPicker.types.pdf], // Allows only PDF selection
+        allowMultiSelection: true, // Allows multiple PDFs
+      });
+
+      const newDocs = response.map(doc => ({
+        uri: doc.uri,
+        name: doc.name,
+      }));
+
+      setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
+      // setDocumentPdf(prevFiles => [
+      //   ...new Set([...prevFiles, ...response.assets]),
+      // ]);
+      console.log('Selected PDFs:', newDocs);
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        console.log('User canceled document picker');
+      } else {
+        Alert.alert('Error', 'Something went wrong while selecting documents.');
+      }
+    }
+  };
+
+  // Function to remove a selected document
+  const handleRemovePDF = index => {
+    setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    // setDocumentPdf(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
@@ -130,59 +181,73 @@ const PostBidScreen = () => {
                   <CalenderIcon />
                   <Text style={styles.detailText}>{details?.last_date}</Text>
                 </View>
-                <View style={styles.row}>
+                <View style={[styles.row, {width: WIDTH(40)}]}>
                   <MaterialIcon />
                   <Text style={styles.detailText}>{details?.material}</Text>
                 </View>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>{details?.budget_range}</Text>
-                </View>
-                <View style={styles.row}>
                   <LocationIcon />
                   <Text style={styles.detailText}>{details?.address}</Text>
                 </View>
               </View>
 
-              <TextInput
-                style={styles.InputField}
-                placeholder="Price"
-                placeholderTextColor="gray"
-                keyboardType="numeric"
-                value={createData.price}
-                onChangeText={text => onChange('price', text)}
-              />
+              <Text style={styles.label}>Upload Quotation</Text>
+              <View style={styles.btnWrap}>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={handleUploadPDF}
+                  activeOpacity={0.9}>
+                  <View style={styles.uploadView}>
+                    <Text style={styles.icon}>📄</Text>
+                    <Text style={styles.uploadTxt}>Upload Blue Print</Text>
+                  </View>
+                </TouchableOpacity>
 
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{marginTop: 10}}>
+                  {PdfFiles.map((doc, index) => (
+                    <View key={index} style={styles.documentContainer}>
+                      {/* PDF Preview */}
+                      <Pdf source={{uri: doc.uri}} style={styles.pdfStyle} />
+                      {/* PDF Name */}
+                      <Text numberOfLines={1} style={styles.documentName}>
+                        {doc.name}
+                      </Text>
+                      {/* Remove Button */}
+                      <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => handleRemovePDF(index)}>
+                        <Image
+                          source={require('../../../../assets/Icons/cross.png')}
+                          style={styles.closeIcon}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <Text style={styles.label}>
+                Duration to Complete Project (months){' '}
+              </Text>
               <TextInput
                 style={styles.InputField}
-                placeholder="Time"
+                placeholder="Duration to Complete Project (months) "
                 placeholderTextColor="gray"
-                keyboardType="default"
+                keyboardType="number-pad"
                 value={createData.time}
                 onChangeText={text => onChange('time', text)}
               />
-
-              {/* For Material Select */}
-              <View
-                style={[
-                  styles.InputField,
-                  {alignItems: 'center', justifyContent: 'center'},
-                ]}>
-                <RNPickerSelect
-                  onValueChange={value => setMaterialSelected(value)}
-                  items={[
-                    {label: 'Labour', value: 'Labour'},
-                    {label: 'Labour + Material', value: 'Labour + Material'},
-                  ]}
-                  // placeholder={{label: 'Labour', value: null}}
-                  style={styles.picker}
-                />
-              </View>
             </View>
 
-            <CustomButton name="Apply" onPress={() => ApplyForBidAPI()} />
+            <CustomButton
+              name="Upload Quotation"
+              onPress={() => ApplyForBidAPI()}
+            />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -223,17 +288,17 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_bold,
     fontSize: 22,
     color: COLOR.Black,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: HEIGHT(2),
   },
   detailsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: HEIGHT(1),
+    // marginVertical: HEIGHT(1),
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: WIDTH(2),
     marginBottom: HEIGHT(1),
   },
@@ -275,10 +340,21 @@ const styles = StyleSheet.create({
     fontFamily: NotoSans_Medium,
   },
 
+  label: {
+    fontFamily: NotoSans_Medium,
+    paddingLeft: 2,
+    fontSize: 14,
+    fontWeight: '300',
+    textAlign: 'left',
+    color: COLOR.Black,
+    marginTop: HEIGHT(1),
+    marginBottom: 3,
+  },
+
   InputField: {
     width: WIDTH(91.5),
     height: HEIGHT(7.5),
-    marginVertical: HEIGHT(1.5),
+    marginBottom: HEIGHT(1.5),
     borderRadius: 10,
     borderWidth: 1,
     paddingLeft: 12,
@@ -290,5 +366,83 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: 0,
+    right: -1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'red',
+    width: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  closeIcon: {
+    width: 15, // Adjust the size of the cross icon
+    height: 15,
+    tintColor: 'red', // Change color if needed
+  },
+
+  btnWrap: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  uploadView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLOR.Gray,
+    color: COLOR.black,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
+  },
+
+  uploadButton: {
+    alignItems: 'center',
+    marginBottom: HEIGHT(1),
+    backgroundColor: '#fff',
+  },
+
+  uploadTxt: {
+    fontFamily: NotoSans_Light,
+    fontSize: 11,
+    color: COLOR.Gray9,
+    width: WIDTH(25),
+    textAlign: 'center',
+  },
+
+  documentContainer: {
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  pdfStyle: {
+    width: 100,
+    height: 85,
+  },
+  documentName: {
+    maxWidth: 100,
+    textAlign: 'center',
+  },
+  pdf: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    padding: 5,
   },
 });

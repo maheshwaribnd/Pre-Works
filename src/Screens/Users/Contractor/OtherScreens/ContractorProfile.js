@@ -170,6 +170,7 @@ const ContractorProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.name}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.name}
             onChangeText={text => onChange('name', text)}
@@ -178,6 +179,7 @@ const ContractorProfile = () => {
           <TextInput
             style={styles.InputField}
             keyboardType="number-pad"
+            placeholderTextColor="gray"
             placeholder={data?.mobile_no}
             editable={edit}
             value={data?.mobile_no}
@@ -187,6 +189,7 @@ const ContractorProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.email}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.email}
             onChangeText={text => onChange('email', text)}
@@ -195,6 +198,7 @@ const ContractorProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.address || 'Address'}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.address}
             onChangeText={text => onChange('address', text)}
@@ -203,6 +207,7 @@ const ContractorProfile = () => {
           <TextInput
             style={styles.InputField}
             keyboardType="number-pad"
+            placeholderTextColor="gray"
             placeholder={data?.experience}
             editable={edit}
             value={data?.experience}

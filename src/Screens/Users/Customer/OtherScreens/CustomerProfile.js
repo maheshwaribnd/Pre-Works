@@ -166,6 +166,7 @@ const CustomerProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.name}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.name}
             onChangeText={text => onChange('name', text)}
@@ -174,6 +175,7 @@ const CustomerProfile = () => {
           <TextInput
             style={styles.InputField}
             keyboardType="number-pad"
+            placeholderTextColor="gray"
             placeholder={data?.mobile_no}
             editable={edit}
             value={data?.mobile_no}
@@ -183,6 +185,7 @@ const CustomerProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.email}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.email}
             onChangeText={text => onChange('email', text)}
@@ -191,6 +194,7 @@ const CustomerProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.address || 'Address'}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.address}
             onChangeText={text => onChange('address', text)}
@@ -200,6 +204,7 @@ const CustomerProfile = () => {
             <TextInput
               style={[styles.InputField, {width: WIDTH(44)}]}
               placeholder={data?.city || 'City'}
+              placeholderTextColor="gray"
               editable={edit}
               value={data?.city}
               onChangeText={text => onChange('city', text)}
@@ -207,6 +212,7 @@ const CustomerProfile = () => {
             <TextInput
               style={[styles.InputField, {width: WIDTH(44)}]}
               keyboardType="number-pad"
+              placeholderTextColor="gray"
               placeholder={data?.pincode || 'Pincode'}
               editable={edit}
               value={data?.pincode}
@@ -217,6 +223,7 @@ const CustomerProfile = () => {
           <TextInput
             style={styles.InputField}
             placeholder={data?.state || 'State'}
+            placeholderTextColor="gray"
             editable={edit}
             value={data?.state}
             onChangeText={text => onChange('state', text)}

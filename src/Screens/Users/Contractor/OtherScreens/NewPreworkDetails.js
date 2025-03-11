@@ -27,11 +27,13 @@ import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import LinearGradient from 'react-native-linear-gradient';
 import BidModal from '../../../../Component/BidModal/BidModal';
+import Snackbar from 'react-native-snackbar';
 
 const NewPreworkDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const preId = route?.params?.preworkId;
+  const isexpired = route?.params?.expired;
   const [details, setDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
   const [bid, setBid] = useState(false);
@@ -53,6 +55,19 @@ const NewPreworkDetails = () => {
       })
       .catch(err => console.log(err));
   };
+
+  // const BidFunction = () => {
+  //   if (isexpired) {
+  //     setBid(false);
+  //     Snackbar.show({
+  //       text: 'This Prework is Expired!',
+  //       backgroundColor: '#D1264A',
+  //       duration: Snackbar.LENGTH_SHORT,
+  //     });
+  //   } else {
+  //     setBid(true);
+  //   }
+  // };
 
   const GradientButton = ({text, colors, onPress}) => {
     return (
@@ -78,17 +93,18 @@ const NewPreworkDetails = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
             <Swiper
-              autoplay
+              autoplay={true}
               loop
-              showsPagination
-              paginationStyle={{bottom: 0}}
-              style={{height: 240}}>
+              showsPagination={true}
+              style={{height: 240}}
+              paginationStyle={{bottom: 0}}>
               {resImgs?.map((item, index) => (
                 <View key={index} style={styles.imageContainer}>
                   <Image source={{uri: item?.files}} style={styles.image} />
                 </View>
               ))}
             </Swiper>
+
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{details?.name}</Text>
               <View style={styles.detailsWrapper}>
@@ -98,22 +114,18 @@ const NewPreworkDetails = () => {
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />
-                  <Text style={styles.detailText}>{details?.material}</Text>
+                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
+                    {details?.material}
+                  </Text>
                 </View>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>{details?.budget_range}</Text>
-                </View>
-                <View style={styles.row}>
                   <LocationIcon />
-                  <Text style={styles.detailText}>{details?.address}</Text>
+                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
+                    {details?.address}
+                  </Text>
                 </View>
-                {/* <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>{details?.custombid}</Text>
-                </View> */}
               </View>
 
               <View style={styles.section}>
@@ -123,42 +135,12 @@ const NewPreworkDetails = () => {
 
               <View
                 style={{
-                  flexDirection: 'row',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
                 <GradientButton
-                  text="CANCEL"
-                  colors={['#CF310A', '#F68740']}
-                  onPress={() => setCancel(true)}
-                />
-
-                <GradientButton
-                  text="BID NOW"
+                  text="SEND YOUR QUOTATION"
                   colors={['#029A49', '#0BDB8D']}
-                  onPress={() => setBid(true)}
-                />
-              </View>
-              {cancel ? (
-                <BidModal
-                  heading="Are you Sure, you want to cancel?"
-                  showModal={cancel}
-                  setShowModal={setCancel}
-                  name="Yes"
-                  color={['#F78941', '#D2390F']}
-                  onPress={() => {
-                    setCancel(!cancel), navigation.goBack();
-                  }}
-                />
-              ) : null}
-
-              {bid ? (
-                <BidModal
-                  heading="Are you Sure, do you want to go with this bid now?"
-                  showModal={bid}
-                  setShowModal={setBid}
-                  name="Bid"
-                  color={['#0AD788', '#03A151']}
                   onPress={() =>
                     navigation.navigate('postbidscreen', {
                       preId: preId,
@@ -166,7 +148,7 @@ const NewPreworkDetails = () => {
                     })
                   }
                 />
-              ) : null}
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -225,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: WIDTH(2),
-    marginBottom: HEIGHT(1),
+    marginBottom: 2,
   },
   detailText: {
     fontSize: 16,
@@ -251,6 +233,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   button: {
+    width: WIDTH(80),
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 10,
