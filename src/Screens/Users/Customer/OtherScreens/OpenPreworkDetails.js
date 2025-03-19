@@ -1,14 +1,20 @@
 import {
+  Alert,
   FlatList,
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
+  Button,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
+import RNFS from 'react-native-fs';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import COLOR from '../../../../config/color.json';
 import {
@@ -28,6 +34,9 @@ import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {ActivityIndicator} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {WebView} from 'react-native-webview';
+import RNFetchBlob from 'react-native-blob-util';
+import Pdf from 'react-native-pdf';
 
 const OpenPreworkDetails = () => {
   const navigation = useNavigation();
@@ -36,8 +45,10 @@ const OpenPreworkDetails = () => {
   const [data, setData] = useState([]);
   const [cusId, setCusId] = useState('');
   const [resImgs, setResImgs] = useState([]);
+  const [resPdf, setResPdf] = useState([]);
   const [loader, setLoader] = useState(false);
   const [contractorList, setContractorList] = useState([]);
+  console.log('resImgs', resImgs);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -72,8 +83,11 @@ const OpenPreworkDetails = () => {
       setLoader(true);
       const res = await ApiManager.OpenPreworkById(PreworkId);
       if (res?.data?.status === 200) {
-        setResImgs(res?.data?.preworkfiles || []);
+        console.log('preDetails', res?.data);
+
         setData(res?.data?.prework || []);
+        setResImgs(res?.data?.preworkfiles || []);
+        setResPdf(res?.data?.preworkpdf);
         setLoader(false);
       }
     } catch (error) {
@@ -81,6 +95,89 @@ const OpenPreworkDetails = () => {
     } finally {
       setLoader(false);
     }
+  };
+
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Check Android Version
+        if (Platform.Version >= 33) {
+          return true; // No permission needed for Android 13+
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need permission
+  };
+
+  // Download PDF Function
+  const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
+    try {
+      console.log('Download URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request storage permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        return;
+      }
+
+      // Download Path
+      const {dirs} = RNFetchBlob.fs;
+      const downloadPath = `${dirs.DownloadDir}/${fileName}`;
+      console.log('Download Path:', downloadPath);
+
+      // Download Configuration
+      RNFetchBlob.config({
+        fileCache: true,
+        path: downloadPath,
+        addAndroidDownloads: {
+          useDownloadManager: true, // Use Download Manager
+          notification: true,
+          mime: 'application/pdf',
+          title: fileName,
+          path: downloadPath,
+          description: 'Downloading PDF...',
+          mediaScannable: true,
+        },
+      })
+        .fetch('GET', pdfUrl)
+        .then(res => {
+          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+        })
+        .catch(error => {
+          Alert.alert('Download Failed', 'Error downloading the file.');
+        });
+    } catch (error) {
+      console.error('Download Error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const RenderPDF = ({item}) => {
+    console.log('itemitem', item);
+
+    return (
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity
+          onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+          <Image source={require('../../../../assets/Icons/download.png')} />
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   const ContractorList = ({item}) => {
@@ -112,7 +209,7 @@ const OpenPreworkDetails = () => {
                 showsPagination
                 style={{height: 240}} // Make sure it has height
                 paginationStyle={{bottom: 0}}>
-                {resImgs.map((item, index) => (
+                {resImgs?.map((item, index) => (
                   <View
                     key={index}
                     style={{
@@ -124,6 +221,19 @@ const OpenPreworkDetails = () => {
                   </View>
                 ))}
               </Swiper>
+
+              {resPdf?.length > 0 ? (
+                <View>
+                  <Text style={styles.title}>PDF Document</Text>
+                  <FlatList
+                    data={resPdf}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({item}) => <RenderPDF item={item} />}
+                  />
+                </View>
+              ) : (
+                <Text>No PDF available</Text>
+              )}
 
               {/* Title */}
               <Text style={styles.nametitle}>{data?.name}</Text>

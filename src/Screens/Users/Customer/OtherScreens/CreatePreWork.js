@@ -1,6 +1,9 @@
 import {
+  Alert,
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,16 +30,20 @@ import Snackbar from 'react-native-snackbar';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import ApiManager from '../../../../API/Api';
+import {ActivityIndicator} from 'react-native-paper';
 
 const CreatePreWork = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [id, setId] = useState(null);
   const [isStartDatePickerVisible, setStartDatePickerVisibility] =
     useState(false);
   const [selectedStartDate, setStartSelectedDate] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
-  const [materialSelected, setMaterialSelected] = useState('');
+  const [materialSelected, setMaterialSelected] = useState(
+    'Labour Rate + Material',
+  );
   const [projectSelected, setProjectSelected] = useState('');
   const [uploadImgs, setUploadImgs] = useState([]); // Store multiple images
   const [documentFiles, setDocumentFiles] = useState([]);
@@ -137,6 +144,15 @@ const CreatePreWork = () => {
     //   return false;
     // }
 
+    if (!createData.plotArea.trim()) {
+      Snackbar.show({
+        text: 'Please enter Plot Size',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
     if (!materialSelected) {
       Snackbar.show({
         text: 'Please select Material item',
@@ -147,7 +163,7 @@ const CreatePreWork = () => {
     }
     if (!selectedStartDate) {
       Snackbar.show({
-        text: 'Please select Start Date for Bidding',
+        text: 'Please select expected Start Date for work.',
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
@@ -177,10 +193,27 @@ const CreatePreWork = () => {
       });
       return false;
     }
+
+    if (documentpdf.length === 0) {
+      Snackbar.show({
+        text: 'Please upload at least one PDF file.',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    // if (!documentFiles.length && !documentpdf.length) {
+    //   Alert.alert('No files selected');
+    //   return;
+    // }
+
     return true; // If all validations pass
   };
 
   const CreatePewWorkAPI = async () => {
+    // if (loading) return;
+    setLoading(true);
     if (!Validate()) return;
     const formData = new FormData();
 
@@ -195,34 +228,49 @@ const CreatePreWork = () => {
     // formData.append('projects', projectSelected);
     formData.append('customer_id', id);
     formData.append('description', createData.description);
-    // for Images
+    // Upload images
     if (documentFiles && documentFiles.length > 0) {
       documentFiles.forEach((file, index) => {
         const formattedUri = file.uri.startsWith('file://')
           ? file.uri
           : `file://${file.uri}`;
+
         formData.append(`upload_image[]`, {
           uri: formattedUri,
-          type: file.type ? file.type : 'image/jpeg',
-
+          type: file.type || 'image/jpeg',
           name: file.fileName || `image_${index}.jpg`,
         });
       });
     }
-    //for PDF's
-    if (documentpdf && documentpdf.length > 0) {
-      documentpdf.forEach((file, index) => {
-        const formattedUri = file.uri.startsWith('file://')
-          ? file.uri
-          : `file://${file.uri}`;
 
-        formData.append(`upload_file[]`, {
-          uri: formattedUri,
-          type: file.type || 'application/pdf', // Ensure it's set to PDF
-          name: file.fileName || `document_${index}.pdf`, // Ensure correct file extension
-        });
-      });
+    // Upload PDFs
+    if (PdfFiles.length === 0) {
+      Alert.alert('Error', 'No PDF selected');
+      return;
     }
+
+    documentpdf.forEach((pdf, index) => {
+      formData.append(`files[]`, {
+        uri: pdf.uri,
+        name: pdf.name,
+        type: pdf.type,
+      });
+    });
+    // if (documentpdf && documentpdf.length > 0) {
+    //   documentpdf.forEach((file, index) => {
+    //     const formattedUri = file.uri.startsWith('file://')
+    //       ? file.uri
+    //       : `file://${file.uri}`;
+
+    //     formData.append(`files[]`, {
+    //       uri: formattedUri,
+    //       type: file.type || 'application/pdf',
+    //       name: file.fileName || `document_${index}.pdf`,
+    //     });
+    //   });
+    // }
+
+    console.log('formdata', formData);
 
     await ApiManager.createPreWork(formData)
       .then(res => {
@@ -233,6 +281,7 @@ const CreatePreWork = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
+          // setLoading(false);
 
           // Reset states
           setCreateData({
@@ -252,11 +301,7 @@ const CreatePreWork = () => {
           setDocumentFiles([]);
           setDocumentPdf([]);
           setUploadImgs([]); // Clear preview images
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
-            duration: Snackbar.LENGTH_SHORT,
-          });
+
           navigation.navigate('customerTabs');
         } else {
           Snackbar.show({
@@ -316,36 +361,106 @@ const CreatePreWork = () => {
     setDocumentFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        if (Platform.Version >= 34) {
+          // Android 14+ requires image and video permissions
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+          ]);
+  
+          console.log('Permissions granted:', granted);
+  
+          return (
+            granted['android.permission.READ_MEDIA_IMAGES'] === PermissionsAndroid.RESULTS.GRANTED &&
+            granted['android.permission.READ_MEDIA_VIDEO'] === PermissionsAndroid.RESULTS.GRANTED
+          );
+        } else if (Platform.Version >= 33) {
+          // Android 13
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+          ]);
+  
+          console.log('Permissions granted (Android 13):', granted);
+  
+          return (
+            granted['android.permission.READ_MEDIA_IMAGES'] === PermissionsAndroid.RESULTS.GRANTED &&
+            granted['android.permission.READ_MEDIA_VIDEO'] === PermissionsAndroid.RESULTS.GRANTED
+          );
+        } else {
+          // Android 12 and below
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+          );
+  
+          console.log('Permission granted (READ_EXTERNAL_STORAGE):', granted);
+  
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        }
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need these permissions
+  };
+
   const handleUploadPDF = async () => {
+    const permissionGranted = await requestStoragePermission();
+    console.log('Permission Granted:', permissionGranted);
+  
+    if (!permissionGranted) {
+      Alert.alert('Permission Denied', 'Cannot access storage.');
+      return;
+    }
+  
     try {
       const response = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf], // Allows only PDF selection
-        allowMultiSelection: true, // Allows multiple PDFs
+        type: [DocumentPicker.types.pdf],
+        allowMultiSelection: true,
       });
-
+  
+      console.log('Selected PDFs:', response);
+  
+      // Map and filter unique documents
       const newDocs = response.map(doc => ({
         uri: doc.uri,
         name: doc.name,
+        type: doc.type || 'application/pdf',
       }));
-
-      setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
-      // setDocumentPdf(prevFiles => [
-      //   ...new Set([...prevFiles, ...response.assets]),
-      // ]);
-      console.log('Selected PDFs:', newDocs);
+  
+      setPdfFiles(prevFiles => {
+        const uniqueDocs = newDocs.filter(
+          newDoc => !prevFiles.some(existingDoc => existingDoc.uri === newDoc.uri)
+        );
+        return [...prevFiles, ...uniqueDocs];
+      });
+  
+      setDocumentPdf(prevFiles => {
+        const uniqueDocs = newDocs.filter(
+          newDoc => !prevFiles.some(existingDoc => existingDoc.uri === newDoc.uri)
+        );
+        return [...prevFiles, ...uniqueDocs];
+      });
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
       } else {
+        console.error('Error during document picking:', error);
         Alert.alert('Error', 'Something went wrong while selecting documents.');
       }
     }
   };
 
+  
+
   // Function to remove a selected document
   const handleRemovePDF = index => {
     setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-    // setDocumentPdf(prevFiles => prevFiles.filter((_, i) => i !== index));
+    setDocumentPdf(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
@@ -403,7 +518,7 @@ const CreatePreWork = () => {
             <Text style={styles.label}>Plot Size</Text>
             <TextInput
               style={styles.InputField}
-              placeholder="Approx Plot Size ( in sqft) (Optional)"
+              placeholder="Approx Plot Size ( in sqft)"
               placeholderTextColor="gray"
               keyboardType="numeric"
               value={createData.siteArea}
@@ -417,6 +532,7 @@ const CreatePreWork = () => {
                 {alignItems: 'center', justifyContent: 'center'},
               ]}>
               <RNPickerSelect
+                value={materialSelected}
                 onValueChange={value => setMaterialSelected(value)}
                 items={[
                   {label: 'Labour Rate Only', value: 'Labour Rate Only'},
@@ -425,7 +541,8 @@ const CreatePreWork = () => {
                     value: 'Labour Rate + Material',
                   },
                 ]}
-                placeholder={{label: 'Labour Rate + Material', value: null}}
+                placeholderTextColor={COLOR.Gray9}
+                placeholder={{label: 'Select option', value: null}}
                 style={styles.picker}
               />
             </View>
@@ -543,7 +660,11 @@ const CreatePreWork = () => {
                 {PdfFiles.map((doc, index) => (
                   <View key={index} style={styles.documentContainer}>
                     {/* PDF Preview */}
-                    <Pdf source={{uri: doc.uri}} style={styles.pdfStyle} />
+                    <Pdf
+                      source={{uri: doc.uri, cache: true}}
+                      style={styles.pdfStyle}
+                    />
+
                     {/* PDF Name */}
                     <Text numberOfLines={1} style={styles.documentName}>
                       {doc.name}
@@ -575,6 +696,7 @@ const CreatePreWork = () => {
               style={[styles.InputField, {height: HEIGHT(16)}]}
             />
             <CustomButton name="SUBMIT" onPress={() => CreatePewWorkAPI()} />
+            {/* {loading && <ActivityIndicator size="large" color="blue" />} */}
           </View>
         </ScrollView>
       </ImageBackground>
@@ -692,13 +814,12 @@ const styles = StyleSheet.create({
     inputIOS: {
       fontSize: 16,
       padding: 10,
-      color: 'gray',
+      color: COLOR.Black,
     },
     inputAndroid: {
       fontSize: 16,
       padding: 10,
-      paddingLeft: 3,
-      color: 'gray',
+      color: COLOR.Black,
     },
   },
 
