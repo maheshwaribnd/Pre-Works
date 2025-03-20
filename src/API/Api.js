@@ -100,6 +100,7 @@ const requestPath = {
 
   // Delete Request
   deleteAccount: 'auth/deleteAccount',
+  deletePrework: 'auth/deletePrework',
 };
 
 const ApiManager = {
@@ -276,6 +277,10 @@ const ApiManager = {
 
   DeleteAccount: (userType, userId) => {
     return requests.post(`${requestPath.deleteAccount}/${userType}/${userId}`);
+  },
+
+  DeletePrework: PreId => {
+    return requests.post(`${requestPath.deletePrework}/${PreId}`);
   },
 
   // notification: userId => {

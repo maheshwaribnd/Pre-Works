@@ -135,26 +135,26 @@ const OfferEnquiesDetails = () => {
                     {contractorDetails?.contractor_mobile}
                   </Text>
                 </View>
-                <View style={styles.row}>
+                {/* <View style={styles.row}>
                   <MaterialIcon />
                   <Text style={[styles.detailText, {width: WIDTH(20)}]}>
                     {contractorDetails?.contractor_material}
                   </Text>
-                </View>
+                </View> */}
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <Time />
                   <Text style={styles.detailText}>
-                    {contractorDetails?.contractor_time}
+                    {contractorDetails?.contractor_time} Months
                   </Text>
                 </View>
-                <View style={styles.row}>
+                {/* <View style={styles.row}>
                   <Currency />
                   <Text style={styles.detailText}>
                     {contractorDetails?.contractor_price}
                   </Text>
-                </View>
+                </View> */}
               </View>
               <View style={styles.row}>
                 <LocationIcon />

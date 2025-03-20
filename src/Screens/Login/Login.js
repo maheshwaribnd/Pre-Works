@@ -7,7 +7,7 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {HEIGHT, NotoSans_Medium, WIDTH} from '../../config/AppConst';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import COLOR from '../../config/color.json';
@@ -17,12 +17,17 @@ import ApiManager from '../../API/Api';
 import Snackbar from 'react-native-snackbar';
 import PreworkLogo2 from '../../assets/Svg/Preworkslogo2.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import requestStoragePermission from '../../Component/Permission';
 
 const Login = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const userType = route.params?.userType;
   console.log('usetpeeee', userType);
+
+  useEffect(() => {
+    requestStoragePermission();
+  }, []);
 
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState({

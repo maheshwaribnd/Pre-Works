@@ -15,6 +15,7 @@ import {
 import React, {useEffect, useState} from 'react';
 import RNFS from 'react-native-fs';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import DeleteIcon from '../../../../assets/Svg/delete.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import COLOR from '../../../../config/color.json';
 import {
@@ -37,6 +38,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {WebView} from 'react-native-webview';
 import RNFetchBlob from 'react-native-blob-util';
 import Pdf from 'react-native-pdf';
+import Snackbar from 'react-native-snackbar';
 
 const OpenPreworkDetails = () => {
   const navigation = useNavigation();
@@ -48,7 +50,6 @@ const OpenPreworkDetails = () => {
   const [resPdf, setResPdf] = useState([]);
   const [loader, setLoader] = useState(false);
   const [contractorList, setContractorList] = useState([]);
-  console.log('resImgs', resImgs);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -65,6 +66,23 @@ const OpenPreworkDetails = () => {
     }
   }, [cusId]);
 
+  const PreWorkByIdAPI = async () => {
+    try {
+      setLoader(true);
+      const res = await ApiManager.OpenPreworkById(PreworkId);
+      if (res?.data?.status === 200) {
+        setData(res?.data?.prework || []);
+        setResImgs(res?.data?.preworkfiles || []);
+        setResPdf(res?.data?.preworkpdf);
+        setLoader(false);
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
   const EnquiresListAPI = () => {
     ApiManager.ListOfEnquires(PreworkId)
       .then(res => {
@@ -78,23 +96,26 @@ const OpenPreworkDetails = () => {
       });
   };
 
-  const PreWorkByIdAPI = async () => {
-    try {
-      setLoader(true);
-      const res = await ApiManager.OpenPreworkById(PreworkId);
-      if (res?.data?.status === 200) {
-        console.log('preDetails', res?.data);
-
-        setData(res?.data?.prework || []);
-        setResImgs(res?.data?.preworkfiles || []);
-        setResPdf(res?.data?.preworkpdf);
-        setLoader(false);
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-    } finally {
-      setLoader(false);
-    }
+  const DeletePreworkAPI = () => {
+    ApiManager.DeletePrework(PreworkId)
+      .then(res => {
+        if (res?.data?.status == 200) {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          navigation.navigate('customerTabs');
+        }
+      })
+      .catch(err => {
+        console.log('API Error:', err.response?.data || err.message);
+        Snackbar.show({
+          text: err.response?.data?.message || err.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      });
   };
 
   const requestStoragePermission = async () => {
@@ -222,18 +243,29 @@ const OpenPreworkDetails = () => {
                 ))}
               </Swiper>
 
-              {resPdf?.length > 0 ? (
-                <View>
-                  <Text style={styles.title}>PDF Document</Text>
-                  <FlatList
-                    data={resPdf}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({item}) => <RenderPDF item={item} />}
-                  />
-                </View>
-              ) : (
-                <Text>No PDF available</Text>
-              )}
+              <View
+                style={{
+                  paddingHorizontal: WIDTH(4),
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                {resPdf?.length > 0 ? (
+                  <View>
+                    <Text style={styles.title}>PDF Document</Text>
+                    <FlatList
+                      data={resPdf}
+                      keyExtractor={item => item.id.toString()}
+                      renderItem={({item}) => <RenderPDF item={item} />}
+                    />
+                  </View>
+                ) : (
+                  <Text>No PDF available</Text>
+                )}
+                <TouchableOpacity onPress={() => DeletePreworkAPI()}>
+                  <DeleteIcon />
+                </TouchableOpacity>
+              </View>
 
               {/* Title */}
               <Text style={styles.nametitle}>{data?.name}</Text>
@@ -250,13 +282,13 @@ const OpenPreworkDetails = () => {
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    StartDate: {data?.expected_date}
+                    Expected Start Date: {data?.expected_date}
                   </Text>
                 </View>
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    EndDate: {data?.last_date}
+                    Last Date for Quote Submission: {data?.last_date}
                   </Text>
                 </View>
               </View>

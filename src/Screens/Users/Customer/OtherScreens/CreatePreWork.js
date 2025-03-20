@@ -41,6 +41,8 @@ const CreatePreWork = () => {
   const [selectedStartDate, setStartSelectedDate] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
+  const [minBidDate, setMinBidDate] = useState(new Date());
+
   const [materialSelected, setMaterialSelected] = useState(
     'Labour Rate + Material',
   );
@@ -90,6 +92,7 @@ const CreatePreWork = () => {
 
   const handleStartConfirm = date => {
     setStartSelectedDate(formatDate(date)); // Format date as needed
+    setMinBidDate(date);
     hideStartDatePicker();
   };
 
@@ -244,10 +247,10 @@ const CreatePreWork = () => {
     }
 
     // Upload PDFs
-    if (PdfFiles.length === 0) {
-      Alert.alert('Error', 'No PDF selected');
-      return;
-    }
+    // if (PdfFiles.length === 0) {
+    //   Alert.alert('Error', 'No PDF selected');
+    //   return;
+    // }
 
     documentpdf.forEach((pdf, index) => {
       formData.append(`files[]`, {
@@ -256,19 +259,6 @@ const CreatePreWork = () => {
         type: pdf.type,
       });
     });
-    // if (documentpdf && documentpdf.length > 0) {
-    //   documentpdf.forEach((file, index) => {
-    //     const formattedUri = file.uri.startsWith('file://')
-    //       ? file.uri
-    //       : `file://${file.uri}`;
-
-    //     formData.append(`files[]`, {
-    //       uri: formattedUri,
-    //       type: file.type || 'application/pdf',
-    //       name: file.fileName || `document_${index}.pdf`,
-    //     });
-    //   });
-    // }
 
     console.log('formdata', formData);
 
@@ -321,6 +311,32 @@ const CreatePreWork = () => {
       });
   };
 
+  useEffect(() => {
+    requestStoragePermission();
+  }, []);
+
+  //download pdf function
+  const requestStoragePermission = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        ]);
+        return (
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        );
+      }
+      return true;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
   const handleUpload = async () => {
     try {
       launchImageLibrary(
@@ -361,106 +377,45 @@ const CreatePreWork = () => {
     setDocumentFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
-  const requestStoragePermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        if (Platform.Version >= 34) {
-          // Android 14+ requires image and video permissions
-          const granted = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
-          ]);
-  
-          console.log('Permissions granted:', granted);
-  
-          return (
-            granted['android.permission.READ_MEDIA_IMAGES'] === PermissionsAndroid.RESULTS.GRANTED &&
-            granted['android.permission.READ_MEDIA_VIDEO'] === PermissionsAndroid.RESULTS.GRANTED
-          );
-        } else if (Platform.Version >= 33) {
-          // Android 13
-          const granted = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-            PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
-          ]);
-  
-          console.log('Permissions granted (Android 13):', granted);
-  
-          return (
-            granted['android.permission.READ_MEDIA_IMAGES'] === PermissionsAndroid.RESULTS.GRANTED &&
-            granted['android.permission.READ_MEDIA_VIDEO'] === PermissionsAndroid.RESULTS.GRANTED
-          );
-        } else {
-          // Android 12 and below
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-          );
-  
-          console.log('Permission granted (READ_EXTERNAL_STORAGE):', granted);
-  
-          return granted === PermissionsAndroid.RESULTS.GRANTED;
-        }
-      } catch (err) {
-        console.warn('Permission error:', err);
-        return false;
-      }
-    }
-    return true; // iOS does not need these permissions
-  };
-
   const handleUploadPDF = async () => {
-    const permissionGranted = await requestStoragePermission();
-    console.log('Permission Granted:', permissionGranted);
-  
-    if (!permissionGranted) {
-      Alert.alert('Permission Denied', 'Cannot access storage.');
-      return;
-    }
-  
     try {
       const response = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf],
-        allowMultiSelection: true,
+        type: [DocumentPicker.types.pdf], // Allows only PDF selection
+        allowMultiSelection: true, // Allows multiple PDFs
       });
-  
-      console.log('Selected PDFs:', response);
-  
-      // Map and filter unique documents
-      const newDocs = response.map(doc => ({
-        uri: doc.uri,
-        name: doc.name,
-        type: doc.type || 'application/pdf',
-      }));
-  
-      setPdfFiles(prevFiles => {
-        const uniqueDocs = newDocs.filter(
-          newDoc => !prevFiles.some(existingDoc => existingDoc.uri === newDoc.uri)
-        );
-        return [...prevFiles, ...uniqueDocs];
-      });
-  
-      setDocumentPdf(prevFiles => {
-        const uniqueDocs = newDocs.filter(
-          newDoc => !prevFiles.some(existingDoc => existingDoc.uri === newDoc.uri)
-        );
-        return [...prevFiles, ...uniqueDocs];
-      });
+
+      // const newDocs = response.map(doc => ({
+      //   uri: doc.uri,
+      //   name: doc.name,
+      // }));
+
+      const newDocs = await Promise.all(
+        response.map(async doc => {
+          const newPath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
+          await RNFS.copyFile(doc.uri, newPath);
+
+          return {uri: `file://${newPath}`, name: doc.name};
+        }),
+      );
+
+      setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
+      // setDocumentPdf(prevFiles => [
+      //   ...new Set([...prevFiles, ...response.assets]),
+      // ]);
+      console.log('Selected PDFs:', newDocs);
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
       } else {
-        console.error('Error during document picking:', error);
         Alert.alert('Error', 'Something went wrong while selecting documents.');
       }
     }
   };
 
-  
-
   // Function to remove a selected document
   const handleRemovePDF = index => {
     setPdfFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-    setDocumentPdf(prevFiles => prevFiles.filter((_, i) => i !== index));
+    // setDocumentPdf(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
@@ -518,7 +473,7 @@ const CreatePreWork = () => {
             <Text style={styles.label}>Plot Size</Text>
             <TextInput
               style={styles.InputField}
-              placeholder="Approx Plot Size ( in sqft)"
+              placeholder="Approx Plot Size (in sqft)"
               placeholderTextColor="gray"
               keyboardType="numeric"
               value={createData.siteArea}
@@ -585,7 +540,7 @@ const CreatePreWork = () => {
                 mode="date"
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
-                minimumDate={new Date()}
+                minimumDate={minBidDate}
               />
             </View>
             {/* For Project Select */}
@@ -657,32 +612,24 @@ const CreatePreWork = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={{marginTop: 10}}>
-                {PdfFiles.map((doc, index) => (
-                  <View key={index} style={styles.documentContainer}>
-                    {/* PDF Preview */}
-                    <Pdf
-                      source={{uri: doc.uri, cache: true}}
-                      style={styles.pdfStyle}
-                    />
-
-                    {/* PDF Name */}
-                    <Text numberOfLines={1} style={styles.documentName}>
-                      {doc.name}
-                    </Text>
-                    {/* Remove Button */}
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={() => handleRemovePDF(index)}>
-                      <Image
-                        source={require('../../../../assets/Icons/cross.png')}
-                        style={styles.closeIcon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                {PdfFiles.length > 0 &&
+                  PdfFiles.map((doc, index) => {
+                    return (
+                      <View>
+                        <Pdf source={{uri: doc.uri}} style={styles.pdfStyle} />;
+                        <TouchableOpacity
+                          style={styles.closeButton}
+                          onPress={() => handleRemovePDF(index)}>
+                          <Image
+                            source={require('../../../../assets/Icons/cross.png')}
+                            style={styles.closeIcon}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
               </ScrollView>
             </View>
-
             <Text style={styles.label}>Description</Text>
             <TextInput
               value={createData.description}
@@ -730,7 +677,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingLeft: 12,
     borderColor: COLOR.Gray,
-    color: COLOR.black,
+    color: COLOR.Black,
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
