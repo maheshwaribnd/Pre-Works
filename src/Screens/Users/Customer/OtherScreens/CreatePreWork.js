@@ -31,6 +31,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import ApiManager from '../../../../API/Api';
 import {ActivityIndicator} from 'react-native-paper';
+import RNFS from 'react-native-fs';
 
 const CreatePreWork = () => {
   const navigation = useNavigation();
@@ -399,10 +400,8 @@ const CreatePreWork = () => {
       );
 
       setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
-      // setDocumentPdf(prevFiles => [
-      //   ...new Set([...prevFiles, ...response.assets]),
-      // ]);
-      console.log('Selected PDFs:', newDocs);
+      setDocumentPdf(prevFiles => [...new Set([...prevFiles, ...response])]);
+
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
