@@ -41,7 +41,6 @@ const ProjectAppliedDetails = () => {
   const [edit, setEdit] = useState(false);
   const [userId, setUserId] = useState('');
   const [appliedDetails, setAppliedDetails] = useState([]);
-
   const [resImgs, setResImgs] = useState([]);
   const [preworkPdf, setPreworkPdf] = useState([]);
   const [contractorPdf, setContractorPdf] = useState([]);
@@ -253,24 +252,28 @@ const ProjectAppliedDetails = () => {
 
   return (
     <View style={{flex: 1}}>
-      <HeaderWithEdit name="Project Applied" edit={edit} setEdit={setEdit} />
+      <CustomHeader name="Project Applied" edit={edit} setEdit={setEdit} />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
-            <Swiper
-              autoplay
-              loop
-              showsPagination
-              paginationStyle={{bottom: 0}}
-              style={styles.imageSlider}>
-              {resImgs?.map((item, index) => (
-                <View key={index} style={styles.imageContainer}>
-                  <Image source={{uri: item?.files}} style={styles.image} />
-                </View>
-              ))}
-            </Swiper>
+            {resImgs?.length > 0 && (
+              <Swiper
+                key={resImgs.length} // Ensures remount on data change
+                autoplay
+                loop
+                showsPagination
+                style={styles.imageSlider}
+                paginationStyle={{bottom: 10}} // Ensure pagination is visible
+              >
+                {resImgs.map((item, index) => (
+                  <View key={index} style={styles.imageContainer}>
+                    <Image source={{uri: item?.files}} style={styles.imgs} />
+                  </View>
+                ))}
+              </Swiper>
+            )}
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{appliedDetails?.name}</Text>
               <View style={styles.detailsWrapper}>
@@ -397,7 +400,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginVertical: HEIGHT(3),
     marginHorizontal: HEIGHT(1),
-
     overflow: 'hidden',
   },
   imageSlider: {
@@ -407,11 +409,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  image: {
-    width: '100%',
+  imgs: {
+    width: 330,
     height: 200,
     resizeMode: 'cover',
     borderRadius: 9,
+    marginBottom: HEIGHT(4),
   },
   contentWrapper: {
     padding: WIDTH(4),
@@ -426,7 +429,7 @@ const styles = StyleSheet.create({
   detailsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: HEIGHT(1),
+    // marginVertical: HEIGHT(1),
   },
   row: {
     flexDirection: 'row',

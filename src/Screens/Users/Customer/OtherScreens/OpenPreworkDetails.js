@@ -272,13 +272,13 @@ const OpenPreworkDetails = () => {
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    Expected Start Date: {data?.expected_date}
+                    Ex Prework Start Date: {data?.expected_date}
                   </Text>
                 </View>
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    Last Date for Quote Submission: {data?.last_date}
+                    End Date for Quote Submission: {data?.last_date}
                   </Text>
                 </View>
               </View>

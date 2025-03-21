@@ -29,8 +29,7 @@ import Snackbar from 'react-native-snackbar';
 const Profile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const edit = route?.params?.edit;
-  const setEdit = route?.params?.setEdit;
+  const [edit, setEdit] = useState(route.params?.isEditable || false);
 
   const [data, setData] = useState([]);
   const [userId, setUserId] = useState('');
@@ -81,38 +80,71 @@ const Profile = () => {
     }
   }, [userId]);
 
-  const validateWhatsApp = text => {
-    // Allow numbers and require between 10 to 15 digits
-    const regex = /^[0-9]{10,15}$/;
-    if (text && !regex.test(text)) {
-      setErrors(prevState => ({
-        ...prevState,
-        whatsAppError: 'Please enter a valid WhatsApp number (10-15 digits).',
-      }));
-    } else {
-      setErrors(prevState => ({
-        ...prevState,
-        whatsAppError: '',
-      }));
-    }
-  };
+ // WhatsApp validation (optional field)
+const validateWhatsApp = text => {
+  const regex = /^[0-9]{10,15}$/;
+  if (text && !regex.test(text)) {
+    const errorMessage = 'Please enter a valid WhatsApp number (10 digits).';
+    setErrors(prevState => ({
+      ...prevState,
+      whatsAppError: errorMessage,
+    }));
+    return false; // Invalid input
+  } else {
+    setErrors(prevState => ({
+      ...prevState,
+      whatsAppError: '',
+    }));
+    return true; // Valid or empty input
+  }
+};
 
-  // Instagram URL validation regex
-  const validateInstagramLink = text => {
-    // Ensure it's a valid Instagram URL
-    const regex = /^(https:\/\/www\.instagram\.com\/[a-zA-Z0-9_.]+\/?)$/;
-    if (text && !regex.test(text)) {
-      setErrors(prevState => ({
-        ...prevState,
-        instagramError: 'Please enter a valid Instagram URL.',
-      }));
-    } else {
-      setErrors(prevState => ({
-        ...prevState,
-        instagramError: '',
-      }));
-    }
-  };
+// Instagram validation (optional field)
+const validateInstagramLink = text => {
+  const regex = /^(https:\/\/www\.instagram\.com\/[a-zA-Z0-9_.]+\/?)$/;
+  if (text && !regex.test(text)) {
+    const errorMessage = 'Please enter a valid Instagram URL.';
+    setErrors(prevState => ({
+      ...prevState,
+      instagramError: errorMessage,
+    }));
+    return false; // Invalid input
+  } else {
+    setErrors(prevState => ({
+      ...prevState,
+      instagramError: '',
+    }));
+    return true; // Valid or empty input
+  }
+};
+
+// Call this function on form submission
+const handleSubmit = () => {
+  const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
+  const isInstagramValid = validateInstagramLink(data?.instagram_link);
+
+  // Show Snackbar only if validation fails
+  if (!isWhatsAppValid ) {
+    Snackbar.show({
+      text: 'Please enter a valid WhatsApp number (10 digits).',
+      backgroundColor: '#D1264A',
+      duration: Snackbar.LENGTH_SHORT,
+    });
+    return; // Stop form submission
+  }
+  else if (!isInstagramValid) {
+    Snackbar.show({
+      text: 'Please enter a valid Instagram URL.',
+      backgroundColor: '#D1264A',
+      duration: Snackbar.LENGTH_SHORT,
+    });
+    return; // Stop form submission
+
+  }
+
+  // Proceed with form submission (e.g., API call)
+  ArchitectUpdateAPI();
+};
 
   const ArchitectProfileAPI = async () => {
     if (!userId) return;
@@ -140,13 +172,13 @@ const Profile = () => {
   };
 
   const ArchitectUpdateAPI = async () => {
-    // const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
-    // const isInstagramValid = validateInstagramLink(data?.instagram_link);
+    const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
+    const isInstagramValid = validateInstagramLink(data?.instagram_link);
 
     // If any validation fails, don't proceed with API call
-    // if (!isWhatsAppValid || !isInstagramValid) {
-    //   return;
-    // }
+    if (!isWhatsAppValid || !isInstagramValid) {
+      return;
+    }
     const formData = new FormData();
     formData.append('name', data?.name);
     formData.append('mobile_no', data?.mobile_no);
@@ -339,6 +371,7 @@ const Profile = () => {
                 onChange('whatsup_no', text);
                 validateWhatsApp(text); // Validate WhatsApp number
               }}
+              onBlur={() => validateWhatsApp(data?.whatsup_no)}
             />
 
             {/* {errors.whatsAppError && (
@@ -356,6 +389,7 @@ const Profile = () => {
                 onChange('instagram_link', text);
                 validateInstagramLink(text); // Validate Instagram URL
               }}
+              onBlur={() => validateInstagramLink(data?.instagram_link)}
             />
 
             {/* {errors.instagramError && (
@@ -372,14 +406,14 @@ const Profile = () => {
               keyboardType="default"
               placeholderTextColor="gray"
               value={data?.about_us}
-              onChangeText={text => onChange('about_us', text)}
+              onChangeText={text => onChange('about_me', text)}
             />
 
             <View style={{marginBottom: HEIGHT(2)}}>
               {edit ? (
                 <CustomButton
                   name="SAVE"
-                  onPress={() => ArchitectUpdateAPI()}
+                  onPress={() => handleSubmit()}
                 />
               ) : null}
             </View>

@@ -233,7 +233,7 @@ const PostBidScreen = () => {
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    Last Date for Quote Submission: {details?.last_date}
+                    End Date for Quote Submission: {details?.last_date}
                   </Text>
                 </View>
                 <View style={[styles.row, {width: WIDTH(40)}]}>
@@ -248,7 +248,7 @@ const PostBidScreen = () => {
                 </View>
               </View>
 
-              <Text style={styles.label}>Upload Quotation</Text>
+              <Text style={styles.label}>Upload PDF</Text>
               <View style={styles.btnWrap}>
                 <TouchableOpacity
                   style={styles.uploadButton}
@@ -272,7 +272,6 @@ const PostBidScreen = () => {
                             source={{uri: doc.uri}}
                             style={styles.pdfStyle}
                           />
-                          ;
                           <TouchableOpacity
                             style={styles.closeButton}
                             onPress={() => handleRemovePDF(index)}>

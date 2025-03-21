@@ -28,7 +28,6 @@ const ArchitectSetting = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setDeleteShowModal] = useState(false);
   const [userId, setUserId] = useState('');
-  const [edit, setEdit] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -116,8 +115,7 @@ const ArchitectSetting = () => {
               style={styles.InputField}
               onPress={() =>
                 navigation.navigate('architectprofile', {
-                  edit: edit,
-                  setEdit: setEdit,
+                  isEditable: true,
                 })
               }>
               <View

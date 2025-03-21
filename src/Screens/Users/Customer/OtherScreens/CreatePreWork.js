@@ -532,7 +532,7 @@ const CreatePreWork = () => {
                 mode="date"
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
-                minimumDate={minBidDate}
+                minimumDate={new Date()}
               />
             </View>
             {/* For Project Select */}
@@ -596,7 +596,7 @@ const CreatePreWork = () => {
                 activeOpacity={0.9}>
                 <View style={styles.uploadView}>
                   <Text style={styles.icon}>📄</Text>
-                  <Text style={styles.uploadTxt}>Upload Blue Print</Text>
+                  <Text style={styles.uploadTxt}>Site Blue Print</Text>
                 </View>
               </TouchableOpacity>
 

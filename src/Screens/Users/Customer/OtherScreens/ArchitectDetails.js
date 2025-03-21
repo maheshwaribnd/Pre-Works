@@ -41,35 +41,58 @@ const ArchitectDetails = () => {
         if (res?.data?.status === 200) {
           setLoader(false);
           setImages(res?.data?.architectureWorks);
-          setArchitectData(res?.data?.architectureDetails);
+          setArchitectData(res?.data?.architecture);
           setArchitectWorkList(res?.data?.preworks);
         }
       })
       .catch(err => console.log(err));
   };
 
-  const openURL = url => {
-    Linking.canOpenURL(url)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(url);
-        } else {
-          console.log('URL not supported');
-        }
-      })
-      .catch(err => console.error('An error occurred', err));
+  const openURL = (url) => {
+    Linking.openURL(url).catch(err => console.error('An error occurred', err));
   };
 
   const phoneNumber = architectData?.mobile_no || '';
   const whatsapp = architectData?.whatsup_no;
   const email = architectData?.email || '';
   const socialMediaLink = architectData?.instagram_link || '';
+console.log('socialMediaLink', socialMediaLink);
 
   // Define handlers
-  const handleCall = () => openURL(`tel:${phoneNumber}`);
-  const handleWhatsApp = () => openURL(`https://wa.me/${whatsapp}`);
-  const handleInstagram = () => openURL(socialMediaLink);
-  const handleGmail = () => openURL(`mailto:${email}`);
+  const handleCall = () => {
+    if (phoneNumber) {
+      openURL(`tel:${phoneNumber}`);
+    } else {
+      alert('Phone number is not available.');
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (whatsapp) {
+      openURL(`https://wa.me/${whatsapp}`)
+    } else if (socialMediaLink) {
+      openURL(socialMediaLink); // Fallback to Instagram
+    } else {
+      alert('WhatsApp number is not available.');
+    }
+  };
+
+  const handleInstagram = () => {
+    if (socialMediaLink) {
+      openURL(socialMediaLink);
+    } else {
+      alert('Instagram link is not available.');
+    }
+  };
+
+  const handleGmail = (email) => {
+    if (email) {
+      Linking.openURL(`mailto:${email}`).catch((err) =>
+        console.error("Failed to open email client", err)
+      );
+    }
+  };
+  
 
   const RenderWorkList = item => {
     const PastPreworkFunction = () => {
@@ -182,8 +205,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: HEIGHT(25),
     borderWidth: 0.5,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    // borderTopLeftRadius: 16,
+    // borderTopRightRadius: 16,
     borderColor: COLOR.Gray,
   },
   profileWrapper: {
@@ -210,11 +233,11 @@ const styles = StyleSheet.create({
     color: COLOR.Black,
   },
   description: {
-    // fontSize: WIDTH(3.5),
+    fontSize: WIDTH(3.5),
     color: COLOR.Gray,
   },
   address: {
-    fontSize: WIDTH(3.5),
+    // fontSize: WIDTH(3.5),
     color: COLOR.DarkGray,
   },
   actionsContainer: {

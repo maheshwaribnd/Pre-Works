@@ -268,7 +268,7 @@ const OfferEnquiesDetails = () => {
                 <Text>No PDF available</Text>
               )}
 
-              <View
+              {/* <View
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -278,7 +278,7 @@ const OfferEnquiesDetails = () => {
                   colors={['#029A49', '#0BDB8D']}
                   onPress={() => setAccept(true)}
                 />
-              </View>
+              </View> */}
               {/* {Reject ? (
                 <BidModal
                   heading="Are you Sure, you want to cancel?"

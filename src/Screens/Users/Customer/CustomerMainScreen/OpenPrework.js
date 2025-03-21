@@ -121,23 +121,21 @@ const OpenPrework = () => {
         <View style={styles.cardContent}>
           <Text style={styles.title}>{item?.item?.name}</Text>
           <View style={styles.row}>
-            <View style={styles.row}>
-              <CalenderIcon />
-              <Text style={styles.text}>{item?.item?.last_date}</Text>
-            </View>
-            <View style={styles.row}>
-              <MaterialIcon />
-              <Text style={styles.text}>{item?.item?.material}</Text>
-            </View>
+            <CalenderIcon />
+            <Text style={styles.text}>
+              End Date for Quote Submission: {item?.item?.last_date}
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <MaterialIcon />
+            <Text style={styles.text}>{item?.item?.material}</Text>
           </View>
 
           <View style={styles.row}>
-            <View style={styles.row}>
-              <LocationIcon />
-              <Text style={[styles.text, {width: WIDTH(32)}]}>
-                {item?.item?.address}
-              </Text>
-            </View>
+            <LocationIcon />
+            <Text style={[styles.text, {width: WIDTH(32)}]}>
+              {item?.item?.address}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>

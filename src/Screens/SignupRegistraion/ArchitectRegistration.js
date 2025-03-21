@@ -165,7 +165,9 @@ const ArchitectRegistration = () => {
   const validateForm = () => {
     let newErrors = {};
 
-    if (!/^[A-Za-z0-9][A-Za-z0-9\s]{3,}$/.test(userData.name.trim())) {
+    if (userData.name.length === 0) {
+      newErrors.name = 'Please Enter Name';
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 

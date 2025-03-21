@@ -89,19 +89,17 @@ const ProjectApplied = () => {
       <TouchableOpacity
         style={styles.ListBox}
         onPress={() => ParticularProject(item)}>
-        <View>
+        <View style={styles.listView}>
           <Image
             source={{uri: item?.item?.files[0]?.files}}
             style={{width: 100, height: 100, borderRadius: 6}}
           />
-        </View>
-        <View style={styles.listView}>
           <View>
             <Text style={styles.name}>{item?.item?.name}</Text>
             <Text style={styles.address}>{item?.item?.address}</Text>
           </View>
-          <Arrow name="caretright" color="#03A151" />
         </View>
+        <Arrow name="caretright" color="#03A151" />
       </TouchableOpacity>
     );
   };
@@ -149,10 +147,9 @@ const styles = StyleSheet.create({
 
   listView: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    gap: 16,
-    padding: HEIGHT(2),
+    gap: 9,
   },
 
   img: {
@@ -165,8 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#464646',
     lineHeight: 21,
-    textAlign: 'right',
-    paddingBottom: HEIGHT(1.5),
+    paddingBottom: HEIGHT(1),
   },
 
   address: {
@@ -174,6 +170,5 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     fontSize: 14,
     width: WIDTH(35),
-    textAlign: 'right',
   },
 });

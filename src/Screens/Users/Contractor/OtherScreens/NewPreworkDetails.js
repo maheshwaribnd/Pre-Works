@@ -175,18 +175,22 @@ const NewPreworkDetails = () => {
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
-            <Swiper
-              autoplay={true}
-              loop
-              showsPagination={true}
-              style={{height: 240}}
-              paginationStyle={{bottom: 0}}>
-              {resImgs?.map((item, index) => (
-                <View key={index} style={styles.imageContainer}>
-                  <Image source={{uri: item?.files}} style={styles.image} />
-                </View>
-              ))}
-            </Swiper>
+            {resImgs?.length > 0 && (
+              <Swiper
+                key={resImgs.length} // Ensures remount on data change
+                autoplay
+                loop
+                showsPagination
+                style={styles.imageSlider}
+                paginationStyle={{bottom: 10}} // Ensure pagination is visible
+              >
+                {resImgs.map((item, index) => (
+                  <View key={index} style={styles.imageContainer}>
+                    <Image source={{uri: item?.files}} style={styles.imgs} />
+                  </View>
+                ))}
+              </Swiper>
+            )}
 
             <View
               style={{
@@ -283,6 +287,15 @@ const styles = StyleSheet.create({
 
     overflow: 'hidden',
   },
+
+  imgs: {
+    width: '100%',
+    height: 210,
+    resizeMode: 'cover',
+    borderRadius: 9,
+    marginBottom: HEIGHT(4),
+  },
+
   imageSlider: {
     height: 240,
   },

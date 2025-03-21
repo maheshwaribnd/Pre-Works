@@ -77,36 +77,25 @@ const OfferEnquires = () => {
             <Text style={styles.name}>{item?.item?.contractor_name}</Text>
             <View style={styles.ViewAlign}>
               <View>
-                <View style={styles.ViewAlign}>
-                  <View style={styles.row}>
-                    <Mobile />
-                    <Text style={styles.infoText}>
-                      {item?.item?.contractor_mobile}
-                    </Text>
-                  </View>
-
-                  <View style={styles.row}>
-                    <Experience />
-                    <Text style={styles.infoText}>
-                      {item?.item?.contractor_experience} Year
-                    </Text>
-                  </View>
+                <View style={styles.row}>
+                  <Mobile />
+                  <Text style={styles.infoText}>
+                    {item?.item?.contractor_mobile}
+                  </Text>
                 </View>
 
-                <View style={styles.ViewAlign}>
-                  <View style={styles.row}>
-                    <LocationIcon />
-                    <Text style={[styles.infoText, {width: WIDTH(26)}]}>
-                      {item?.item?.contractor_address}
-                    </Text>
-                  </View>
+                <View style={styles.row}>
+                  <Experience />
+                  <Text style={styles.infoText}>
+                    {item?.item?.contractor_experience} Year
+                  </Text>
+                </View>
 
-                  <View style={styles.row}>
-                    <Currency />
-                    <Text style={styles.infoText}>
-                      {item?.item?.work_price}
-                    </Text>
-                  </View>
+                <View style={styles.row}>
+                  <LocationIcon />
+                  <Text style={[styles.infoText, {width: WIDTH(26)}]}>
+                    {item?.item?.contractor_address}
+                  </Text>
                 </View>
               </View>
               <Arrow name="caretright" color="#03A151" />
@@ -173,7 +162,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
   },
 
   ViewAlign: {

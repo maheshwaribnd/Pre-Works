@@ -82,7 +82,7 @@ const WelcomeScreen = () => {
 
   return (
     <ImageBackground
-      source={require('../../assets/Imgs/Background.png')}
+      source={require('../../assets/Imgs/loginBg.png')}
       style={styles.container}>
       <PreworkLogo2 height={140} width={175} />
 

@@ -8,7 +8,7 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   FONTSIZE,
   HEIGHT,
@@ -22,7 +22,6 @@ import COLOR from '../../config/color.json';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import ApiManager from '../../API/Api';
 import CustomButton from '../../Component/CustomButton/CustomButton';
 import {Badge} from 'react-native-paper';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -58,7 +57,9 @@ const CustomerRegistraion = () => {
   const validateForm = () => {
     let newErrors = {};
 
-    if (!/^[A-Za-z0-9][A-Za-z0-9\s]{3,}$/.test(userData.name.trim())) {
+    if (userData.name.length === 0) {
+      newErrors.name = 'Please Enter Name';
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 
