@@ -76,7 +76,6 @@ const Login = () => {
             duration: Snackbar.LENGTH_SHORT,
           });
         } else {
-          // If status is not 200, show validation error
           setError(prev => ({
             ...prev,
             password: 'Invalid password. Please try again.',
@@ -85,7 +84,6 @@ const Login = () => {
       })
       .catch(err => {
         console.log('err', err);
-        // setError(prev => ({...prev, password: 'Invalid Credentials'}));
         Snackbar.show({
           text: 'Invalid Credentials',
           backgroundColor: '#D1264A',
@@ -127,7 +125,7 @@ const Login = () => {
 
   return (
     <ImageBackground
-      source={require('../../assets/Imgs/Background.png')}
+      source={require('../../assets/Imgs/loginBg.png')}
       style={styles.container}>
       <View style={{alignItems: 'center'}}>
         <PreworkLogo2 height={140} width={175} />

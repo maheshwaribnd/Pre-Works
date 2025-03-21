@@ -1,6 +1,8 @@
 import {
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -32,6 +34,7 @@ import Swiper from 'react-native-swiper';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
+import RNFS from 'react-native-fs';
 
 const PostBidScreen = () => {
   const navigation = useNavigation();
@@ -43,6 +46,7 @@ const PostBidScreen = () => {
   const [userId, setUserId] = useState(null);
   const [PdfFiles, setPdfFiles] = useState([]);
   const [documentpdf, setDocumentPdf] = useState([]);
+
   const [createData, setCreateData] = useState({
     time: '',
   });
@@ -72,7 +76,30 @@ const PostBidScreen = () => {
       .catch(err => console.log(err));
   };
 
+  const Validate = () => {
+    if (documentpdf.length === 0) {
+      Snackbar.show({
+        text: 'Please upload at least one PDF file.',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!createData.time.trim()) {
+      Snackbar.show({
+        text: 'Please enter time',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const ApplyForBidAPI = () => {
+    if (!Validate()) return;
     const formData = new FormData();
 
     formData.append('contractor_id', userId);
@@ -80,19 +107,13 @@ const PostBidScreen = () => {
     formData.append('customer_id', customerId);
     formData.append('time', createData.time);
     //for PDF's
-    if (documentpdf && documentpdf.length > 0) {
-      documentpdf.forEach((file, index) => {
-        const formattedUri = file.uri.startsWith('file://')
-          ? file.uri
-          : `file://${file.uri}`;
-
-        formData.append(`upload_file[]`, {
-          uri: formattedUri,
-          type: file.type || 'application/pdf', // Ensure it's set to PDF
-          name: file.fileName || `document_${index}.pdf`, // Ensure correct file extension
-        });
+    documentpdf.forEach((pdf, index) => {
+      formData.append(`files[]`, {
+        uri: pdf.uri,
+        name: pdf.name,
+        type: pdf.type,
       });
-    }
+    });
 
     ApiManager.ApplyForBid(formData)
       .then(res => {
@@ -122,6 +143,32 @@ const PostBidScreen = () => {
     }));
   };
 
+  useEffect(() => {
+    requestStoragePermission();
+  }, []);
+
+  //download pdf function
+  const requestStoragePermission = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        ]);
+        return (
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        );
+      }
+      return true;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
   const handleUploadPDF = async () => {
     try {
       const response = await DocumentPicker.pick({
@@ -129,16 +176,22 @@ const PostBidScreen = () => {
         allowMultiSelection: true, // Allows multiple PDFs
       });
 
-      const newDocs = response.map(doc => ({
-        uri: doc.uri,
-        name: doc.name,
-      }));
+      // const newDocs = response.map(doc => ({
+      //   uri: doc.uri,
+      //   name: doc.name,
+      // }));
+
+      const newDocs = await Promise.all(
+        response.map(async doc => {
+          const newPath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
+          await RNFS.copyFile(doc.uri, newPath);
+
+          return {uri: `file://${newPath}`, name: doc.name};
+        }),
+      );
 
       setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
-      // setDocumentPdf(prevFiles => [
-      //   ...new Set([...prevFiles, ...response.assets]),
-      // ]);
-      console.log('Selected PDFs:', newDocs);
+      setDocumentPdf(prevFiles => [...new Set([...prevFiles, ...response])]);
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
@@ -179,7 +232,9 @@ const PostBidScreen = () => {
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <CalenderIcon />
-                  <Text style={styles.detailText}>{details?.last_date}</Text>
+                  <Text style={styles.detailText}>
+                    Last Date for Quote Submission: {details?.last_date}
+                  </Text>
                 </View>
                 <View style={[styles.row, {width: WIDTH(40)}]}>
                   <MaterialIcon />
@@ -208,26 +263,27 @@ const PostBidScreen = () => {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  style={{marginTop: 10}}>
-                  {PdfFiles.map((doc, index) => (
-                    <View key={index} style={styles.documentContainer}>
-                      {/* PDF Preview */}
-                      <Pdf source={{uri: doc.uri}} style={styles.pdfStyle} />
-                      {/* PDF Name */}
-                      <Text numberOfLines={1} style={styles.documentName}>
-                        {doc.name}
-                      </Text>
-                      {/* Remove Button */}
-                      <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => handleRemovePDF(index)}>
-                        <Image
-                          source={require('../../../../assets/Icons/cross.png')}
-                          style={styles.closeIcon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                  style={{marginRight: 20}}>
+                  {PdfFiles.length > 0 &&
+                    PdfFiles.map((doc, index) => {
+                      return (
+                        <View>
+                          <Pdf
+                            source={{uri: doc.uri}}
+                            style={styles.pdfStyle}
+                          />
+                          ;
+                          <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => handleRemovePDF(index)}>
+                            <Image
+                              source={require('../../../../assets/Icons/cross.png')}
+                              style={styles.closeIcon}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
                 </ScrollView>
               </View>
 
@@ -432,6 +488,7 @@ const styles = StyleSheet.create({
   pdfStyle: {
     width: 100,
     height: 85,
+    // padding: WIDTH(1),
   },
   documentName: {
     maxWidth: 100,

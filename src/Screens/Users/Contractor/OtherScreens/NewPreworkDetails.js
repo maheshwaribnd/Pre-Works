@@ -1,6 +1,9 @@
 import {
+  FlatList,
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,12 +25,9 @@ import ApiManager from '../../../../API/Api';
 import Swiper from 'react-native-swiper';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import RNFetchBlob from 'react-native-blob-util';
 import LinearGradient from 'react-native-linear-gradient';
-import BidModal from '../../../../Component/BidModal/BidModal';
-import Snackbar from 'react-native-snackbar';
 
 const NewPreworkDetails = () => {
   const navigation = useNavigation();
@@ -36,6 +36,7 @@ const NewPreworkDetails = () => {
   const isexpired = route?.params?.expired;
   const [details, setDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
+  const [resPdf, setResPdf] = useState([]);
   const [bid, setBid] = useState(false);
   const [cancel, setCancel] = useState(false);
 
@@ -49,6 +50,7 @@ const NewPreworkDetails = () => {
         if (res?.data?.status === 200) {
           const prework = res?.data?.prework;
           const preworkFiles = res?.data?.preworkfiles;
+          setResPdf(res?.data?.preworkpdf);
           setDetails(prework);
           setResImgs(preworkFiles);
         }
@@ -84,6 +86,87 @@ const NewPreworkDetails = () => {
     );
   };
 
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Check Android Version
+        if (Platform.Version >= 33) {
+          return true; // No permission needed for Android 13+
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need permission
+  };
+
+  // Download PDF Function
+  const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
+    try {
+      console.log('Download URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request storage permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        return;
+      }
+
+      // Download Path
+      const {dirs} = RNFetchBlob.fs;
+      const downloadPath = `${dirs.DownloadDir}/${fileName}`;
+      console.log('Download Path:', downloadPath);
+
+      // Download Configuration
+      RNFetchBlob.config({
+        fileCache: true,
+        path: downloadPath,
+        addAndroidDownloads: {
+          useDownloadManager: true, // Use Download Manager
+          notification: true,
+          mime: 'application/pdf',
+          title: fileName,
+          path: downloadPath,
+          description: 'Downloading PDF...',
+          mediaScannable: true,
+        },
+      })
+        .fetch('GET', pdfUrl)
+        .then(res => {
+          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+        })
+        .catch(error => {
+          Alert.alert('Download Failed', 'Error downloading the file.');
+        });
+    } catch (error) {
+      console.error('Download Error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const RenderPDF = ({item}) => {
+    return (
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity
+          onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+          <Image source={require('../../../../assets/Icons/pdf.png')} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={{flex: 1}}>
       <CustomHeader name="New Pre-Works Project" />
@@ -105,12 +188,37 @@ const NewPreworkDetails = () => {
               ))}
             </Swiper>
 
+            <View
+              style={{
+                paddingHorizontal: WIDTH(4),
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              {resPdf?.length > 0 ? (
+                <View>
+                  <Text style={styles.title}>PDF Document</Text>
+                  <FlatList
+                    data={resPdf}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({item}) => <RenderPDF item={item} />}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </View>
+              ) : (
+                <Text>No PDF available</Text>
+              )}
+            </View>
+
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{details?.name}</Text>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <CalenderIcon />
-                  <Text style={styles.detailText}>{details?.last_date}</Text>
+                  <Text style={styles.detailText}>
+                    Last Date for Quote Submission: {details?.last_date}
+                  </Text>
                 </View>
                 <View style={styles.row}>
                   <MaterialIcon />

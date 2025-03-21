@@ -1,6 +1,9 @@
 import {
+  FlatList,
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,16 +24,13 @@ import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import Swiper from 'react-native-swiper';
 import Time from '../../../../assets/Svg/Time.svg';
-import Experience from '../../../../assets/Svg/Experience.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import Currency from '../../../../assets/Svg/currency.svg';
 import Mobile from '../../../../assets/Svg/Mobile.svg';
-import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import LinearGradient from 'react-native-linear-gradient';
-import BidModal from '../../../../Component/BidModal/BidModal';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
+import RNFetchBlob from 'react-native-blob-util';
 
 const OfferEnquiesDetails = () => {
   const route = useRoute();
@@ -39,6 +39,7 @@ const OfferEnquiesDetails = () => {
   const [cusId, setCusId] = useState('');
   const [contractorDetails, setContractorDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
+  const [resPdf, setResPdf] = useState([]);
 
   const [Accept, setAccept] = useState(false);
   const [Reject, setReject] = useState(false);
@@ -63,8 +64,11 @@ const OfferEnquiesDetails = () => {
         if (res?.data?.status === 200) {
           const response = res?.data?.contractorDetail;
           const images = res?.data?.contractorImage;
+          const contractorPdf = res?.data?.contractorPdffiles;
+
           setContractorDetails(response);
           setResImgs(images);
+          setResPdf(contractorPdf);
         }
       })
       .catch(err => {
@@ -106,6 +110,85 @@ const OfferEnquiesDetails = () => {
           style={styles.button}>
           <Text style={styles.buttonText}>{text}</Text>
         </LinearGradient>
+      </TouchableOpacity>
+    );
+  };
+
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Check Android Version
+        if (Platform.Version >= 33) {
+          return true; // No permission needed for Android 13+
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need permission
+  };
+
+  // Download PDF Function
+  const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
+    try {
+      console.log('Download URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request storage permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        return;
+      }
+
+      // Download Path
+      const {dirs} = RNFetchBlob.fs;
+      const downloadPath = `${dirs.DownloadDir}/${fileName}`;
+      console.log('Download Path:', downloadPath);
+
+      // Download Configuration
+      RNFetchBlob.config({
+        fileCache: true,
+        path: downloadPath,
+        addAndroidDownloads: {
+          useDownloadManager: true, // Use Download Manager
+          notification: true,
+          mime: 'application/pdf',
+          title: fileName,
+          path: downloadPath,
+          description: 'Downloading PDF...',
+          mediaScannable: true,
+        },
+      })
+        .fetch('GET', pdfUrl)
+        .then(res => {
+          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+        })
+        .catch(error => {
+          Alert.alert('Download Failed', 'Error downloading the file.');
+        });
+    } catch (error) {
+      console.error('Download Error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const RenderPDF = ({item}) => {
+    return (
+      <TouchableOpacity
+        onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+        <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
     );
   };
@@ -169,6 +252,21 @@ const OfferEnquiesDetails = () => {
                   {contractorDetails?.prework_description}
                 </Text>
               </View>
+
+              {resPdf?.length > 0 ? (
+                <View>
+                  <Text style={styles.title}>PDF Document</Text>
+                  <FlatList
+                    data={resPdf}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({item}) => <RenderPDF item={item} />}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </View>
+              ) : (
+                <Text>No PDF available</Text>
+              )}
 
               <View
                 style={{

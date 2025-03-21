@@ -1,6 +1,9 @@
 import {
+  FlatList,
   Image,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,8 +28,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNPickerSelect from 'react-native-picker-select';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import RNFetchBlob from 'react-native-blob-util';
 import Snackbar from 'react-native-snackbar';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import HeaderWithEdit from '../../../../Component/CustomeHeader/HeaderWithEdit';
@@ -41,6 +43,8 @@ const ProjectAppliedDetails = () => {
   const [appliedDetails, setAppliedDetails] = useState([]);
 
   const [resImgs, setResImgs] = useState([]);
+  const [preworkPdf, setPreworkPdf] = useState([]);
+  const [contractorPdf, setContractorPdf] = useState([]);
   const [materialSelected, setMaterialSelected] = useState('');
   const [createData, setCreateData] = useState({
     price: '',
@@ -66,9 +70,14 @@ const ProjectAppliedDetails = () => {
       if (res?.data?.status === 200) {
         const appliedResponse = res?.data?.contractor;
         const imgResponse = res?.data?.preworkFiles;
+        const prePdfResponse = res?.data?.preworkpdf;
+        const contractorPdfResponse = res?.data?.contractorPdffiles;
+
         setCreateData(appliedResponse);
         setAppliedDetails(appliedResponse);
         setResImgs(imgResponse);
+        setPreworkPdf(prePdfResponse);
+        setContractorPdf(contractorPdfResponse);
       }
     });
   };
@@ -104,6 +113,144 @@ const ProjectAppliedDetails = () => {
     }));
   };
 
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Check Android Version
+        if (Platform.Version >= 33) {
+          return true; // No permission needed for Android 13+
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need permission
+  };
+
+  // Download PDF Function
+  const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
+    try {
+      console.log('Download URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request storage permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        return;
+      }
+
+      // Download Path
+      const {dirs} = RNFetchBlob.fs;
+      const downloadPath = `${dirs.DownloadDir}/${fileName}`;
+      console.log('Download Path:', downloadPath);
+
+      // Download Configuration
+      RNFetchBlob.config({
+        fileCache: true,
+        path: downloadPath,
+        addAndroidDownloads: {
+          useDownloadManager: true, // Use Download Manager
+          notification: true,
+          mime: 'application/pdf',
+          title: fileName,
+          path: downloadPath,
+          description: 'Downloading PDF...',
+          mediaScannable: true,
+        },
+      })
+        .fetch('GET', pdfUrl)
+        .then(res => {
+          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+        })
+        .catch(error => {
+          Alert.alert('Download Failed', 'Error downloading the file.');
+        });
+    } catch (error) {
+      console.error('Download Error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const RenderPrewordPDF = ({item}) => {
+    return (
+      <TouchableOpacity
+        onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+        <Image source={require('../../../../assets/Icons/pdf.png')} />
+      </TouchableOpacity>
+    );
+  };
+
+  const DownloadCPdfFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
+    try {
+      console.log('Download URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request storage permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        return;
+      }
+
+      // Download Path
+      const {dirs} = RNFetchBlob.fs;
+      const downloadPath = `${dirs.DownloadDir}/${fileName}`;
+      console.log('Download Path:', downloadPath);
+
+      // Download Configuration
+      RNFetchBlob.config({
+        fileCache: true,
+        path: downloadPath,
+        addAndroidDownloads: {
+          useDownloadManager: true, // Use Download Manager
+          notification: true,
+          mime: 'application/pdf',
+          title: fileName,
+          path: downloadPath,
+          description: 'Downloading PDF...',
+          mediaScannable: true,
+        },
+      })
+        .fetch('GET', pdfUrl)
+        .then(res => {
+          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+        })
+        .catch(error => {
+          Alert.alert('Download Failed', 'Error downloading the file.');
+        });
+    } catch (error) {
+      console.error('Download Error:', error);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
+  };
+
+  const RenderContractorPDF = ({item}) => {
+    return (
+      <TouchableOpacity
+        onPress={() => DownloadCPdfFunction(item?.files, item?.file_name)}>
+        <Image source={require('../../../../assets/Icons/pdf.png')} />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={{flex: 1}}>
       <HeaderWithEdit name="Project Applied" edit={edit} setEdit={setEdit} />
@@ -130,34 +277,15 @@ const ProjectAppliedDetails = () => {
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    {appliedDetails?.last_date}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.material}
+                    Last Date for Quote Submission: {appliedDetails?.last_date}
                   </Text>
                 </View>
               </View>
-              <View style={styles.detailsWrapper}>
-                <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.budget_range}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <LocationIcon />
-                  <Text style={styles.detailText}>
-                    {appliedDetails?.address}
-                  </Text>
-                </View>
-                {/* <View style={styles.row}>
-                <BiddingIcon />
-                <Text style={styles.detailText}>{appliedDetails?.custombid}</Text>
-              </View> */}
+              <View style={styles.row}>
+                <LocationIcon />
+                <Text style={styles.detailText}>{appliedDetails?.address}</Text>
               </View>
+              <View style={styles.detailsWrapper}></View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
@@ -166,9 +294,39 @@ const ProjectAppliedDetails = () => {
                 </Text>
               </View>
 
-              <Text style={styles.sectionTitle}>My Bid Info</Text>
+              <Text style={styles.sectionTitle}>My Quotation Info</Text>
 
-              <TextInput
+              {preworkPdf?.length > 0 ? (
+                <View>
+                  <Text style={styles.title}>Prework PDF Document</Text>
+                  <FlatList
+                    data={preworkPdf}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({item}) => <RenderPrewordPDF item={item} />}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </View>
+              ) : (
+                <Text>No PDF available</Text>
+              )}
+
+              {contractorPdf?.length > 0 ? (
+                <View>
+                  <Text style={styles.title}>Contractor PDF Document</Text>
+                  <FlatList
+                    data={contractorPdf}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({item}) => <RenderContractorPDF item={item} />}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  />
+                </View>
+              ) : (
+                <Text>No PDF available</Text>
+              )}
+
+              {/* <TextInput
                 style={styles.InputField}
                 placeholder={String(createData?.price ?? '')}
                 placeholderTextColor="gray"
@@ -186,10 +344,10 @@ const ProjectAppliedDetails = () => {
                 editable={edit}
                 keyboardType="default"
                 onChangeText={text => onChange('time', text)}
-              />
+              /> */}
 
               {/* For Material Select */}
-              <View
+              {/* <View
                 style={[
                   styles.InputField,
                   {alignItems: 'center', justifyContent: 'center'},
@@ -208,7 +366,7 @@ const ProjectAppliedDetails = () => {
                   disabled={!edit}
                   dropdownItemStyle={{color: 'black'}}
                 />
-              </View>
+              </View> */}
 
               {edit ? (
                 <CustomButton

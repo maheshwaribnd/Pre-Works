@@ -8,13 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  Button,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import RNFS from 'react-native-fs';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import DeleteIcon from '../../../../assets/Svg/delete.svg';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import COLOR from '../../../../config/color.json';
@@ -30,14 +27,10 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {ActivityIndicator} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {WebView} from 'react-native-webview';
 import RNFetchBlob from 'react-native-blob-util';
-import Pdf from 'react-native-pdf';
 import Snackbar from 'react-native-snackbar';
 
 const OpenPreworkDetails = () => {
@@ -189,15 +182,11 @@ const OpenPreworkDetails = () => {
   };
 
   const RenderPDF = ({item}) => {
-    console.log('itemitem', item);
-
     return (
-      <View style={{flexDirection: 'row'}}>
-        <TouchableOpacity
-          onPress={() => DownloadFunction(item?.files, item?.file_name)}>
-          <Image source={require('../../../../assets/Icons/download.png')} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+        <Image source={require('../../../../assets/Icons/pdf.png')} />
+      </TouchableOpacity>
     );
   };
 
@@ -245,7 +234,6 @@ const OpenPreworkDetails = () => {
 
               <View
                 style={{
-                  paddingHorizontal: WIDTH(4),
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -257,6 +245,8 @@ const OpenPreworkDetails = () => {
                       data={resPdf}
                       keyExtractor={item => item.id.toString()}
                       renderItem={({item}) => <RenderPDF item={item} />}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
                     />
                   </View>
                 ) : (

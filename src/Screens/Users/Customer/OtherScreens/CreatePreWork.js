@@ -247,12 +247,6 @@ const CreatePreWork = () => {
       });
     }
 
-    // Upload PDFs
-    // if (PdfFiles.length === 0) {
-    //   Alert.alert('Error', 'No PDF selected');
-    //   return;
-    // }
-
     documentpdf.forEach((pdf, index) => {
       formData.append(`files[]`, {
         uri: pdf.uri,
@@ -401,7 +395,6 @@ const CreatePreWork = () => {
 
       setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
       setDocumentPdf(prevFiles => [...new Set([...prevFiles, ...response])]);
-
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
@@ -629,6 +622,7 @@ const CreatePreWork = () => {
                   })}
               </ScrollView>
             </View>
+
             <Text style={styles.label}>Description</Text>
             <TextInput
               value={createData.description}
