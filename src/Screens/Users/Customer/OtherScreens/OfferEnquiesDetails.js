@@ -27,7 +27,7 @@ import Time from '../../../../assets/Svg/Time.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import Mobile from '../../../../assets/Svg/Mobile.svg';
 import LinearGradient from 'react-native-linear-gradient';
-
+import FileViewer from 'react-native-file-viewer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
 import RNFetchBlob from 'react-native-blob-util';
@@ -133,6 +133,40 @@ const OfferEnquiesDetails = () => {
     return true; // iOS does not need permission
   };
 
+  const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
+    try {
+      console.log('Preview URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Denied', 'Storage permission is required.');
+        return;
+      }
+
+      // Set path for the temporary PDF
+      const {dirs} = RNFetchBlob.fs;
+      const filePath = `${dirs.CacheDir}/${fileName}`;
+
+      // Download the PDF temporarily
+      const response = await RNFetchBlob.config({
+        fileCache: true,
+        path: filePath,
+      }).fetch('GET', pdfUrl);
+
+      // Preview the downloaded PDF
+      console.log('PDF Path:', response.path());
+      await FileViewer.open(response.path(), {showOpenWithDialog: true});
+    } catch (error) {
+      console.error('Preview Error:', error);
+      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+    }
+  };
+
   // Download PDF Function
   const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
     try {
@@ -187,7 +221,10 @@ const OfferEnquiesDetails = () => {
   const RenderPDF = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+        onPress={async () => {
+          await previewPDF(item?.files, item?.file_name);
+          DownloadFunction(item?.files, item?.file_name);
+        }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
     );

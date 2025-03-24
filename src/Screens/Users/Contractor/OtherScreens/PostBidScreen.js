@@ -227,8 +227,14 @@ const PostBidScreen = () => {
                 </View>
               ))}
             </Swiper>
-            <View>
+            <View style={{paddingRight: WIDTH(7)}}>
               <Text style={styles.title}>{details?.name}</Text>
+              <View style={styles.row}>
+                <CalenderIcon />
+                <Text style={styles.detailText}>
+                  Expected Start Date for Prwork: {details?.expected_date}
+                </Text>
+              </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <CalenderIcon />
@@ -236,10 +242,10 @@ const PostBidScreen = () => {
                     End Date for Quote Submission: {details?.last_date}
                   </Text>
                 </View>
-                <View style={[styles.row, {width: WIDTH(40)}]}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>{details?.material}</Text>
-                </View>
+              </View>
+              <View style={styles.row}>
+                <MaterialIcon />
+                <Text style={styles.detailText}>{details?.material}</Text>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>

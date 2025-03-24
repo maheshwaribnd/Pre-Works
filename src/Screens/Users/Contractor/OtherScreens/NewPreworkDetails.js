@@ -27,6 +27,7 @@ import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import RNFetchBlob from 'react-native-blob-util';
+import FileViewer from 'react-native-file-viewer';
 import LinearGradient from 'react-native-linear-gradient';
 
 const NewPreworkDetails = () => {
@@ -89,9 +90,8 @@ const NewPreworkDetails = () => {
   const requestStoragePermission = async () => {
     if (Platform.OS === 'android') {
       try {
-        // Check Android Version
         if (Platform.Version >= 33) {
-          return true; // No permission needed for Android 13+
+          return true; // Android 13+ does not require storage permission
         }
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -102,10 +102,45 @@ const NewPreworkDetails = () => {
         return false;
       }
     }
-    return true; // iOS does not need permission
+    return true; // No permission required on iOS
   };
 
-  // Download PDF Function
+  // Function to preview PDF
+  const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
+    try {
+      console.log('Preview URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Denied', 'Storage permission is required.');
+        return;
+      }
+
+      // Set path for the temporary PDF
+      const {dirs} = RNFetchBlob.fs;
+      const filePath = `${dirs.CacheDir}/${fileName}`;
+
+      // Download the PDF temporarily
+      const response = await RNFetchBlob.config({
+        fileCache: true,
+        path: filePath,
+      }).fetch('GET', pdfUrl);
+
+      // Preview the downloaded PDF
+      console.log('PDF Path:', response.path());
+      await FileViewer.open(response.path(), {showOpenWithDialog: true});
+    } catch (error) {
+      console.error('Preview Error:', error);
+      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+    }
+  };
+
+  // Function to download PDF
   const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
     try {
       console.log('Download URL:', pdfUrl);
@@ -114,31 +149,25 @@ const NewPreworkDetails = () => {
         return;
       }
 
-      // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
-        Alert.alert(
-          'Permission Denied',
-          'Storage permission is required to download files.',
-        );
+        Alert.alert('Permission Denied', 'Storage permission is required.');
         return;
       }
 
       // Download Path
       const {dirs} = RNFetchBlob.fs;
       const downloadPath = `${dirs.DownloadDir}/${fileName}`;
-      console.log('Download Path:', downloadPath);
 
-      // Download Configuration
+      // Download PDF using Android Download Manager
       RNFetchBlob.config({
         fileCache: true,
         path: downloadPath,
         addAndroidDownloads: {
-          useDownloadManager: true, // Use Download Manager
+          useDownloadManager: true,
           notification: true,
           mime: 'application/pdf',
           title: fileName,
-          path: downloadPath,
           description: 'Downloading PDF...',
           mediaScannable: true,
         },
@@ -160,7 +189,10 @@ const NewPreworkDetails = () => {
     return (
       <View style={{flexDirection: 'row'}}>
         <TouchableOpacity
-          onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+          onPress={async () => {
+            await previewPDF(item?.files, item?.file_name);
+            DownloadFunction(item?.files, item?.file_name);
+          }}>
           <Image source={require('../../../../assets/Icons/pdf.png')} />
         </TouchableOpacity>
       </View>
@@ -217,6 +249,13 @@ const NewPreworkDetails = () => {
 
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{details?.name}</Text>
+              <View style={styles.row}>
+                <CalenderIcon />
+                <Text style={styles.detailText}>
+                  Exp Start Date for Prework:
+                  {details?.expected_date}
+                </Text>
+              </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <CalenderIcon />

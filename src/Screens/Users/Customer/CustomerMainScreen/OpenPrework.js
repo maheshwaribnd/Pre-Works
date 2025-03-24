@@ -123,6 +123,13 @@ const OpenPrework = () => {
           <View style={styles.row}>
             <CalenderIcon />
             <Text style={styles.text}>
+              Exp Prework Start Date:
+              {/* {item?.item?.last_date} */}
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <CalenderIcon />
+            <Text style={styles.text}>
               End Date for Quote Submission: {item?.item?.last_date}
             </Text>
           </View>
@@ -262,7 +269,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     marginVertical: 2,
   },
   text: {

@@ -29,13 +29,19 @@ const ArchitectList = () => {
     ApiManager.ArchitectList()
       .then(res => {
         if (res?.data?.status === 200) {
-          const response = res?.data?.architectures;
+          let response = res?.data?.architectures;
+          // Ensure response is an array
+          if (!Array.isArray(response)) {
+            response = [response];
+          }
+          console.log('Final Architectures:', response); // Verify the transformed list
           setList(response);
-          setRefreshing(false);
         }
+        setRefreshing(false);
       })
       .catch(err => {
-        console.log(err);
+        console.log('API Error:', err);
+        setRefreshing(false);
       });
   };
 
@@ -44,32 +50,27 @@ const ArchitectList = () => {
   };
 
   const RenderList = ({item}) => {
-    const ParticularArchitect = item => {
+    const ParticularArchitect = () => {
       navigation.navigate('architectDetailscreen', {
-        architectId: item?.item?.id,
+        architectId: item?.id,
       });
     };
 
     return (
-      <TouchableOpacity
-        style={styles.ListBox}
-        onPress={() => ParticularArchitect(item)}>
-        <View>
-          <Image
-            source={{uri: item?.item?.profile_image}}
-            style={{width: 100, height: 100, borderRadius: 6}}
-          />
-        </View>
+      <TouchableOpacity style={styles.ListBox} onPress={ParticularArchitect}>
+        <Image
+          source={{uri: item?.profile_image}}
+          style={{width: 100, height: 100, borderRadius: 6}}
+        />
         <View style={styles.listView}>
-          <View>
-            <Text style={styles.name}>{item?.item?.name}</Text>
-            <Text style={styles.address}>{item?.item?.address}</Text>
-          </View>
+          <Text style={styles.name}>{item?.name || 'No Name'}</Text>
+          <Text style={styles.address}>{item?.address || 'No Address'}</Text>
           <Arrow name="caretright" color="#03A151" />
         </View>
       </TouchableOpacity>
     );
   };
+
   return (
     <View style={{flex: 1}}>
       <CustomHeader name="Architect List" />
@@ -78,7 +79,10 @@ const ArchitectList = () => {
         style={styles.container}>
         <FlatList
           data={list}
-          renderItem={item => <RenderList item={item} />}
+          renderItem={({item}) => <RenderList item={item} />}
+          keyExtractor={(item, index) =>
+            item?.id?.toString() || index.toString()
+          }
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -80,71 +80,69 @@ const Profile = () => {
     }
   }, [userId]);
 
- // WhatsApp validation (optional field)
-const validateWhatsApp = text => {
-  const regex = /^[0-9]{10,15}$/;
-  if (text && !regex.test(text)) {
-    const errorMessage = 'Please enter a valid WhatsApp number (10 digits).';
-    setErrors(prevState => ({
-      ...prevState,
-      whatsAppError: errorMessage,
-    }));
-    return false; // Invalid input
-  } else {
-    setErrors(prevState => ({
-      ...prevState,
-      whatsAppError: '',
-    }));
-    return true; // Valid or empty input
-  }
-};
+  // WhatsApp validation (optional field)
+  const validateWhatsApp = text => {
+    const regex = /^[0-9]{10,15}$/;
+    if (text && !regex.test(text)) {
+      const errorMessage = 'Please enter a valid WhatsApp number (10 digits).';
+      setErrors(prevState => ({
+        ...prevState,
+        whatsAppError: errorMessage,
+      }));
+      return false; // Invalid input
+    } else {
+      setErrors(prevState => ({
+        ...prevState,
+        whatsAppError: '',
+      }));
+      return true; // Valid or empty input
+    }
+  };
 
-// Instagram validation (optional field)
-const validateInstagramLink = text => {
-  const regex = /^(https:\/\/www\.instagram\.com\/[a-zA-Z0-9_.]+\/?)$/;
-  if (text && !regex.test(text)) {
-    const errorMessage = 'Please enter a valid Instagram URL.';
-    setErrors(prevState => ({
-      ...prevState,
-      instagramError: errorMessage,
-    }));
-    return false; // Invalid input
-  } else {
-    setErrors(prevState => ({
-      ...prevState,
-      instagramError: '',
-    }));
-    return true; // Valid or empty input
-  }
-};
+  // Instagram validation (optional field)
+  const validateInstagramLink = text => {
+    const regex = /^(https:\/\/www\.instagram\.com\/[a-zA-Z0-9_.]+\/?)$/;
+    if (text && !regex.test(text)) {
+      const errorMessage = 'Please enter a valid Instagram URL.';
+      setErrors(prevState => ({
+        ...prevState,
+        instagramError: errorMessage,
+      }));
+      return false; // Invalid input
+    } else {
+      setErrors(prevState => ({
+        ...prevState,
+        instagramError: '',
+      }));
+      return true; // Valid or empty input
+    }
+  };
 
-// Call this function on form submission
-const handleSubmit = () => {
-  const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
-  const isInstagramValid = validateInstagramLink(data?.instagram_link);
+  // Call this function on form submission
+  const handleSubmit = () => {
+    const isWhatsAppValid = validateWhatsApp(data?.whatsup_no);
+    const isInstagramValid = validateInstagramLink(data?.instagram_link);
 
-  // Show Snackbar only if validation fails
-  if (!isWhatsAppValid ) {
-    Snackbar.show({
-      text: 'Please enter a valid WhatsApp number (10 digits).',
-      backgroundColor: '#D1264A',
-      duration: Snackbar.LENGTH_SHORT,
-    });
-    return; // Stop form submission
-  }
-  else if (!isInstagramValid) {
-    Snackbar.show({
-      text: 'Please enter a valid Instagram URL.',
-      backgroundColor: '#D1264A',
-      duration: Snackbar.LENGTH_SHORT,
-    });
-    return; // Stop form submission
+    // Show Snackbar only if validation fails
+    if (!isWhatsAppValid) {
+      Snackbar.show({
+        text: 'Please enter a valid WhatsApp number (10 digits).',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return; // Stop form submission
+    } else if (!isInstagramValid) {
+      Snackbar.show({
+        text: 'Please enter a valid Instagram URL.',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return; // Stop form submission
+    }
 
-  }
-
-  // Proceed with form submission (e.g., API call)
-  ArchitectUpdateAPI();
-};
+    // Proceed with form submission (e.g., API call)
+    ArchitectUpdateAPI();
+  };
 
   const ArchitectProfileAPI = async () => {
     if (!userId) return;
@@ -401,20 +399,17 @@ const handleSubmit = () => {
                 styles.InputField,
                 {height: HEIGHT(16), textAlign: 'left'},
               ]}
-              placeholder={data?.about_us || 'About Us'}
+              placeholder={data?.about_us || 'About Me'}
               editable={edit}
               keyboardType="default"
               placeholderTextColor="gray"
               value={data?.about_us}
-              onChangeText={text => onChange('about_me', text)}
+              onChangeText={text => onChange('about_us', text)}
             />
 
             <View style={{marginBottom: HEIGHT(2)}}>
               {edit ? (
-                <CustomButton
-                  name="SAVE"
-                  onPress={() => handleSubmit()}
-                />
+                <CustomButton name="SAVE" onPress={() => handleSubmit()} />
               ) : null}
             </View>
           </View>

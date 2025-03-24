@@ -19,7 +19,7 @@ const BidModal = ({showModal, setShowModal, heading, name, color, onPress}) => {
             <TouchableOpacity
               style={[styles.button, styles.noButton]}
               onPress={() => setShowModal(false)}>
-              <Text style={styles.noText}>No</Text>
+              <Text style={styles.noText}>Cancel</Text>
             </TouchableOpacity>
 
             <LinearGradient

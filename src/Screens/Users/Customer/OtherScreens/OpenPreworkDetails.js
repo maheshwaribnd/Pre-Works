@@ -32,6 +32,8 @@ import {ActivityIndicator} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFetchBlob from 'react-native-blob-util';
 import Snackbar from 'react-native-snackbar';
+import FileViewer from 'react-native-file-viewer';
+import BidModal from '../../../../Component/BidModal/BidModal';
 
 const OpenPreworkDetails = () => {
   const navigation = useNavigation();
@@ -43,6 +45,7 @@ const OpenPreworkDetails = () => {
   const [resPdf, setResPdf] = useState([]);
   const [loader, setLoader] = useState(false);
   const [contractorList, setContractorList] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -130,6 +133,40 @@ const OpenPreworkDetails = () => {
     return true; // iOS does not need permission
   };
 
+  const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
+    try {
+      console.log('Preview URL:', pdfUrl);
+      if (!pdfUrl) {
+        Alert.alert('Invalid URL', 'No valid PDF URL provided.');
+        return;
+      }
+
+      // Request permission (Android 12 and below)
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Denied', 'Storage permission is required.');
+        return;
+      }
+
+      // Set path for the temporary PDF
+      const {dirs} = RNFetchBlob.fs;
+      const filePath = `${dirs.CacheDir}/${fileName}`;
+
+      // Download the PDF temporarily
+      const response = await RNFetchBlob.config({
+        fileCache: true,
+        path: filePath,
+      }).fetch('GET', pdfUrl);
+
+      // Preview the downloaded PDF
+      console.log('PDF Path:', response.path());
+      await FileViewer.open(response.path(), {showOpenWithDialog: true});
+    } catch (error) {
+      console.error('Preview Error:', error);
+      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+    }
+  };
+
   // Download PDF Function
   const DownloadFunction = async (pdfUrl, fileName = 'downloaded.pdf') => {
     try {
@@ -184,7 +221,10 @@ const OpenPreworkDetails = () => {
   const RenderPDF = ({item}) => {
     return (
       <TouchableOpacity
-        onPress={() => DownloadFunction(item?.files, item?.file_name)}>
+        onPress={async () => {
+          await previewPDF(item?.files, item?.file_name);
+          DownloadFunction(item?.files, item?.file_name);
+        }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
     );
@@ -237,6 +277,7 @@ const OpenPreworkDetails = () => {
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  paddingLeft: WIDTH(3),
                 }}>
                 {resPdf?.length > 0 ? (
                   <View>
@@ -252,11 +293,21 @@ const OpenPreworkDetails = () => {
                 ) : (
                   <Text>No PDF available</Text>
                 )}
-                <TouchableOpacity onPress={() => DeletePreworkAPI()}>
+                <TouchableOpacity onPress={() => setShowModal(true)}>
                   <DeleteIcon />
                 </TouchableOpacity>
               </View>
 
+              {showModal ? (
+                <BidModal
+                  heading="Are you Sure, you want to Delete Prework?"
+                  showModal={showModal}
+                  setShowModal={setShowModal}
+                  name="DELETE"
+                  color={['#F78941', '#D2390F']}
+                  onPress={() => DeletePreworkAPI()}
+                />
+              ) : null}
               {/* Title */}
               <Text style={styles.nametitle}>{data?.name}</Text>
 
@@ -272,7 +323,7 @@ const OpenPreworkDetails = () => {
                 <View style={styles.row}>
                   <CalenderIcon />
                   <Text style={styles.detailText}>
-                    Ex Prework Start Date: {data?.expected_date}
+                    Exp Prework Start Date: {data?.expected_date}
                   </Text>
                 </View>
                 <View style={styles.row}>
