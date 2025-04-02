@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import COLOR from '../../../../config/color.json';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import {
@@ -16,14 +16,11 @@ import {
   WIDTH,
   windowWidth,
 } from '../../../../config/AppConst';
-import ApiManager from '../../../../API/Api';
 import {useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
-import CalenderIcon from '../../../../assets//Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
+import Time from '../../../../assets//Svg/Time.svg';
 import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
-import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {ActivityIndicator} from 'react-native-paper';
 
 const ArchitectPastPreworkDetails = () => {
@@ -47,62 +44,52 @@ const ArchitectPastPreworkDetails = () => {
           ) : (
             <View style={styles.contentWrapper}>
               {/* Swiper for Images */}
-              <Swiper
-                autoplay
-                loop
-                showsPagination
-                style={{height: 240}} // Make sure it has height
-                paginationStyle={{bottom: 0}}>
-                {itemImages.map((item, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      flex: 1,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <Image source={{uri: item?.files}} style={styles.imgs} />
-                  </View>
-                ))}
-              </Swiper>
+              {itemImages?.length > 0 ? (
+                <Swiper
+                  autoplay
+                  loop
+                  showsPagination
+                  style={{height: 240}}
+                  paginationStyle={{bottom: 0}}>
+                  {itemImages?.map((item, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <Image
+                        source={{uri: item?.files || 'fallback_image_url'}}
+                        style={styles.imgs}
+                      />
+                    </View>
+                  ))}
+                </Swiper>
+              ) : (
+                <Text style={styles.noImageText}>No Image</Text>
+              )}
 
               {/* Title */}
-              <Text style={styles.nametitle}>{itemDetails?.name}</Text>
+              <Text style={styles.nametitle}>{itemDetails?.site_name}</Text>
 
               {/* Details Section */}
               <View style={styles.detailsContainer}>
                 <View style={styles.row}>
-                  <CalenderIcon />
+                  <Time />
                   <Text style={styles.detailText}>
-                    {itemDetails?.last_date}
+                    {itemDetails?.time} Months
                   </Text>
                 </View>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>{itemDetails?.material}</Text>
-                </View>
-              </View>
 
-              <View style={styles.detailsContainer}>
                 <View style={styles.row}>
                   <MoneyIcon />
-                  <Text style={styles.detailText}>
-                    {itemDetails?.budget_range}
-                  </Text>
+                  <Text style={styles.detailText}>{itemDetails?.cost}</Text>
                 </View>
-                {/* <View style={styles.row}>
-                  <BiddingIcon />
-                  <Text style={styles.detailText}>
-                    {itemDetails?.custombid}
-                  </Text>
-                </View> */}
-                <View style={styles.detailsContainer}>
-                  <View style={styles.row}>
-                    <LocationIcon />
-                    <Text style={styles.detailText}>
-                      {itemDetails?.address}
-                    </Text>
-                  </View>
+
+                <View style={styles.row}>
+                  <LocationIcon />
+                  <Text style={styles.detailText}>{itemDetails?.address}</Text>
                 </View>
               </View>
 
@@ -157,23 +144,24 @@ const styles = StyleSheet.create({
   nametitle: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
-    textAlign: 'center',
+    textAlign: 'left',
     color: COLOR.Black,
-    marginVertical: HEIGHT(2),
+    marginTop: HEIGHT(2),
+    paddingHorizontal: WIDTH(4),
   },
   detailsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    // flexDirection: 'row',
+    // justifyContent: 'space-between',
     // backgroundColor: COLOR.LightGray,
     borderRadius: 8,
-    paddingHorizontal: WIDTH(4),
+    paddingHorizontal: WIDTH(3),
     marginVertical: HEIGHT(0.5),
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: WIDTH(2),
-    marginVertical: HEIGHT(1),
+    marginVertical: HEIGHT(.5),
   },
   detailText: {
     fontSize: 16,

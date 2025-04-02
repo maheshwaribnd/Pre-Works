@@ -23,8 +23,7 @@ import {
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import MoneyIcon from '../../../../assets/Svg/Money.svg';
-import BiddingIcon from '../../../../assets/Svg/Bidding.svg';
+import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
@@ -229,6 +228,21 @@ const PostBidScreen = () => {
             </Swiper>
             <View style={{paddingRight: WIDTH(7)}}>
               <Text style={styles.title}>{details?.name}</Text>
+
+              <View style={styles.row}>
+                <MaterialIcon />
+                <Text style={styles.detailText}>
+                  Material: {details?.material}
+                </Text>
+              </View>
+
+              <View style={styles.row}>
+                <PlotIcon />
+                <Text style={styles.detailText}>
+                  Plot Size: {details?.site_area} (in sqft)
+                </Text>
+              </View>
+
               <View style={styles.row}>
                 <CalenderIcon />
                 <Text style={styles.detailText}>
@@ -242,10 +256,6 @@ const PostBidScreen = () => {
                     End Date for Quote Submission: {details?.last_date}
                   </Text>
                 </View>
-              </View>
-              <View style={styles.row}>
-                <MaterialIcon />
-                <Text style={styles.detailText}>{details?.material}</Text>
               </View>
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>

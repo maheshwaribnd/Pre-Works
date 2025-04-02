@@ -28,6 +28,7 @@ import Swiper from 'react-native-swiper';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import {ActivityIndicator} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFetchBlob from 'react-native-blob-util';
@@ -274,14 +275,13 @@ const OpenPreworkDetails = () => {
 
               <View
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingLeft: WIDTH(3),
+                  paddingLeft: WIDTH(4),
                 }}>
                 {resPdf?.length > 0 ? (
                   <View>
-                    <Text style={styles.title}>PDF Document</Text>
+                    <Text style={styles.sectionTitle}>
+                      Architectural Drawing
+                    </Text>
                     <FlatList
                       data={resPdf}
                       keyExtractor={item => item.id.toString()}
@@ -293,6 +293,61 @@ const OpenPreworkDetails = () => {
                 ) : (
                   <Text>No PDF available</Text>
                 )}
+              </View>
+
+              {/* Title */}
+              <Text style={styles.nametitle}>{data?.name}</Text>
+
+              {/* Details Section */}
+              <View style={{paddingLeft: WIDTH(4)}}>
+                <View style={styles.row}>
+                  <MaterialIcon />
+                  <Text style={styles.detailText}>
+                    Material: {data?.material}
+                  </Text>
+                </View>
+
+                <View style={styles.row}>
+                  <PlotIcon />
+                  <Text style={styles.detailText}>
+                    Plot Size: {data?.site_area} (in sqft)
+                  </Text>
+                </View>
+
+                <View style={styles.row}>
+                  <CalenderIcon />
+                  <Text style={styles.detailText}>
+                    Exp Prework Start Date: {data?.expected_date}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <CalenderIcon />
+                  <Text style={[styles.detailText, {width: WIDTH(85)}]}>
+                    End Date for Quote Submission: {data?.last_date}
+                  </Text>
+                </View>
+
+                <View style={[styles.row, {marginVertical: HEIGHT(0)}]}>
+                  <LocationIcon />
+                  <Text style={[styles.detailText, {width: WIDTH(85)}]}>
+                    {data?.address}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Description */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Description</Text>
+                <Text style={styles.detailText}>{data?.description}</Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  padding: WIDTH(4),
+                }}>
+                <Text style={styles.sectionTitle}>Delete Prework</Text>
                 <TouchableOpacity onPress={() => setShowModal(true)}>
                   <DeleteIcon />
                 </TouchableOpacity>
@@ -308,49 +363,9 @@ const OpenPreworkDetails = () => {
                   onPress={() => DeletePreworkAPI()}
                 />
               ) : null}
-              {/* Title */}
-              <Text style={styles.nametitle}>{data?.name}</Text>
-
-              {/* Details Section */}
-              <View style={styles.detailsContainer}>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>{data?.material}</Text>
-                </View>
-              </View>
-
-              <View style={{paddingLeft: WIDTH(4)}}>
-                <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>
-                    Exp Prework Start Date: {data?.expected_date}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>
-                    End Date for Quote Submission: {data?.last_date}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.detailsContainer}>
-                <View style={[styles.row, {marginVertical: HEIGHT(0)}]}>
-                  <LocationIcon />
-                  <Text style={[styles.detailText, {width: WIDTH(85)}]}>
-                    {data?.address}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Description */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>{data?.description}</Text>
-              </View>
 
               {contractorList.length > 0 ? (
-                <View style={styles.section}>
+                <View style={[styles.section, {marginTop: HEIGHT(0)}]}>
                   <Text
                     style={[
                       styles.sectionTitle,
@@ -379,9 +394,9 @@ const OpenPreworkDetails = () => {
                         PreworkId: PreworkId,
                       })
                     }
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
+                    style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={styles.linkText}>
-                      Click here to more enquiries
+                      Click here to see enquiries
                     </Text>
                     <Image
                       source={require('../../../../assets/Icons/arrow.png')}
@@ -432,8 +447,8 @@ const styles = StyleSheet.create({
     fontSize: 22,
     textAlign: 'left',
     color: COLOR.Black,
-    marginVertical: HEIGHT(2),
-    marginLeft: WIDTH(4),
+    marginTop: HEIGHT(1),
+    marginLeft: WIDTH(4.2),
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -441,13 +456,13 @@ const styles = StyleSheet.create({
     // backgroundColor: COLOR.LightGray,
     borderRadius: 8,
     paddingHorizontal: WIDTH(4),
-    marginVertical: HEIGHT(0.5),
+    // marginVertical: HEIGHT(0.5),
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: WIDTH(2),
-    marginVertical: HEIGHT(1),
+    marginVertical: HEIGHT(0.5),
   },
   detailText: {
     fontSize: 16,
@@ -455,7 +470,7 @@ const styles = StyleSheet.create({
     color: COLOR.Gray,
   },
   section: {
-    marginVertical: HEIGHT(1),
+    marginTop: HEIGHT(2),
     marginHorizontal: WIDTH(5),
   },
   sectionTitle: {
@@ -499,6 +514,7 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_bold,
     color: COLOR.PrimaryDarkColor,
     lineHeight: 22,
+    textAlign: 'center',
     marginRight: 7,
   },
 

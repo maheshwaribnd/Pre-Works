@@ -350,7 +350,7 @@ const Profile = () => {
 
             <TextInput
               style={styles.InputField}
-              placeholder={data?.experience || 'Experience'}
+              placeholder={data?.experience || 'Experience (Years)'}
               keyboardType="number-pad"
               placeholderTextColor="gray"
               editable={edit}

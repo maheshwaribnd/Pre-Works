@@ -26,6 +26,7 @@ import Swiper from 'react-native-swiper';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import RNFetchBlob from 'react-native-blob-util';
 import FileViewer from 'react-native-file-viewer';
 import LinearGradient from 'react-native-linear-gradient';
@@ -214,7 +215,7 @@ const NewPreworkDetails = () => {
                 loop
                 showsPagination
                 style={styles.imageSlider}
-                paginationStyle={{bottom: 10}} // Ensure pagination is visible
+                paginationStyle={{bottom: 5}} // Ensure pagination is visible
               >
                 {resImgs.map((item, index) => (
                   <View key={index} style={styles.imageContainer}>
@@ -233,7 +234,7 @@ const NewPreworkDetails = () => {
               }}>
               {resPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.title}>PDF Document</Text>
+                  <Text style={styles.sectionTitle}>Architectural Drawing</Text>
                   <FlatList
                     data={resPdf}
                     keyExtractor={item => item.id.toString()}
@@ -249,6 +250,21 @@ const NewPreworkDetails = () => {
 
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{details?.name}</Text>
+
+              <View style={styles.row}>
+                <MaterialIcon />
+                <Text style={styles.detailText}>
+                  Material: {details?.material}
+                </Text>
+              </View>
+
+              <View style={styles.row}>
+                <PlotIcon />
+                <Text style={styles.detailText}>
+                  Plot Size: {details?.site_area} (in sqft)
+                </Text>
+              </View>
+
               <View style={styles.row}>
                 <CalenderIcon />
                 <Text style={styles.detailText}>
@@ -256,32 +272,22 @@ const NewPreworkDetails = () => {
                   {details?.expected_date}
                 </Text>
               </View>
-              <View style={styles.detailsWrapper}>
-                <View style={styles.row}>
-                  <CalenderIcon />
-                  <Text style={styles.detailText}>
-                    Last Date for Quote Submission: {details?.last_date}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
-                    {details?.material}
-                  </Text>
-                </View>
+
+              <View style={styles.row}>
+                <CalenderIcon />
+                <Text style={styles.detailText}>
+                  End Date for Quote Submission: {details?.last_date}
+                </Text>
               </View>
-              <View style={styles.detailsWrapper}>
-                <View style={styles.row}>
-                  <LocationIcon />
-                  <Text style={[styles.detailText, {width: WIDTH(32)}]}>
-                    {details?.address}
-                  </Text>
-                </View>
+
+              <View style={styles.row}>
+                <LocationIcon />
+                <Text style={styles.detailText}>{details?.address}</Text>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>{details?.description}</Text>
+                <Text style={styles.detailText}>{details?.description}</Text>
               </View>
 
               <View
@@ -356,18 +362,18 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: COLOR.Black,
     textAlign: 'left',
-    marginBottom: HEIGHT(2),
+    marginBottom: HEIGHT(1),
   },
   detailsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: HEIGHT(1),
+    marginVertical: HEIGHT(0.5),
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: WIDTH(2),
-    marginBottom: 2,
+    marginBottom: HEIGHT(0.5),
   },
   detailText: {
     fontSize: 16,

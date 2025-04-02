@@ -117,7 +117,7 @@ const StackNavigation = () => {
           component={ProjectAppliedDetails}
         />
         <Stack.Screen name="contractormywork" component={ContractorMyWork} />
-        <Stack.Screen name='contractorworldetails' component={ContractorWorkDetails} />
+        <Stack.Screen name='contractorworkdetails' component={ContractorWorkDetails} />
 
         {/* Architect */}
 

@@ -125,7 +125,7 @@ const Login = () => {
 
   return (
     <ImageBackground
-      source={require('../../assets/Imgs/loginBg.png')}
+      source={require('../../assets/Imgs/Background.png')}
       style={styles.container}>
       <View style={{alignItems: 'center'}}>
         <PreworkLogo2 height={140} width={175} />

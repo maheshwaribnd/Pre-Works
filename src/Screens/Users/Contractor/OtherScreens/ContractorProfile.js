@@ -223,7 +223,7 @@ const ContractorProfile = () => {
                     <TouchableOpacity
                       key={index}
                       onPress={() =>
-                        navigation.navigate('contractorworldetails', {
+                        navigation.navigate('contractorworkdetails', {
                           workId: item?.id,
                         })
                       }

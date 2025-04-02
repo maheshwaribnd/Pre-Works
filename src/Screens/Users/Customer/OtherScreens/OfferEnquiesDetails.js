@@ -248,7 +248,7 @@ const OfferEnquiesDetails = () => {
               <Text style={styles.title}>
                 {contractorDetails?.contractor_name}
               </Text>
-              <View style={styles.detailsWrapper}>
+              
                 <View style={styles.row}>
                   <Mobile />
                   <Text style={styles.detailText}>
@@ -261,8 +261,7 @@ const OfferEnquiesDetails = () => {
                     {contractorDetails?.contractor_material}
                   </Text>
                 </View> */}
-              </View>
-              <View style={styles.detailsWrapper}>
+             
                 <View style={styles.row}>
                   <Time />
                   <Text style={styles.detailText}>
@@ -275,7 +274,7 @@ const OfferEnquiesDetails = () => {
                     {contractorDetails?.contractor_price}
                   </Text>
                 </View> */}
-              </View>
+              
               <View style={styles.row}>
                 <LocationIcon />
                 <Text style={styles.detailText}>
@@ -285,14 +284,14 @@ const OfferEnquiesDetails = () => {
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>
+                <Text style={styles.detailText}>
                   {contractorDetails?.prework_description}
                 </Text>
               </View>
 
               {resPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.title}>PDF Document</Text>
+                  <Text style={styles.sectionTitle}>PDF Document</Text>
                   <FlatList
                     data={resPdf}
                     keyExtractor={item => item.id.toString()}
@@ -396,7 +395,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: COLOR.Black,
     textAlign: 'left',
-    marginVertical: HEIGHT(2),
+    marginVertical: HEIGHT(1.5),
   },
   detailsWrapper: {
     flexDirection: 'row',

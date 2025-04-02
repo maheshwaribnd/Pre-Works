@@ -25,7 +25,8 @@ import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import ApiManager from '../../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNPickerSelect from 'react-native-picker-select';
+import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import RNFetchBlob from 'react-native-blob-util';
@@ -312,6 +313,25 @@ const ProjectAppliedDetails = () => {
             )}
             <View style={styles.contentWrapper}>
               <Text style={styles.title}>{appliedDetails?.name}</Text>
+
+              <View style={styles.detailsContainer}>
+                <View style={styles.row}>
+                  <MaterialIcon />
+                  <Text style={styles.detailText}>
+                    Material: {appliedDetails?.material}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.detailsContainer}>
+                <View style={styles.row}>
+                  <PlotIcon />
+                  <Text style={styles.detailText}>
+                    Plot Size: {appliedDetails?.site_area} (in sqft)
+                  </Text>
+                </View>
+              </View>
+
               <View style={styles.detailsWrapper}>
                 <View style={styles.row}>
                   <CalenderIcon />
@@ -335,16 +355,16 @@ const ProjectAppliedDetails = () => {
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
-                <Text style={styles.description}>
+                <Text style={styles.detailText}>
                   {appliedDetails?.description}
                 </Text>
               </View>
 
-              <Text style={styles.sectionTitle}>My Quotation Info</Text>
+              <Text style={styles.title}>My Quotation Info</Text>
 
               {preworkPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.title}>Prework PDF Document</Text>
+                  <Text style={styles.sectionTitle}>Prework PDF Document</Text>
                   <FlatList
                     data={preworkPdf}
                     keyExtractor={item => item.id.toString()}
@@ -359,7 +379,9 @@ const ProjectAppliedDetails = () => {
 
               {contractorPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.title}>Contractor PDF Document</Text>
+                  <Text style={styles.sectionTitle}>
+                    Contractor PDF Document
+                  </Text>
                   <FlatList
                     data={contractorPdf}
                     keyExtractor={item => item.id.toString()}
@@ -467,7 +489,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: COLOR.Black,
     textAlign: 'left',
-    marginBottom: HEIGHT(2),
+    marginBottom: HEIGHT(1),
   },
   detailsWrapper: {
     // flexDirection: 'row',
@@ -476,9 +498,9 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: WIDTH(2),
-    marginBottom: HEIGHT(1),
+    marginBottom: HEIGHT(0.5),
   },
   detailText: {
     fontSize: 16,
@@ -492,7 +514,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: Montserrat_bold,
     color: COLOR.Black,
-    marginBottom: HEIGHT(1),
+    marginVertical: HEIGHT(1),
   },
   description: {
     fontSize: 14,

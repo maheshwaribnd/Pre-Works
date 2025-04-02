@@ -13,7 +13,6 @@ import ApiManager from '../../../../API/Api';
 import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import COLOR from '../../../../config/color.json';
 import {HEIGHT, NotoSans_Light, WIDTH} from '../../../../config/AppConst';
-import RNPickerSelect from 'react-native-picker-select';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import {launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,15 +22,12 @@ import {useNavigation} from '@react-navigation/native';
 const CreateMyWork = () => {
   const navigation = useNavigation();
   const [archiId, setArchiId] = useState(null);
-
-  const [materialSelected, setMaterialSelected] = useState('');
   const [uploadImgs, setUploadImgs] = useState([]); // Store multiple images
   const [documentFiles, setDocumentFiles] = useState([]);
   const [createData, setCreateData] = useState({
     siteName: '',
     address: '',
-    budget: '',
-    // bid: '',
+    cost: '',
     time: '',
     description: '',
   });
@@ -66,32 +62,15 @@ const CreateMyWork = () => {
     }
     if (!createData.address.trim()) {
       Snackbar.show({
-        text: 'Please enter Address',
+        text: 'Please enter Project Location',
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
       return false;
     }
-    if (!createData.budget.trim()) {
+    if (!createData.cost.trim()) {
       Snackbar.show({
-        text: 'Please enter Budget',
-        backgroundColor: '#D1264A',
-        duration: Snackbar.LENGTH_SHORT,
-      });
-      return false;
-    }
-    // if (!createData.bid.trim()) {
-    //   Snackbar.show({
-    //     text: 'Please enter Bid',
-    //     backgroundColor: '#D1264A',
-    //     duration: Snackbar.LENGTH_SHORT,
-    //   });
-    //   return false;
-    // }
-
-    if (!materialSelected) {
-      Snackbar.show({
-        text: 'Please select Material item',
+        text: 'Please enter Project Cost',
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
@@ -99,7 +78,7 @@ const CreateMyWork = () => {
     }
     if (!createData.time.trim()) {
       Snackbar.show({
-        text: 'Please enter Time',
+        text: 'Please enter Time to Complete Project',
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
@@ -131,10 +110,8 @@ const CreateMyWork = () => {
 
     formData.append('site_name', createData.siteName);
     formData.append('address', createData.address);
-    formData.append('budget', createData.budget);
-    // formData.append('bid', createData.bid);
+    formData.append('cost', createData.cost);
     formData.append('time', createData.time);
-    formData.append('material', materialSelected);
     formData.append('description', createData.description);
     formData.append('architecture_id', archiId);
 
@@ -165,12 +142,10 @@ const CreateMyWork = () => {
           setCreateData({
             siteName: '',
             address: '',
-            budget: '',
-            // bid: '',
+            cost: '',
             time: '',
             description: '',
           });
-          setMaterialSelected([]);
           setDocumentFiles([]);
           setUploadImgs([]); // Clear preview images
           Snackbar.show({
@@ -258,57 +233,30 @@ const CreateMyWork = () => {
 
             <TextInput
               style={styles.InputField}
-              placeholder="Address"
+              placeholder="Project Location"
               placeholderTextColor="gray"
               keyboardType="default"
               value={createData.address}
               onChangeText={text => onChange('address', text)}
             />
 
-            {/* <View style={styles.experienceView}> */}
             <TextInput
               style={styles.InputField}
-              placeholder="Budget"
+              placeholder="Project Cost"
               placeholderTextColor="gray"
               keyboardType="numeric"
-              value={createData.budget}
-              onChangeText={text => onChange('budget', text)}
+              value={createData.cost}
+              onChangeText={text => onChange('cost', text)}
             />
-            {/* <TextInput
-                style={[styles.InputField, {width: WIDTH(44)}]}
-                placeholder="Bid"
-                placeholderTextColor="gray"
-                keyboardType="numeric"
-                value={createData.bid}
-                onChangeText={text => onChange('bid', text)}
-              /> */}
-            {/* </View> */}
 
             <TextInput
               style={styles.InputField}
-              placeholder="Time"
+              placeholder="Time to Complete (in months)"
               placeholderTextColor="gray"
               keyboardType="default"
               value={createData.time}
               onChangeText={text => onChange('time', text)}
             />
-
-            {/* For Material Select */}
-            <View
-              style={[
-                styles.InputField,
-                {alignItems: 'center', justifyContent: 'center'},
-              ]}>
-              <RNPickerSelect
-                onValueChange={value => setMaterialSelected(value)}
-                items={[
-                  {label: 'Labour', value: 'Labour'},
-                  {label: 'Labour + Material', value: 'Labour + Material'},
-                ]}
-                // placeholder={{label: 'Material', value: null}}
-                style={styles.picker}
-              />
-            </View>
 
             <View style={styles.btnWrap}>
               <TouchableOpacity

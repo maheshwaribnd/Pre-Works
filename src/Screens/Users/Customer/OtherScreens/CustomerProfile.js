@@ -1,9 +1,7 @@
 import {
   StyleSheet,
-  Text,
   View,
   TextInput,
-  TouchableOpacity,
   ScrollView,
   ImageBackground,
   Image,
@@ -12,7 +10,6 @@ import React, {useEffect, useState} from 'react';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
 import {useNavigation} from '@react-navigation/native';
 import COLOR from '../../../../config/color.json';
-import Entypo from 'react-native-vector-icons/Entypo';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EditIcon from '../../../../assets/Svg/edit.svg';

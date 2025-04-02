@@ -50,7 +50,57 @@ const ContractorMyWork = () => {
     }));
   };
 
+  const Validate = () => {
+    if (!createWork.name.trim()) {
+      Snackbar.show({
+        text: 'Please enter Site Name',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!createWork.address.trim()) {
+      Snackbar.show({
+        text: 'Please enter Address',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!createWork.price.trim()) {
+      Snackbar.show({
+        text: 'Please enter price',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!createWork.time.trim()) {
+      Snackbar.show({
+        text: 'Please enter time',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    if (!materialSelected) {
+      Snackbar.show({
+        text: 'Please select Material item',
+        backgroundColor: '#D1264A',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return false;
+    }
+
+    return true; // If all validations pass
+  };
+
   const ContractorWorkAPI = () => {
+    if (!Validate()) return;
     const formData = new FormData();
 
     formData.append('name', createWork?.name);
@@ -154,6 +204,7 @@ const ContractorMyWork = () => {
               style={styles.InputField}
               keyboardType="default"
               placeholder="Site Name"
+              placeholderTextColor="gray"
               value={createWork?.name}
               onChangeText={text => onChange('name', text)}
             />
@@ -162,6 +213,7 @@ const ContractorMyWork = () => {
               style={styles.InputField}
               placeholder="Address"
               keyboardType="default"
+              placeholderTextColor="gray"
               value={createWork?.address}
               onChangeText={text => onChange('address', text)}
             />
@@ -170,14 +222,16 @@ const ContractorMyWork = () => {
               style={styles.InputField}
               placeholder="Price"
               keyboardType="number-pad"
+              placeholderTextColor="gray"
               value={createWork?.price}
               onChangeText={text => onChange('price', text)}
             />
 
             <TextInput
               style={styles.InputField}
-              placeholder="Time"
-              keyboardType="default"
+              placeholder="Time (in months)"
+              keyboardType="number-pad"
+              placeholderTextColor="gray"
               value={createWork.time}
               onChangeText={text => onChange('time', text)}
             />
@@ -189,6 +243,7 @@ const ContractorMyWork = () => {
                   {label: 'Labour', value: 'Labour'},
                   {label: 'Labour + Material', value: 'Labour + Material'},
                 ]}
+                placeholderTextColor={COLOR.Gray9}
                 placeholder={{label: 'Select Material', value: null}}
                 value={materialSelected} // Ensure selected value is shown
                 style={{

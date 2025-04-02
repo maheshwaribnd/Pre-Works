@@ -496,7 +496,7 @@ const ContractorRegistration = () => {
           />
           <TextInput
             style={[styles.InputField, {width: WIDTH(44)}]}
-            placeholder="Experience"
+            placeholder="Experience (Years)"
             placeholderTextColor="gray"
             keyboardType="numeric"
             value={userData.experience}

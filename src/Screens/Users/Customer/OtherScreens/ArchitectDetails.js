@@ -40,15 +40,27 @@ const ArchitectDetails = () => {
       .then(res => {
         if (res?.data?.status === 200) {
           setLoader(false);
-          setImages(res?.data?.architectureWorks);
           setArchitectData(res?.data?.architecture);
-          setArchitectWorkList(res?.data?.preworks);
+
+          // Ensure prework is always an array
+          const response = res?.data?.prework
+            ? Array.isArray(res.data.prework)
+              ? res.data.prework
+              : [res.data.prework]
+            : [];
+
+          setArchitectWorkList(response);
+          const allImages = response.flatMap(item => item.images || []);
+          setImages(allImages);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        setLoader(false);
+        console.log(err);
+      });
   };
 
-  const openURL = (url) => {
+  const openURL = url => {
     Linking.openURL(url).catch(err => console.error('An error occurred', err));
   };
 
@@ -56,7 +68,6 @@ const ArchitectDetails = () => {
   const whatsapp = architectData?.whatsup_no;
   const email = architectData?.email || '';
   const socialMediaLink = architectData?.instagram_link || '';
-console.log('socialMediaLink', socialMediaLink);
 
   // Define handlers
   const handleCall = () => {
@@ -69,7 +80,7 @@ console.log('socialMediaLink', socialMediaLink);
 
   const handleWhatsApp = () => {
     if (whatsapp) {
-      openURL(`https://wa.me/${whatsapp}`)
+      openURL(`https://wa.me/${whatsapp}`);
     } else if (socialMediaLink) {
       openURL(socialMediaLink); // Fallback to Instagram
     } else {
@@ -85,40 +96,34 @@ console.log('socialMediaLink', socialMediaLink);
     }
   };
 
-  const handleGmail = (email) => {
+  const handleGmail = email => {
     if (email) {
-      Linking.openURL(`mailto:${email}`).catch((err) =>
-        console.error("Failed to open email client", err)
+      Linking.openURL(`mailto:${email}`).catch(err =>
+        console.error('Failed to open email client', err),
       );
     }
   };
-  
 
-  const RenderWorkList = item => {
+  const RenderWorkList = ({item}) => {
     const PastPreworkFunction = () => {
       navigation.navigate('architectpastpreworkdetails', {
-        item: item?.item,
+        item: item,
         loader: loader,
-        images: images,
+        images: item?.images,
       });
     };
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          PastPreworkFunction();
-        }}>
+      <TouchableOpacity onPress={PastPreworkFunction}>
         <View style={styles.workCard}>
           <Image
-            source={{uri: item?.item?.profile_image}}
+            source={{uri: item?.images[0]?.files}}
             style={styles.workImage}
           />
           <View style={styles.workInfo}>
-            <Text style={styles.workTitle}>{item?.item?.name}</Text>
-            <Text style={styles.workDescription}>
-              {item?.item?.description}
-            </Text>
-            <Text style={styles.workAddress}> {item?.item?.address}</Text>
+            <Text style={styles.workTitle}>{item?.site_name}</Text>
+            <Text style={styles.workDescription}>{item?.description}</Text>
+            <Text style={styles.workAddress}>{item?.address}</Text>
           </View>
           <Arrow name="caretright" color="#03A151" />
         </View>
@@ -135,7 +140,7 @@ console.log('socialMediaLink', socialMediaLink);
         {/* Architect Profile */}
         <View style={styles.profileContainer}>
           <Image
-            source={{uri: architectData?.profile_image}}
+            source={{uri: architectData?.background_img}}
             style={styles.bgImage}
           />
           <View style={styles.profileWrapper}>
@@ -177,7 +182,7 @@ console.log('socialMediaLink', socialMediaLink);
         </View>
 
         {/* Past Work Section */}
-        <Text style={styles.pastWorkTitle}>Past Work</Text>
+        <Text style={styles.pastWorkTitle}>Portfolio</Text>
         <FlatList
           data={architectWorkList}
           keyExtractor={(item, index) => index.toString()}
@@ -266,14 +271,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: COLOR.White,
     borderRadius: WIDTH(3),
-    padding: WIDTH(2),
+    // padding: WIDTH(2),
     marginVertical: HEIGHT(1),
     marginHorizontal: WIDTH(5),
     elevation: 3,
     alignItems: 'center',
   },
   workImage: {
-    width: WIDTH(30),
+    width: WIDTH(26),
     height: WIDTH(25),
     borderRadius: WIDTH(2),
   },

@@ -113,39 +113,49 @@ const ContractorWorkDetails = () => {
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.contentWrapper}>
-            <Swiper
-              autoplay
-              loop
-              showsPagination
-              paginationStyle={{bottom: 0}}
-              style={styles.imageSlider}>
-              {resImgs?.map((item, index) => (
-                <View key={index} style={styles.imageContainer}>
-                  <Image source={{uri: item?.files}} style={styles.image} />
-                </View>
-              ))}
-            </Swiper>
+            {resImgs?.length > 0 ? (
+              <Swiper
+                autoplay
+                loop
+                showsPagination
+                style={{height: 240}}
+                paginationStyle={{bottom: 0}}>
+                {resImgs?.map((item, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Image
+                      source={{uri: item?.files || 'fallback_image_url'}}
+                      style={styles.imgs}
+                    />
+                  </View>
+                ))}
+              </Swiper>
+            ) : (
+              <Text style={styles.noImageText}>No Image</Text>
+            )}
+
             <View>
               <Text style={styles.title}>{details?.name}</Text>
-              <View style={styles.detailsWrapper}>
-                <View style={styles.row}>
-                  <Time />
-                  <Text style={styles.detailText}>{details?.time}</Text>
-                </View>
-                <View style={styles.row}>
-                  <MaterialIcon />
-                  <Text style={styles.detailText}>{details?.material}</Text>
-                </View>
+              <View style={styles.row}>
+                <Time />
+                <Text style={styles.detailText}>{details?.time}</Text>
               </View>
-              <View style={styles.detailsWrapper}>
-                <View style={styles.row}>
-                  <MoneyIcon />
-                  <Text style={styles.detailText}>{details?.price}</Text>
-                </View>
-                <View style={styles.row}>
-                  <LocationIcon />
-                  <Text style={styles.detailText}>{details?.address}</Text>
-                </View>
+              <View style={styles.row}>
+                <MaterialIcon />
+                <Text style={styles.detailText}>{details?.material}</Text>
+              </View>
+              <View style={styles.row}>
+                <MoneyIcon />
+                <Text style={styles.detailText}>{details?.price}</Text>
+              </View>
+              <View style={styles.row}>
+                <LocationIcon />
+                <Text style={styles.detailText}>{details?.address}</Text>
               </View>
 
               <TextInput
@@ -168,19 +178,21 @@ const ContractorWorkDetails = () => {
                 onChangeText={text => onChange('time', text)}
               />
 
-              <View
-                style={[
-                  styles.InputField,
-                  {alignItems: 'center', justifyContent: 'center'},
-                ]}>
+              <View style={styles.InputField}>
                 <RNPickerSelect
                   onValueChange={value => setMaterialSelected(value)}
-                  editable={edit}
                   items={[
                     {label: 'Labour', value: 'Labour'},
                     {label: 'Labour + Material', value: 'Labour + Material'},
                   ]}
-                  style={styles.picker}
+                  placeholderTextColor={COLOR.Gray9}
+                  placeholder={{label: 'Select Material', value: null}}
+                  value={materialSelected} // Ensure selected value is shown
+                  style={{
+                    inputIOS: styles.pickerInput,
+                    inputAndroid: styles.pickerInput,
+                  }}
+                  useNativeAndroidPickerStyle={false}
                 />
               </View>
             </View>
@@ -298,5 +310,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+  },
+
+  imgs: {
+    width: 330,
+    height: 200,
+    resizeMode: 'cover',
+    borderRadius: 9,
+    marginBottom: HEIGHT(4),
+  },
+
+  pickerContainer: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: COLOR.Gray,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+  pickerInput: {
+    fontSize: 16,
+    color: 'black',
+  },
+
+  picker: {
+    inputIOS: {
+      fontSize: 16,
+      padding: 10,
+      color: 'gray',
+    },
+    inputAndroid: {
+      fontSize: 16,
+      paddingLeft: 3,
+      color: 'gray',
+    },
   },
 });

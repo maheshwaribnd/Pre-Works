@@ -103,10 +103,10 @@ const WelcomeScreen = () => {
         })}
       </View>
       <View style={styles.bottomContainer}>
-        <Image
+        {/* <Image
           source={require('../../assets/Imgs/welcomImg.png')}
           style={styles.bottomImage}
-        />
+        /> */}
       </View>
     </ImageBackground>
   );
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLOR.White,
-    paddingTop: HEIGHT(10),
+    paddingTop: HEIGHT(15),
     // justifyContent: 'center',
     alignItems: 'center',
   },
@@ -126,15 +126,15 @@ const styles = StyleSheet.create({
   welcomeTxt: {
     fontSize: 28,
     fontFamily: NotoSans_Medium,
-    color: COLOR.TextColor,
-    marginTop: HEIGHT(2),
+    color: COLOR.White,
+    // marginTop: HEIGHT(2),
     textAlign: 'center',
   },
 
   txt: {
     fontSize: 16,
     fontFamily: NotoSans_Medium,
-    color: COLOR.Gray9,
+    color: COLOR.White,
     marginTop: HEIGHT(2),
     textAlign: 'center',
   },

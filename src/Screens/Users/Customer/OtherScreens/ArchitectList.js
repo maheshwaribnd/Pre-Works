@@ -58,15 +58,22 @@ const ArchitectList = () => {
 
     return (
       <TouchableOpacity style={styles.ListBox} onPress={ParticularArchitect}>
-        <Image
-          source={{uri: item?.profile_image}}
-          style={{width: 100, height: 100, borderRadius: 6}}
-        />
-        <View style={styles.listView}>
-          <Text style={styles.name}>{item?.name || 'No Name'}</Text>
-          <Text style={styles.address}>{item?.address || 'No Address'}</Text>
-          <Arrow name="caretright" color="#03A151" />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 9,
+          }}>
+          <Image
+            source={{uri: item?.profile_image}}
+            style={{width: 100, height: 100, borderRadius: 6}}
+          />
+          <View>
+            <Text style={styles.name}>{item?.name || 'No Name'}</Text>
+            <Text style={styles.address}>{item?.address || 'No Address'}</Text>
+          </View>
         </View>
+        <Arrow name="caretright" color="#03A151" />
       </TouchableOpacity>
     );
   };
@@ -112,10 +119,10 @@ const styles = StyleSheet.create({
     elevation: 5,
     backgroundColor: COLOR.White,
     borderColor: COLOR.LightGray,
-
     borderRadius: 6,
     marginHorizontal: HEIGHT(1),
     marginVertical: HEIGHT(0.8),
+    paddingRight: 7,
     // height: HEIGHT(20)
   },
 
@@ -137,7 +144,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#464646',
     lineHeight: 21,
-    textAlign: 'right',
+    // textAlign: 'right',
     paddingBottom: HEIGHT(1.5),
   },
 
@@ -146,6 +153,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     fontSize: 14,
     width: WIDTH(35),
-    textAlign: 'right',
+    // textAlign: 'right',
   },
 });

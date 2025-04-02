@@ -15,7 +15,6 @@ import CustomHeader from '../../../../Component/CustomeHeader/CustomHeader';
 import ApiManager from '../../../../API/Api';
 import Experience from '../../../../assets/Svg/Experience.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
-import Currency from '../../../../assets/Svg/currency.svg';
 import Mobile from '../../../../assets/Svg/Mobile.svg';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -93,7 +92,7 @@ const OfferEnquires = () => {
 
                 <View style={styles.row}>
                   <LocationIcon />
-                  <Text style={[styles.infoText, {width: WIDTH(26)}]}>
+                  <Text style={styles.infoText}>
                     {item?.item?.contractor_address}
                   </Text>
                 </View>

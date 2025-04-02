@@ -123,8 +123,7 @@ const OpenPrework = () => {
           <View style={styles.row}>
             <CalenderIcon />
             <Text style={styles.text}>
-              Exp Prework Start Date:
-              {/* {item?.item?.last_date} */}
+              Exp Prework Start Date: {item?.item?.expected_date}
             </Text>
           </View>
           <View style={styles.row}>
@@ -140,9 +139,7 @@ const OpenPrework = () => {
 
           <View style={styles.row}>
             <LocationIcon />
-            <Text style={[styles.text, {width: WIDTH(32)}]}>
-              {item?.item?.address}
-            </Text>
+            <Text style={styles.text}>{item?.item?.address}</Text>
           </View>
         </View>
       </TouchableOpacity>

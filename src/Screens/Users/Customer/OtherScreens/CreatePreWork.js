@@ -30,8 +30,8 @@ import Snackbar from 'react-native-snackbar';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import ApiManager from '../../../../API/Api';
-import {ActivityIndicator} from 'react-native-paper';
 import RNFS from 'react-native-fs';
+import {ActivityIndicator} from 'react-native-paper';
 
 const CreatePreWork = () => {
   const navigation = useNavigation();
@@ -266,7 +266,7 @@ const CreatePreWork = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
-          // setLoading(false);
+          setLoading(false);
 
           // Reset states
           setCreateData({
@@ -635,8 +635,16 @@ const CreatePreWork = () => {
               placeholder="Write about your expectations or any special requests."
               style={[styles.InputField, {height: HEIGHT(16)}]}
             />
-            <CustomButton name="SUBMIT" onPress={() => CreatePewWorkAPI()} />
-            {/* {loading && <ActivityIndicator size="large" color="blue" />} */}
+            <CustomButton
+              onPress={() => CreatePewWorkAPI()}
+              // disabled={loading} // Disable button when loading
+              name="SUBMIT">
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                'SUBMIT'
+              )}
+            </CustomButton>
           </View>
         </ScrollView>
       </ImageBackground>

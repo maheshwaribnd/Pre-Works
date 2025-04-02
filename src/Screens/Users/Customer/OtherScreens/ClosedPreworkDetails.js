@@ -20,21 +20,27 @@ import {
   WIDTH,
 } from '../../../../config/AppConst';
 import ApiManager from '../../../../API/Api';
-import {useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
+import DeleteIcon from '../../../../assets/Svg/delete.svg';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
+import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import RNFetchBlob from 'react-native-blob-util';
 import FileViewer from 'react-native-file-viewer';
+import BidModal from '../../../../Component/BidModal/BidModal';
+import Snackbar from 'react-native-snackbar';
 
 const ClosedPreworkDetails = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const PreworkId = route?.params?.preworkId;
 
   const [data, setData] = useState(null);
   const [resImgs, setResImgs] = useState([]);
   const [resPdf, setResPdf] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     ClosedPreWorkByIdAPI();
@@ -48,6 +54,28 @@ const ClosedPreworkDetails = () => {
         setResPdf(res?.data?.preworkpdf);
       }
     });
+  };
+
+  const DeletePreworkAPI = () => {
+    ApiManager.DeletePrework(PreworkId)
+      .then(res => {
+        if (res?.data?.status == 200) {
+          Snackbar.show({
+            text: res?.data?.message,
+            backgroundColor: '#27cc5d',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          navigation.navigate('customerTabs');
+        }
+      })
+      .catch(err => {
+        console.log('API Error:', err.response?.data || err.message);
+        Snackbar.show({
+          text: err.response?.data?.message || err.message,
+          backgroundColor: '#D1264A',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      });
   };
 
   const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
@@ -194,7 +222,7 @@ const ClosedPreworkDetails = () => {
             <View style={{marginLeft: WIDTH(4)}}>
               {resPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.title}>PDF Document</Text>
+                  <Text style={styles.sectionTitle}>Architectural Drawing</Text>
                   <FlatList
                     data={resPdf}
                     keyExtractor={item => item.id.toString()}
@@ -211,37 +239,63 @@ const ClosedPreworkDetails = () => {
               <Text style={styles.title}>{data?.name}</Text>
 
               <View style={styles.row}>
-                <CalenderIcon />
+                <MaterialIcon />
                 <Text style={styles.detailText}>
-                  Exp Prework Start Date:
-                  {/* {data?.expected_date} */}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <CalenderIcon />
-                <Text style={styles.detailText}>
-                  Last Date for Quote Submission: {data?.last_date}
+                  Material: {data?.material}
                 </Text>
               </View>
 
               <View style={styles.row}>
-                <MaterialIcon />
-                <Text style={[styles.detailText, {width: WIDTH(32)}]}>
-                  {data?.material}
+                <PlotIcon />
+                <Text style={styles.detailText}>
+                  Plot Size: {data?.site_area} (in sqft)
+                </Text>
+              </View>
+
+              <View style={styles.row}>
+                <CalenderIcon />
+                <Text style={styles.detailText}>
+                  Exp Prework Start Date: {data?.expected_date}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <CalenderIcon />
+                <Text style={styles.detailText}>
+                  End Date for Quote Submission: {data?.last_date}
                 </Text>
               </View>
 
               <View style={styles.row}>
                 <LocationIcon />
-                <Text style={[styles.detailText, {width: WIDTH(32)}]}>
-                  {data?.address}
-                </Text>
+                <Text style={styles.detailText}>{data?.address}</Text>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Description</Text>
                 <Text style={styles.description}>{data?.description}</Text>
               </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <Text style={styles.sectionTitle}>Delete Prework</Text>
+                <TouchableOpacity onPress={() => setShowModal(true)}>
+                  <DeleteIcon />
+                </TouchableOpacity>
+              </View>
+
+              {showModal ? (
+                <BidModal
+                  heading="Are you Sure, you want to Delete Prework?"
+                  showModal={showModal}
+                  setShowModal={setShowModal}
+                  name="DELETE"
+                  color={['#F78941', '#D2390F']}
+                  onPress={() => DeletePreworkAPI()}
+                />
+              ) : null}
             </View>
           </View>
         </ScrollView>
@@ -280,14 +334,15 @@ const styles = StyleSheet.create({
     marginBottom: HEIGHT(4),
   },
   contentWrapper: {
-    padding: WIDTH(4),
+    paddingVertical: HEIGHT(3),
+    paddingHorizontal: WIDTH(5),
   },
   title: {
     fontFamily: Montserrat_bold,
     fontSize: 22,
     color: COLOR.Black,
     textAlign: 'left',
-    marginBottom: HEIGHT(2),
+    marginBottom: HEIGHT(1),
   },
   detailsWrapper: {
     flexDirection: 'row',
@@ -296,9 +351,9 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: WIDTH(2),
-    marginBottom: HEIGHT(1),
+    marginBottom: HEIGHT(0.5),
   },
   detailText: {
     fontSize: 16,
