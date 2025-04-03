@@ -164,7 +164,7 @@ const OpenPreworkDetails = () => {
       await FileViewer.open(response.path(), {showOpenWithDialog: true});
     } catch (error) {
       console.error('Preview Error:', error);
-      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+      // Alert.alert('Error', 'An error occurred while previewing the PDF.');
     }
   };
 
@@ -211,7 +211,7 @@ const OpenPreworkDetails = () => {
           Alert.alert('Download Complete', `File saved to: ${res.path()}`);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          // Alert.alert('Download Failed', 'Error downloading the file.');
         });
     } catch (error) {
       console.error('Download Error:', error);
@@ -394,7 +394,11 @@ const OpenPreworkDetails = () => {
                         PreworkId: PreworkId,
                       })
                     }
-                    style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
                     <Text style={styles.linkText}>
                       Click here to see enquiries
                     </Text>

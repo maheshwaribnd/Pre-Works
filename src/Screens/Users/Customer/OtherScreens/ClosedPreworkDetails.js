@@ -78,6 +78,27 @@ const ClosedPreworkDetails = () => {
       });
   };
 
+  
+
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        // Check Android Version
+        if (Platform.Version >= 33) {
+          return true; // No permission needed for Android 13+
+        }
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS does not need permission
+  };
+
   const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
     try {
       console.log('Preview URL:', pdfUrl);
@@ -108,27 +129,8 @@ const ClosedPreworkDetails = () => {
       await FileViewer.open(response.path(), {showOpenWithDialog: true});
     } catch (error) {
       console.error('Preview Error:', error);
-      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+      // Alert.alert('Error', 'An error occurred while previewing the PDF.');
     }
-  };
-
-  const requestStoragePermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        // Check Android Version
-        if (Platform.Version >= 33) {
-          return true; // No permission needed for Android 13+
-        }
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn('Permission error:', err);
-        return false;
-      }
-    }
-    return true; // iOS does not need permission
   };
 
   // Download PDF Function
@@ -178,7 +180,7 @@ const ClosedPreworkDetails = () => {
         });
     } catch (error) {
       console.error('Download Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred.');
+      // Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
 

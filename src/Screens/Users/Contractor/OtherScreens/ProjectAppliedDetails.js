@@ -163,7 +163,7 @@ const ProjectAppliedDetails = () => {
       await FileViewer.open(response.path(), {showOpenWithDialog: true});
     } catch (error) {
       console.error('Preview Error:', error);
-      Alert.alert('Error', 'An error occurred while previewing the PDF.');
+      // Alert.alert('Error', 'An error occurred while previewing the PDF.');
     }
   };
 
@@ -208,7 +208,7 @@ const ProjectAppliedDetails = () => {
         });
     } catch (error) {
       console.error('Download Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred.');
+      // Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
 
@@ -271,7 +271,7 @@ const ProjectAppliedDetails = () => {
         });
     } catch (error) {
       console.error('Download Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred.');
+      // Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
 
