@@ -7,6 +7,7 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Linking,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -38,6 +39,7 @@ const ArchitectRegistration = () => {
   const [backImage, setbackImage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
     number: '',
@@ -65,6 +67,7 @@ const ArchitectRegistration = () => {
   });
 
   const ArchitectSignupAPI = async () => {
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('name', userData.name);
@@ -115,6 +118,7 @@ const ArchitectRegistration = () => {
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
         return {status: 200};
       } else if (
         res?.data?.status === 409 ||
@@ -125,6 +129,7 @@ const ArchitectRegistration = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
 
         return {status: 409}; // Return status so navigation doesn't happen
       } else {
@@ -143,7 +148,7 @@ const ArchitectRegistration = () => {
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
-
+      setLoading(false);
       return {status: 500};
     }
   };
@@ -152,7 +157,7 @@ const ArchitectRegistration = () => {
     if (validateForm()) {
       const response = await ArchitectSignupAPI();
       if (response?.status === 200) {
-        navigation.navigate('otpscreen', {mobile_no: userData.number});
+        navigation.navigate('otpscreen', {Email: userData.email});
         console.log('Validate');
       }
 
@@ -494,7 +499,11 @@ const ArchitectRegistration = () => {
         </View>
 
         <View style={{marginTop: HEIGHT(3), justifyContent: 'center'}}>
-          <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignSelf: 'center'}}
+            onPress={() =>
+              Linking.openURL('https://preworks.in/terms-condition/')
+            }>
             <Text
               style={{
                 textAlign: 'center',
@@ -532,7 +541,12 @@ const ArchitectRegistration = () => {
         ) : null} */}
         </View>
 
-        <CustomButton name="SUBMIT" onPress={() => SubmitButton()} />
+        <CustomButton
+          name="SUBMIT"
+          onPress={() => SubmitButton()}
+          loading={loading}
+          disabled={loading}
+        />
 
         <View style={styles.forAskAccount}>
           <Text style={{color: COLOR.Gray}}>If you have an account? </Text>

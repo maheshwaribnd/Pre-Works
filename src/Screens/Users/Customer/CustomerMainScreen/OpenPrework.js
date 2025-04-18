@@ -148,7 +148,7 @@ const OpenPrework = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Open Pre-Works Requirement" />
+      <CustomHeader name="Active Prework Requests" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -174,9 +174,8 @@ const OpenPrework = () => {
           <View style={styles.empty}>
             <NoData height={360} width={360} />
             <Text style={styles.txt}>
-              You currently do not have any Open Pre-Work requirement. To create
-              a Pre-Work requirement, kindly select the + button shown in the
-              bottom
+            You don't have any Active Prework Requests yet. Tap the '+' sign
+            to create one now.
             </Text>
 
             <TouchableOpacity

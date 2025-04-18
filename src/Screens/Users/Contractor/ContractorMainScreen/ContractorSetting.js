@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   BackHandler,
+  Linking,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
@@ -94,6 +95,8 @@ const ContractorSetting = () => {
     ApiManager.DeleteAccount(typeSelector, userId)
       .then(async res => {
         if (res?.data?.status === 200) {
+          console.log('res?.dataddd', res?.data);
+
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
@@ -152,7 +155,11 @@ const ContractorSetting = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InputField}>
+        <TouchableOpacity
+          style={styles.InputField}
+          onPress={() =>
+            Linking.openURL('https://preworks.in/terms-condition/')
+          }>
           <View style={{flexDirection: 'row', gap: 6}}>
             <Image
               source={require('../../../../assets/settingsIcon/terms.png')}
@@ -164,10 +171,14 @@ const ContractorSetting = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InputField}>
+        <TouchableOpacity
+          style={styles.InputField}
+          onPress={() =>
+            Linking.openURL('https://preworks.in/privacy-policy/')
+          }>
           <View style={{flexDirection: 'row', gap: 6}}>
             <Image
-              source={require('../../../../assets/settingsIcon/privacy.png')}
+              source={require('../../../../assets/settingsIcon/terms.png')}
               height={5}
               width={5}
               resizeMode="contain"

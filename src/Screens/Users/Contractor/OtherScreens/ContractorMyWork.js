@@ -28,6 +28,7 @@ const ContractorMyWork = () => {
   const [uploadImgs, setUploadImgs] = useState([]);
   const [documentFiles, setDocumentFiles] = useState([]);
   const [materialSelected, setMaterialSelected] = useState('');
+  const [loading, setLoading] = useState(false);
   const [createWork, setCreateWork] = useState({
     name: '',
     address: '',
@@ -101,6 +102,7 @@ const ContractorMyWork = () => {
 
   const ContractorWorkAPI = () => {
     if (!Validate()) return;
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('name', createWork?.name);
@@ -132,11 +134,13 @@ const ContractorMyWork = () => {
             backgroundColor: '#27cc5d',
             duration: Snackbar.LENGTH_SHORT,
           });
+          setLoading(false);
           navigation.navigate('contractorprofile');
         }
       })
       .catch(err => {
         console.log('API Error:', err.response?.data || err.message);
+        setLoading(false);
       });
   };
 
@@ -272,7 +276,12 @@ const ContractorMyWork = () => {
             </View> */}
 
             <View style={styles.button}>
-              <CustomButton name="SAVE" onPress={() => ContractorWorkAPI()} />
+              <CustomButton
+                name="SAVE"
+                onPress={() => ContractorWorkAPI()}
+                loading={loading}
+                disabled={loading}
+              />
             </View>
           </View>
         </ScrollView>

@@ -36,6 +36,7 @@ const Profile = () => {
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
   const [backgdDocumentFile, setbackgdDocumentFile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [userBackImg, setUserBackImg] = useState('');
   const [errors, setErrors] = useState({
     whatsAppError: '',
@@ -201,7 +202,7 @@ const Profile = () => {
         name: backgdDocumentFile[0].fileName,
       });
     }
-
+    setLoading(true);
     try {
       const res = await ApiManager.ArchitectUpdate(userId, formData);
       if (res?.data?.status === 200) {
@@ -211,6 +212,7 @@ const Profile = () => {
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
         navigation.navigate('architectTabs');
         // setData({
         //   name: res.data.customer?.name || '',
@@ -239,9 +241,11 @@ const Profile = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       }
     } catch (err) {
       console.log('Update Error:', err);
+      setLoading(false);
     }
   };
 
@@ -313,6 +317,7 @@ const Profile = () => {
               style={styles.InputField}
               placeholder={data?.name}
               editable={edit}
+              keyboardType="default"
               placeholderTextColor="gray"
               value={data?.name}
               onChangeText={text => onChange('name', text)}
@@ -331,7 +336,7 @@ const Profile = () => {
             <TextInput
               style={styles.InputField}
               placeholder={data?.email}
-              keyboardType="decimal-pad"
+              keyboardType="default"
               editable={edit}
               placeholderTextColor="gray"
               value={data?.email}
@@ -343,7 +348,7 @@ const Profile = () => {
               placeholder={data?.address || 'Address'}
               editable={edit}
               placeholderTextColor="gray"
-              keyboardType="decimal-pad"
+              keyboardType="default"
               value={data?.address}
               onChangeText={text => onChange('address', text)}
             />
@@ -409,7 +414,12 @@ const Profile = () => {
 
             <View style={{marginBottom: HEIGHT(2)}}>
               {edit ? (
-                <CustomButton name="SAVE" onPress={() => handleSubmit()} />
+                <CustomButton
+                  name="Save"
+                  onPress={() => handleSubmit()}
+                  loading={loading}
+                  disabled={loading}
+                />
               ) : null}
             </View>
           </View>

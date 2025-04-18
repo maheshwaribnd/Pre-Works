@@ -19,14 +19,14 @@ const Tab = createBottomTabNavigator();
 
 const TabArr = [
   {
-    name: 'New Pre-work',
+    name: 'New Projects',
     component: NewPrework,
     Icon1: require('../../assets/NavIcons/newPreworkSelect.png'),
     Icon2: require('../../assets/NavIcons/newPreworkUnselect.png'),
   },
 
   {
-    name: 'Project Applied',
+    name: 'Applied Projects',
     component: ProjectApplied,
     Icon1: require('../../assets/NavIcons/ProjectAppliedSelect.png'),
     Icon2: require('../../assets/NavIcons/ProjectAppliedUnselect.png'),

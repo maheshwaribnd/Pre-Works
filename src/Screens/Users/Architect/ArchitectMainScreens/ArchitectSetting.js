@@ -3,6 +3,7 @@ import {
   BackHandler,
   Image,
   ImageBackground,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -125,7 +126,11 @@ const ArchitectSetting = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.InputField}>
+            <TouchableOpacity
+              style={styles.InputField}
+              onPress={() =>
+                Linking.openURL('https://preworks.in/terms-condition/')
+              }>
               <View style={{flexDirection: 'row', gap: 6}}>
                 <Image
                   source={require('../../../../assets/settingsIcon/terms.png')}
@@ -137,10 +142,14 @@ const ArchitectSetting = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.InputField}>
+            <TouchableOpacity
+              style={styles.InputField}
+              onPress={() =>
+                Linking.openURL('https://preworks.in/privacy-policy/')
+              }>
               <View style={{flexDirection: 'row', gap: 6}}>
                 <Image
-                  source={require('../../../../assets/settingsIcon/privacy.png')}
+                  source={require('../../../../assets/settingsIcon/terms.png')}
                   height={5}
                   width={5}
                   resizeMode="contain"

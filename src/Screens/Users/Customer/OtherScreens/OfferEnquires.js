@@ -57,6 +57,7 @@ const OfferEnquires = () => {
     const ParticularContractor = item => {
       navigation.navigate('offerenquiesdetails', {
         contractorID: item?.item?.contractor_id,
+        PreworkId: PreworkId,
       });
     };
 

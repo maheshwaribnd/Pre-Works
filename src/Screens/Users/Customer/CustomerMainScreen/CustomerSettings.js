@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
   BackHandler,
+  Linking,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {HEIGHT, WIDTH} from '../../../../config/AppConst';
@@ -122,7 +123,7 @@ const CustomerSettings = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Setting" />
+      <CustomHeader name="More" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -166,7 +167,11 @@ const CustomerSettings = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.InputField}>
+          <TouchableOpacity
+            style={styles.InputField}
+            onPress={() =>
+              Linking.openURL('https://preworks.in/terms-condition/')
+            }>
             <View style={{flexDirection: 'row', gap: 6}}>
               <Image
                 source={require('../../../../assets/settingsIcon/terms.png')}
@@ -178,7 +183,11 @@ const CustomerSettings = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.InputField}>
+          <TouchableOpacity
+            style={styles.InputField}
+            onPress={() =>
+              Linking.openURL('https://preworks.in/privacy-policy/')
+            }>
             <View style={{flexDirection: 'row', gap: 6}}>
               <Image
                 source={require('../../../../assets/settingsIcon/privacy.png')}

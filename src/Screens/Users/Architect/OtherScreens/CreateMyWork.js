@@ -24,6 +24,7 @@ const CreateMyWork = () => {
   const [archiId, setArchiId] = useState(null);
   const [uploadImgs, setUploadImgs] = useState([]); // Store multiple images
   const [documentFiles, setDocumentFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [createData, setCreateData] = useState({
     siteName: '',
     address: '',
@@ -106,6 +107,7 @@ const CreateMyWork = () => {
 
   const CreateWorkAPI = () => {
     if (!validateInputs()) return;
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('site_name', createData.siteName);
@@ -132,12 +134,7 @@ const CreateMyWork = () => {
     ApiManager.architectMyworkCreate(formData)
       .then(res => {
         if (res?.data?.status === 200) {
-          Snackbar.show({
-            text: res?.data?.message,
-            backgroundColor: '#27cc5d',
-            duration: Snackbar.LENGTH_SHORT,
-          });
-
+          setLoading(false);
           // Reset states
           setCreateData({
             siteName: '',
@@ -160,6 +157,7 @@ const CreateMyWork = () => {
             backgroundColor: '#D1264A',
             duration: Snackbar.LENGTH_SHORT,
           });
+          setLoading(false);
         }
       })
       .catch(err => {
@@ -169,6 +167,7 @@ const CreateMyWork = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       });
   };
 
@@ -303,7 +302,12 @@ const CreateMyWork = () => {
               ]}
             />
 
-            <CustomButton name="Save" onPress={() => CreateWorkAPI()} />
+            <CustomButton
+              name="Save"
+              onPress={() => CreateWorkAPI()}
+              loading={loading}
+              disabled={loading}
+            />
           </View>
         </ScrollView>
       </ImageBackground>

@@ -30,7 +30,7 @@ import Snackbar from 'react-native-snackbar';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import ApiManager from '../../../../API/Api';
-import RNFS from 'react-native-fs';
+import RNBlobUtil from 'react-native-blob-util';
 import {ActivityIndicator} from 'react-native-paper';
 
 const CreatePreWork = () => {
@@ -217,8 +217,8 @@ const CreatePreWork = () => {
 
   const CreatePewWorkAPI = async () => {
     // if (loading) return;
-    setLoading(true);
     if (!Validate()) return;
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('name', createData.name);
@@ -297,7 +297,7 @@ const CreatePreWork = () => {
         }
       })
       .catch(err => {
-        console.log('API Error:', err.response?.data || err.message);
+        console.log('API Error:', err.response?.data || err.message); setLoading(false);
         Snackbar.show({
           text: err.response?.data?.message || err.message,
           backgroundColor: '#D1264A',
@@ -375,26 +375,31 @@ const CreatePreWork = () => {
   const handleUploadPDF = async () => {
     try {
       const response = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf], // Allows only PDF selection
-        allowMultiSelection: true, // Allows multiple PDFs
+        type: [DocumentPicker.types.pdf],
+        allowMultiSelection: true,
       });
-
-      // const newDocs = response.map(doc => ({
-      //   uri: doc.uri,
-      //   name: doc.name,
-      // }));
 
       const newDocs = await Promise.all(
         response.map(async doc => {
-          const newPath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
-          await RNFS.copyFile(doc.uri, newPath);
+          const newPath = `${RNBlobUtil.fs.dirs.CacheDir}/${doc.name}`;
+          await RNBlobUtil.fs.cp(doc.uri, newPath);
 
           return {uri: `file://${newPath}`, name: doc.name};
         }),
       );
 
+      const sanitizedResponse = response.map(doc => ({
+        ...doc,
+        name: doc.name.replace(/\s+/g, ''),
+      }));
+
+      console.log('sanitizedResponse', sanitizedResponse);
+      console.log('response', response);
+
       setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
-      setDocumentPdf(prevFiles => [...new Set([...prevFiles, ...response])]);
+      setDocumentPdf(prevFiles => [
+        ...new Set([...prevFiles, ...sanitizedResponse]),
+      ]);
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
@@ -403,6 +408,7 @@ const CreatePreWork = () => {
       }
     }
   };
+
 
   // Function to remove a selected document
   const handleRemovePDF = index => {
@@ -635,16 +641,12 @@ const CreatePreWork = () => {
               placeholder="Write about your expectations or any special requests."
               style={[styles.InputField, {height: HEIGHT(16)}]}
             />
-            <CustomButton
+             <CustomButton
+              name="SUBMIT"
               onPress={() => CreatePewWorkAPI()}
-              // disabled={loading} // Disable button when loading
-              name="SUBMIT">
-              {loading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                'SUBMIT'
-              )}
-            </CustomButton>
+              loading={loading}
+              disabled={loading}
+            />
           </View>
         </ScrollView>
       </ImageBackground>

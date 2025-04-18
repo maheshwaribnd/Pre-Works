@@ -162,7 +162,7 @@ const NewPrework = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="New Pre-Work Project" />
+      <CustomHeader name="Upcoming Projects" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>

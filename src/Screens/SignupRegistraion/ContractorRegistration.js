@@ -8,6 +8,7 @@ import {
   ImageBackground,
   Image,
   Alert,
+  Linking,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -37,7 +38,7 @@ const ContractorRegistration = () => {
   const [documentFile, setDocumentFile] = useState(null);
   // const [uploadImg, setUploadImg] = useState('');
   // const [uploadDocumentFile, setUploadDocumentFile] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userData, setUserData] = useState({
@@ -67,6 +68,7 @@ const ContractorRegistration = () => {
   });
 
   const ContractorSignupAPI = async () => {
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('name', userData.name);
@@ -119,7 +121,7 @@ const ContractorRegistration = () => {
           'userId',
           JSON.stringify(res?.data?.user_id),
         );
-
+        setLoading(false);
         Snackbar.show({
           text: res?.data?.message,
           backgroundColor: '#27cc5d',
@@ -135,7 +137,7 @@ const ContractorRegistration = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         return {status: 409}; // Return status so navigation doesn't happen
       } else {
         Snackbar.show({
@@ -143,7 +145,7 @@ const ContractorRegistration = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         return {status: res?.data?.status};
       }
     } catch (error) {
@@ -166,7 +168,7 @@ const ContractorRegistration = () => {
       } else {
         console.log('Error Message:', error.message);
       }
-
+      setLoading(false);
       return {status: 500};
     }
   };
@@ -180,7 +182,7 @@ const ContractorRegistration = () => {
     } else if (!/^[A-Za-z0-9][A-Za-z0-9\s]{3,}$/.test(userData.name.trim())) {
       newErrors.name = 'Name must be at least 3 characters long';
     }
-    
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(userData.email)) {
@@ -268,7 +270,7 @@ const ContractorRegistration = () => {
     if (validateForm()) {
       const response = await ContractorSignupAPI();
       if (response?.status === 200) {
-        navigation.navigate('otpscreen', {mobile_no: userData.number});
+        navigation.navigate('otpscreen', {Email: userData.email});
       }
 
       console.log('Validate');
@@ -542,7 +544,11 @@ const ContractorRegistration = () => {
         </View> */}
 
         <View style={{marginTop: HEIGHT(3), justifyContent: 'center'}}>
-          <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignSelf: 'center'}}
+            onPress={() =>
+              Linking.openURL('https://preworks.in/terms-condition/')
+            }>
             <Text
               style={{
                 textAlign: 'center',
@@ -553,8 +559,12 @@ const ContractorRegistration = () => {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <CustomButton name="SUBMIT" onPress={() => SubmitButton()} />
+        <CustomButton
+          name="SUBMIT"
+          onPress={() => SubmitButton()}
+          loading={loading}
+          disabled={loading}
+        />
 
         <View style={styles.forAskAccount}>
           <Text style={{color: COLOR.Gray}}>If you have an account? </Text>

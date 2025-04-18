@@ -23,10 +23,10 @@ import LinearGradient from 'react-native-linear-gradient';
 const ForgotPassword = () => {
   const navigation = useNavigation();
   const typeSelector = useSelector(state => state.userTypee.usertype);
-  const [number, setNumber] = useState(null);
+  const [email, setEmail] = useState('');
   const [currentOTP, setCurrentOTP] = useState('');
-  const [userOTP, setUserOTP] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [DeviceToken, setDeviceToken] = useState('');
   const [timer, setTimer] = useState(59);
 
@@ -58,17 +58,29 @@ const ForgotPassword = () => {
   }, [showModal || timer]);
 
   const ForgotPasswordAPI = async () => {
-    if (!number || number.length < 10) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
       Snackbar.show({
-        text: 'Please enter a valid mobile number',
+        text: 'Please enter a email address',
+        backgroundColor: 'red',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+
+      return;
+    } else if (!emailRegex.test(email)) {
+      Snackbar.show({
+        text: 'Please enter a valid email address',
         backgroundColor: 'red',
         duration: Snackbar.LENGTH_SHORT,
       });
       return;
     }
 
+    setLoading(true);
+
     const params = {
-      mobile_no: number,
+      email: email,
       user_type: typeSelector,
     };
 
@@ -76,13 +88,13 @@ const ForgotPassword = () => {
       const res = await ApiManager.forgetPassword(params);
 
       if (res?.data?.status === 200) {
-        setUserOTP(res?.data?.otp);
         Snackbar.show({
           text: res?.data?.message,
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
         setShowModal(true);
+        setLoading(false);
       } else {
         console.log('Error Response:', res?.data);
         Snackbar.show({
@@ -90,6 +102,7 @@ const ForgotPassword = () => {
           backgroundColor: 'red',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       }
     } catch (error) {
       if (error.response) {
@@ -107,6 +120,7 @@ const ForgotPassword = () => {
         backgroundColor: 'red',
         duration: Snackbar.LENGTH_SHORT,
       });
+      setLoading(false);
     }
   };
 
@@ -123,34 +137,39 @@ const ForgotPassword = () => {
   };
 
   const handleResendOTP = () => {
+    setLoading(true);
+
     const params = {
-      mobile_no: number,
+      email: email,
       user_type: typeSelector,
     };
     setCurrentOTP('');
     ApiManager.ResendOtp(params).then(res => {
       if (res?.data?.status === 200) {
-        setUserOTP(res?.data?.otp);
+        // setUserOTP(res?.data?.otp);
         Snackbar.show({
           text: 'OTP sent successfully. ',
           fontFamily: NotoSans_Medium,
           backgroundColor: '#19cf55',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       }
     });
     setTimer(30);
   };
 
   const handleOTPSubmit = async () => {
-    if (currentOTP == userOTP) {
+    setLoading(true);
+    if (currentOTP) {
       Snackbar.show({
         text: 'OTP verified successfully. ',
         fontFamily: NotoSans_Medium,
         backgroundColor: '#19cf55',
         duration: Snackbar.LENGTH_SHORT,
       });
-      navigation.navigate('createpassword', {mobileNo: number});
+      setLoading(false);
+      navigation.navigate('createpassword', {email: email});
     } else {
       Snackbar.show({
         text: 'Incorrect OTP. Please enter the correct OTP. ',
@@ -169,18 +188,24 @@ const ForgotPassword = () => {
       </View>
 
       <Text style={styles.txt}>
-        Please provide mobile number for which you want to reset your password
+        Please provide email address for which you want to reset your password
       </Text>
 
       <TextInput
         style={styles.InputField}
-        placeholder="+91 Mobile number"
-        keyboardType="number-pad"
-        value={number}
-        onChangeText={text => setNumber(text)}
+        placeholder="Enter email address"
+        placeholderTextColor={COLOR.Gray}
+        value={email}
+        keyboardType="default"
+        onChangeText={text => setEmail(text)}
       />
 
-      <CustomButton name="SEND OTP" onPress={ForgotPasswordAPI} />
+      <CustomButton
+        name="SEND OTP"
+        onPress={() => ForgotPasswordAPI()}
+        loading={loading}
+        disabled={loading}
+      />
 
       {showModal ? (
         <View style={{flex: 1, backgroundColor: '#fff'}}>
@@ -209,14 +234,20 @@ const ForgotPassword = () => {
               </View>
 
               <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                <TouchableOpacity onPress={() => handleOTPSubmit()}>
+                <TouchableOpacity
+                  onPress={() => handleOTPSubmit()}
+                  disabled={loading}>
                   <LinearGradient
                     colors={['#0AD788', '#03A151']}
                     activeOpacity={0.4}
                     start={{x: 0, y: 0}}
                     end={{x: 1, y: 0}}
                     style={styles.verifyButton}>
-                    <Text style={styles.btnText}>Verify</Text>
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.btnText}>Verify</Text>
+                    )}
                   </LinearGradient>
                 </TouchableOpacity>
               </View>

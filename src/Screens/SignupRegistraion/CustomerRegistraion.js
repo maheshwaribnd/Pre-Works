@@ -7,6 +7,7 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  Linking,
 } from 'react-native';
 import React, {useState} from 'react';
 import {
@@ -32,6 +33,7 @@ const CustomerRegistraion = () => {
   let isSelecting = false;
   const navigation = useNavigation();
 
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [documentFile, setDocumentFile] = useState(null);
@@ -111,7 +113,7 @@ const CustomerRegistraion = () => {
     if (validateForm()) {
       const response = await CustomerSignupAPI();
       if (response?.status === 200) {
-        navigation.navigate('otpscreen', {mobile_no: userData.number});
+        navigation.navigate('otpscreen', {Email: userData.email});
       }
       console.log('Validate');
     } else {
@@ -120,6 +122,7 @@ const CustomerRegistraion = () => {
   };
 
   const CustomerSignupAPI = async () => {
+    setLoading(true);
     const formData = new FormData();
 
     formData.append('name', userData.name);
@@ -159,7 +162,7 @@ const CustomerRegistraion = () => {
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         return {status: 200}; // Return status for SubmitButton to check
       } else if (
         res?.data?.status === 409 ||
@@ -170,7 +173,7 @@ const CustomerRegistraion = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         return {status: 409}; // Return status so navigation doesn't happen
       } else {
         Snackbar.show({
@@ -178,7 +181,7 @@ const CustomerRegistraion = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         return {status: res?.data?.status};
       }
     } catch (error) {
@@ -216,7 +219,7 @@ const CustomerRegistraion = () => {
           duration: Snackbar.LENGTH_SHORT,
         });
       }
-
+      setLoading(false);
       return {status: 500};
     }
   };
@@ -357,7 +360,11 @@ const CustomerRegistraion = () => {
         ) : null}
 
         <View style={{marginTop: HEIGHT(1), justifyContent: 'center'}}>
-          <TouchableOpacity style={{flexDirection: 'row', alignSelf: 'center'}}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignSelf: 'center'}}
+            onPress={() =>
+              Linking.openURL('https://preworks.in/terms-condition/')
+            }>
             <Text
               style={{
                 textAlign: 'center',
@@ -395,7 +402,12 @@ const CustomerRegistraion = () => {
         ) : null} */}
         </View>
 
-        <CustomButton name="SUBMIT" onPress={() => SubmitButton()} />
+        <CustomButton
+          name="SUBMIT"
+          onPress={() => SubmitButton()}
+          loading={loading}
+          disabled={loading}
+        />
 
         <View style={styles.forAskAccount}>
           <Text style={{color: COLOR.Gray}}>If you have an account? </Text>

@@ -1,7 +1,10 @@
 import {
+  Alert,
+  Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Platform,
   ScrollView,
@@ -30,7 +33,8 @@ import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import RNFetchBlob from 'react-native-blob-util';
 import FileViewer from 'react-native-file-viewer';
 import BidModal from '../../../../Component/BidModal/BidModal';
-import Snackbar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';import Pdf from 'react-native-pdf';
+import {ActivityIndicator} from 'react-native-paper';
 
 const ClosedPreworkDetails = () => {
   const navigation = useNavigation();
@@ -41,6 +45,9 @@ const ClosedPreworkDetails = () => {
   const [resImgs, setResImgs] = useState([]);
   const [resPdf, setResPdf] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPdfVisible, setisPdfVisible] = useState(false);
+  const [pdfURL, setpdfURL] = useState('');
 
   useEffect(() => {
     ClosedPreWorkByIdAPI();
@@ -80,7 +87,7 @@ const ClosedPreworkDetails = () => {
 
   
 
-  const requestStoragePermission = async () => {
+   const requestStoragePermission = async () => {
     if (Platform.OS === 'android') {
       try {
         // Check Android Version
@@ -99,6 +106,7 @@ const ClosedPreworkDetails = () => {
     return true; // iOS does not need permission
   };
 
+
   const previewPDF = async (pdfUrl, fileName = 'preview.pdf') => {
     try {
       console.log('Preview URL:', pdfUrl);
@@ -116,7 +124,7 @@ const ClosedPreworkDetails = () => {
 
       // Set path for the temporary PDF
       const {dirs} = RNFetchBlob.fs;
-      const filePath = `${dirs.CacheDir}/${fileName}`;
+      const filePath = `${dirs.DownloadDir}/${fileName}`;
 
       // Download the PDF temporarily
       const response = await RNFetchBlob.config({
@@ -141,7 +149,7 @@ const ClosedPreworkDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
       // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -149,6 +157,7 @@ const ClosedPreworkDetails = () => {
           'Permission Denied',
           'Storage permission is required to download files.',
         );
+        setIsLoading(false);
         return;
       }
 
@@ -173,14 +182,20 @@ const ClosedPreworkDetails = () => {
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setpdfURL(res.data);
+          setisPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setpdfURL(downloadPath);
+            setisPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      // Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -188,8 +203,7 @@ const ClosedPreworkDetails = () => {
     return (
       <TouchableOpacity
         onPress={async () => {
-          await previewPDF(item?.files, item?.file_name);
-          DownloadFunction(item?.files, item?.file_name);
+          await DownloadFunction(item?.files, item?.file_name);
         }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
@@ -198,12 +212,17 @@ const ClosedPreworkDetails = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name="Closed Pre-Works Requirement" />
+      <CustomHeader name="Closed Prework Requirement" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
+          {isLoading && (
+            <View style={styles.loading}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
             {resImgs?.length > 0 && (
               <Swiper
                 key={resImgs.length} // Ensures remount on data change
@@ -282,7 +301,7 @@ const ClosedPreworkDetails = () => {
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                 }}>
-                <Text style={styles.sectionTitle}>Delete Prework</Text>
+             <Text style={styles.sectionTitle}>Delete This Request</Text>
                 <TouchableOpacity onPress={() => setShowModal(true)}>
                   <DeleteIcon />
                 </TouchableOpacity>
@@ -302,6 +321,35 @@ const ClosedPreworkDetails = () => {
           </View>
         </ScrollView>
       </ImageBackground>
+      <Modal
+        transparent
+        visible={isPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: pdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -376,5 +424,22 @@ const styles = StyleSheet.create({
     fontFamily: Montserrat_Medium,
     color: COLOR.Gray,
     lineHeight: 22,
+  },
+
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+
+  loading: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });

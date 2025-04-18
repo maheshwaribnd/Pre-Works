@@ -31,6 +31,7 @@ const ContractorProfile = () => {
   const [workList, setWorkList] = useState([]);
   const [documentFile, setDocumentFile] = useState(null);
   const [userImage, setuserImage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -61,6 +62,7 @@ const ContractorProfile = () => {
   };
 
   const ContractorUpdateAPI = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append('name', data?.name);
     formData.append('email', data?.email);
@@ -86,15 +88,18 @@ const ContractorProfile = () => {
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       } else {
         Snackbar.show({
           text: res?.data?.message || 'Update failed!',
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       }
     } catch (err) {
       console.log('Update Error:', err);
+      setLoading(false);
     }
   };
 
@@ -253,7 +258,12 @@ const ContractorProfile = () => {
 
           <View style={{marginBottom: HEIGHT(2)}}>
             {edit ? (
-              <CustomButton name="SAVE" onPress={() => ContractorUpdateAPI()} />
+              <CustomButton
+                name="SAVE"
+                onPress={() => ContractorUpdateAPI()}
+                loading={loading}
+                disabled={loading}
+              />
             ) : null}
           </View>
         </ScrollView>

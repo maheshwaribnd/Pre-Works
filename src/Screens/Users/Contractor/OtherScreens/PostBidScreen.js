@@ -33,7 +33,7 @@ import Swiper from 'react-native-swiper';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
-import RNFS from 'react-native-fs';
+import RNBlobUtil from 'react-native-blob-util';
 
 const PostBidScreen = () => {
   const navigation = useNavigation();
@@ -45,10 +45,8 @@ const PostBidScreen = () => {
   const [userId, setUserId] = useState(null);
   const [PdfFiles, setPdfFiles] = useState([]);
   const [documentpdf, setDocumentPdf] = useState([]);
-
-  const [createData, setCreateData] = useState({
-    time: '',
-  });
+  const [createData, setCreateData] = useState({time: ''});
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
     PreworkDetailAPI();
@@ -99,6 +97,7 @@ const PostBidScreen = () => {
 
   const ApplyForBidAPI = () => {
     if (!Validate()) return;
+    setLoader(true)
     const formData = new FormData();
 
     formData.append('contractor_id', userId);
@@ -116,7 +115,7 @@ const PostBidScreen = () => {
 
     ApiManager.ApplyForBid(formData)
       .then(res => {
-        if (res?.data?.status === 200) {
+        if (res?.data?.status === 200) {  setLoader(false);
           Snackbar.show({
             text: res?.data?.message,
             backgroundColor: '#27cc5d',
@@ -126,7 +125,7 @@ const PostBidScreen = () => {
         }
       })
       .catch(err => {
-        console.log('API Error:', err.response?.data);
+        console.log('API Error:', err.response?.data)  ;setLoader(false);
         Snackbar.show({
           text: err.response?.data?.message,
           backgroundColor: '#D1264A',
@@ -171,26 +170,31 @@ const PostBidScreen = () => {
   const handleUploadPDF = async () => {
     try {
       const response = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf], // Allows only PDF selection
-        allowMultiSelection: true, // Allows multiple PDFs
+        type: [DocumentPicker.types.pdf],
+        allowMultiSelection: true,
       });
-
-      // const newDocs = response.map(doc => ({
-      //   uri: doc.uri,
-      //   name: doc.name,
-      // }));
 
       const newDocs = await Promise.all(
         response.map(async doc => {
-          const newPath = `${RNFS.CachesDirectoryPath}/${doc.name}`;
-          await RNFS.copyFile(doc.uri, newPath);
+          const newPath = `${RNBlobUtil.fs.dirs.CacheDir}/${doc.name}`;
+          await RNBlobUtil.fs.cp(doc.uri, newPath);
 
           return {uri: `file://${newPath}`, name: doc.name};
         }),
       );
 
+      const sanitizedResponse = response.map(doc => ({
+        ...doc,
+        name: doc.name.replace(/\s+/g, ''),
+      }));
+
+      console.log('sanitizedResponse', sanitizedResponse);
+      console.log('response', response);
+
       setPdfFiles(prevFiles => [...new Set([...prevFiles, ...newDocs])]);
-      setDocumentPdf(prevFiles => [...new Set([...prevFiles, ...response])]);
+      setDocumentPdf(prevFiles => [
+        ...new Set([...prevFiles, ...sanitizedResponse]),
+      ]);
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log('User canceled document picker');
@@ -208,7 +212,7 @@ const PostBidScreen = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name="New Pre-Works Project" />
+      <CustomHeader name="New Prework Project" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
@@ -317,8 +321,21 @@ const PostBidScreen = () => {
 
             <CustomButton
               name="Upload Quotation"
-              onPress={() => ApplyForBidAPI()}
+              onPress={() => {
+                if (details?.status === 'bid') {
+                  Snackbar.show({
+                    text: 'You Already Applied for Bid',
+                    backgroundColor: '#D1264A',
+                    duration: Snackbar.LENGTH_SHORT,
+                  });
+                } else {
+                  ApplyForBidAPI();
+                }
+              }}
+              loading={loader}
+              disabled={loader}
             />
+            
           </View>
         </ScrollView>
       </ImageBackground>

@@ -22,7 +22,7 @@ const Tab = createBottomTabNavigator();
 
 const TabArr = [
   {
-    name: 'My Work',
+    name: 'My Portfolio',
     component: MyWork,
     Icon1: require('../../assets/NavIcons/MyworkSelect.png'),
     Icon2: require('../../assets/NavIcons/MyworkUnselect.png'),

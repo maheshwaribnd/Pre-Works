@@ -29,6 +29,7 @@ const Login = () => {
     requestStoragePermission();
   }, []);
 
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState({
     number: '',
@@ -50,7 +51,7 @@ const Login = () => {
       password: userData.password,
       user_type: userType,
     };
-
+    setLoading(true);
     ApiManager.userLogin(params)
       .then(async res => {
         if (res?.data?.status === 200) {
@@ -62,7 +63,7 @@ const Login = () => {
             'userId',
             JSON.stringify(res?.data?.user_id),
           );
-
+          setLoading(false);
           if (userType === 'customer') {
             navigation.navigate('customerTabs');
           } else if (userType === 'contractor') {
@@ -80,6 +81,7 @@ const Login = () => {
             ...prev,
             password: 'Invalid password. Please try again.',
           }));
+          setLoading(false);
         }
       })
       .catch(err => {
@@ -89,6 +91,7 @@ const Login = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       });
   };
 
@@ -123,6 +126,19 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const renderWelcomeText = () => {
+    switch (userType) {
+      case 'customer':
+        return <Text style={styles.welcomeTxt}>Welcome Customer!</Text>;
+      case 'contractor':
+        return <Text style={styles.welcomeTxt}>Welcome Contractor!</Text>;
+      case 'architect':
+        return <Text style={styles.welcomeTxt}>Welcome Architect!</Text>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <ImageBackground
       source={require('../../assets/Imgs/Background.png')}
@@ -130,7 +146,8 @@ const Login = () => {
       <View style={{alignItems: 'center'}}>
         <PreworkLogo2 height={140} width={175} />
       </View>
-      <Text style={styles.welcomeTxt}>Welcome</Text>
+
+      {renderWelcomeText()}
 
       <Text style={styles.txt}>Please Log in to continue</Text>
 
@@ -175,7 +192,12 @@ const Login = () => {
         </Text>
       </View>
 
-      <CustomButton name="LOGIN" onPress={() => LoginFunction()} />
+      <CustomButton
+        name="LOGIN"
+        onPress={() => LoginFunction()}
+        loading={loading}
+        disabled={loading}
+      />
 
       <View style={styles.forAskAccount}>
         <Text style={{color: COLOR.Gray}}>Don't have an account? </Text>

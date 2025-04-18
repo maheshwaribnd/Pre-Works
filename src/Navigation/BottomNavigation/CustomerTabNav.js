@@ -19,21 +19,21 @@ const Tab = createBottomTabNavigator();
 
 const TabArr = [
   {
-    name: 'Open Pre-works',
+    name: 'Active Requests',
     component: OpenPrework,
     Icon1: require('../../assets/NavIcons/open.png'),
     Icon2: require('../../assets/NavIcons/openUnselect.png'),
   },
 
   {
-    name: 'Closed Pre-work',
+    name: 'Closed Requests',
     component: ClosedPrework,
     Icon1: require('../../assets/NavIcons/IdeaRejected.png'),
     Icon2: require('../../assets/NavIcons/IdeaRejectedUnselect.png'),
   },
 
   {
-    name: 'Settings',
+    name: 'More',
     component: CustomerSettings,
     Icon1: require('../../assets/NavIcons/settings.png'),
     Icon2: require('../../assets/NavIcons/settingsUnselect.png'),

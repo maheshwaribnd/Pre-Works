@@ -3,18 +3,23 @@ import React from 'react';
 import {FONTSIZE, HEIGHT, NotoSans_Medium, WIDTH} from '../../config/AppConst';
 import COLOR from '../../config/color.json';
 import LinearGradient from 'react-native-linear-gradient';
+import { ActivityIndicator } from 'react-native-paper';
 
-const CustomButton = ({name, onPress}) => {
+const CustomButton = ({name, onPress, loading, disabled}) => {
   return (
     <View style={{justifyContent: 'center', alignItems: 'center'}}>
-      <TouchableOpacity onPress={() => onPress()}>
+      <TouchableOpacity onPress={() => onPress()} disabled={disabled}>
         <LinearGradient
           colors={['#0AD788', '#03A151']}
           activeOpacity={0.4}
           start={{x: 0, y: 0}}
           end={{x: 1, y: 0}}
           style={styles.button}>
-          <Text style={styles.txtBtn}>{name}</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.txtBtn}>{name}</Text>
+          )}
         </LinearGradient>
       </TouchableOpacity>
     </View>

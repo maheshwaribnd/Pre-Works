@@ -1,7 +1,9 @@
 import {
+  Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Platform,
   ScrollView,
@@ -30,6 +32,8 @@ import PlotIcon from '../../../../assets/Svg/Plot.svg';
 import RNFetchBlob from 'react-native-blob-util';
 import FileViewer from 'react-native-file-viewer';
 import LinearGradient from 'react-native-linear-gradient';
+import Pdf from 'react-native-pdf';
+import {ActivityIndicator} from 'react-native-paper';
 
 const NewPreworkDetails = () => {
   const navigation = useNavigation();
@@ -39,8 +43,9 @@ const NewPreworkDetails = () => {
   const [details, setDetails] = useState([]);
   const [resImgs, setResImgs] = useState([]);
   const [resPdf, setResPdf] = useState([]);
-  const [bid, setBid] = useState(false);
-  const [cancel, setCancel] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPdfVisible, setisPdfVisible] = useState(false);
+  const [pdfURL, setpdfURL] = useState('');
 
   useEffect(() => {
     PreworkDetailAPI();
@@ -149,10 +154,15 @@ const NewPreworkDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
+      // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
-        Alert.alert('Permission Denied', 'Storage permission is required.');
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -160,29 +170,36 @@ const NewPreworkDetails = () => {
       const {dirs} = RNFetchBlob.fs;
       const downloadPath = `${dirs.DownloadDir}/${fileName}`;
 
-      // Download PDF using Android Download Manager
+      // Download Configuration
       RNFetchBlob.config({
         fileCache: true,
         path: downloadPath,
         addAndroidDownloads: {
-          useDownloadManager: true,
+          useDownloadManager: true, // Use Download Manager
           notification: true,
           mime: 'application/pdf',
           title: fileName,
+          path: downloadPath,
           description: 'Downloading PDF...',
           mediaScannable: true,
         },
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setpdfURL(res.data);
+          setisPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setpdfURL(downloadPath);
+            setisPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      // Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -191,7 +208,7 @@ const NewPreworkDetails = () => {
       <View style={{flexDirection: 'row'}}>
         <TouchableOpacity
           onPress={async () => {
-            await previewPDF(item?.files, item?.file_name);
+            
             DownloadFunction(item?.files, item?.file_name);
           }}>
           <Image source={require('../../../../assets/Icons/pdf.png')} />
@@ -202,12 +219,17 @@ const NewPreworkDetails = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="New Pre-Works Project" />
+      <CustomHeader name="New Project" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
+          {isLoading && (
+              <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            )}
             {resImgs?.length > 0 && (
               <Swiper
                 key={resImgs.length} // Ensures remount on data change
@@ -310,6 +332,36 @@ const NewPreworkDetails = () => {
           </View>
         </ScrollView>
       </ImageBackground>
+
+      <Modal
+        transparent
+        visible={isPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: pdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -412,5 +464,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     fontFamily: NotoSans_Medium,
+  },
+
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+
+  loading: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });

@@ -1,7 +1,9 @@
 import {
+  Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Platform,
   ScrollView,
@@ -31,10 +33,13 @@ import FileViewer from 'react-native-file-viewer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Snackbar from 'react-native-snackbar';
 import RNFetchBlob from 'react-native-blob-util';
+import Pdf from 'react-native-pdf';
+import {ActivityIndicator} from 'react-native-paper';
 
 const OfferEnquiesDetails = () => {
   const route = useRoute();
   const contractorID = route?.params?.contractorID;
+  const PreworkId = route?.params?.PreworkId;
 
   const [cusId, setCusId] = useState('');
   const [contractorDetails, setContractorDetails] = useState([]);
@@ -42,7 +47,9 @@ const OfferEnquiesDetails = () => {
   const [resPdf, setResPdf] = useState([]);
 
   const [Accept, setAccept] = useState(false);
-  const [Reject, setReject] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPdfVisible, setisPdfVisible] = useState(false);
+  const [pdfURL, setpdfURL] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,7 +66,7 @@ const OfferEnquiesDetails = () => {
   }, [cusId]);
 
   const EnquiresListAPI = () => {
-    ApiManager.EnquiryDetailsById(contractorID)
+    ApiManager.EnquiryDetailsById(contractorID, PreworkId)
       .then(res => {
         if (res?.data?.status === 200) {
           const response = res?.data?.contractorDetail;
@@ -150,7 +157,7 @@ const OfferEnquiesDetails = () => {
 
       // Set path for the temporary PDF
       const {dirs} = RNFetchBlob.fs;
-      const filePath = `${dirs.CacheDir}/${fileName}`;
+      const filePath = `${dirs.DownloadDir}/${fileName}`;
 
       // Download the PDF temporarily
       const response = await RNFetchBlob.config({
@@ -175,7 +182,7 @@ const OfferEnquiesDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
       // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -183,6 +190,7 @@ const OfferEnquiesDetails = () => {
           'Permission Denied',
           'Storage permission is required to download files.',
         );
+        setIsLoading(false);
         return;
       }
 
@@ -207,14 +215,20 @@ const OfferEnquiesDetails = () => {
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setpdfURL(res.data);
+          setisPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setpdfURL(downloadPath);
+            setisPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      // Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -222,8 +236,7 @@ const OfferEnquiesDetails = () => {
     return (
       <TouchableOpacity
         onPress={async () => {
-          await previewPDF(item?.files, item?.file_name);
-          DownloadFunction(item?.files, item?.file_name);
+          await DownloadFunction(item?.files, item?.file_name);
         }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
@@ -236,6 +249,11 @@ const OfferEnquiesDetails = () => {
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
+        {isLoading && (
+          <View style={styles.loading}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        )}
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
             <Image
@@ -248,33 +266,33 @@ const OfferEnquiesDetails = () => {
               <Text style={styles.title}>
                 {contractorDetails?.contractor_name}
               </Text>
-              
-                <View style={styles.row}>
-                  <Mobile />
-                  <Text style={styles.detailText}>
-                    {contractorDetails?.contractor_mobile}
-                  </Text>
-                </View>
-                {/* <View style={styles.row}>
+
+              <View style={styles.row}>
+                <Mobile />
+                <Text style={styles.detailText}>
+                  {contractorDetails?.contractor_mobile}
+                </Text>
+              </View>
+              {/* <View style={styles.row}>
                   <MaterialIcon />
                   <Text style={[styles.detailText, {width: WIDTH(20)}]}>
                     {contractorDetails?.contractor_material}
                   </Text>
                 </View> */}
-             
-                <View style={styles.row}>
-                  <Time />
-                  <Text style={styles.detailText}>
-                    {contractorDetails?.contractor_time} Months
-                  </Text>
-                </View>
-                {/* <View style={styles.row}>
+
+              <View style={styles.row}>
+                <Time />
+                <Text style={styles.detailText}>
+                  {contractorDetails?.contractor_time} Months
+                </Text>
+              </View>
+              {/* <View style={styles.row}>
                   <Currency />
                   <Text style={styles.detailText}>
                     {contractorDetails?.contractor_price}
                   </Text>
                 </View> */}
-              
+
               <View style={styles.row}>
                 <LocationIcon />
                 <Text style={styles.detailText}>
@@ -291,7 +309,7 @@ const OfferEnquiesDetails = () => {
 
               {resPdf?.length > 0 ? (
                 <View>
-                  <Text style={styles.sectionTitle}>PDF Document</Text>
+                  <Text style={styles.sectionTitle}>Customised Quotation</Text>
                   <FlatList
                     data={resPdf}
                     keyExtractor={item => item.id.toString()}
@@ -347,6 +365,35 @@ const OfferEnquiesDetails = () => {
           </View>
         </ScrollView>
       </ImageBackground>
+      <Modal
+        transparent
+        visible={isPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: pdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -447,5 +494,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     fontFamily: NotoSans_Medium,
+  },
+
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+
+  loading: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });

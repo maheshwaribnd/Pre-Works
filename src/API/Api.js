@@ -172,8 +172,10 @@ const ApiManager = {
     return requests.get(`${requestPath.enquiesList}/${userId}`);
   },
 
-  EnquiryDetailsById: userId => {
-    return requests.get(`${requestPath.enquiryDetailsById}/${userId}`);
+  EnquiryDetailsById: (userId, preworkId) => {
+    return requests.get(
+      `${requestPath.enquiryDetailsById}/${userId}/${preworkId}`,
+    );
   },
 
   ClosedPrework: userId => {

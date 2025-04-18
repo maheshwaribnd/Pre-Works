@@ -1,7 +1,10 @@
 import {
+  Alert,
+  Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Platform,
   ScrollView,
@@ -27,12 +30,14 @@ import ApiManager from '../../../../API/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcon from '../../../../assets/Svg/Material.svg';
 import PlotIcon from '../../../../assets/Svg/Plot.svg';
+import Pdf from 'react-native-pdf';
 import CalenderIcon from '../../../../assets/Svg/Calander.svg';
 import LocationIcon from '../../../../assets/Svg/Location.svg';
 import RNFetchBlob from 'react-native-blob-util';
 import Snackbar from 'react-native-snackbar';
 import FileViewer from 'react-native-file-viewer';
 import CustomButton from '../../../../Component/CustomButton/CustomButton';
+import {ActivityIndicator} from 'react-native-paper';
 import HeaderWithEdit from '../../../../Component/CustomeHeader/HeaderWithEdit';
 
 const ProjectAppliedDetails = () => {
@@ -46,6 +51,11 @@ const ProjectAppliedDetails = () => {
   const [resImgs, setResImgs] = useState([]);
   const [preworkPdf, setPreworkPdf] = useState([]);
   const [contractorPdf, setContractorPdf] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPdfVisible, setisPdfVisible] = useState(false);
+  const [pdfURL, setpdfURL] = useState('');
+  const [iscontractPdfVisible, setisContractPdfVisible] = useState(false);
+  const [contractPdfURL, setContractpPdfURL] = useState('');
   const [materialSelected, setMaterialSelected] = useState('');
   const [createData, setCreateData] = useState({
     price: '',
@@ -150,7 +160,7 @@ const ProjectAppliedDetails = () => {
 
       // Set path for the temporary PDF
       const {dirs} = RNFetchBlob.fs;
-      const filePath = `${dirs.CacheDir}/${fileName}`;
+      const filePath = `${dirs.DownloadDir}/${fileName}`;
 
       // Download the PDF temporarily
       const response = await RNFetchBlob.config({
@@ -175,10 +185,15 @@ const ProjectAppliedDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
+      // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
-        Alert.alert('Permission Denied', 'Storage permission is required.');
+        Alert.alert(
+          'Permission Denied',
+          'Storage permission is required to download files.',
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -186,29 +201,36 @@ const ProjectAppliedDetails = () => {
       const {dirs} = RNFetchBlob.fs;
       const downloadPath = `${dirs.DownloadDir}/${fileName}`;
 
-      // Download PDF using Android Download Manager
+      // Download Configuration
       RNFetchBlob.config({
         fileCache: true,
         path: downloadPath,
         addAndroidDownloads: {
-          useDownloadManager: true,
+          useDownloadManager: true, // Use Download Manager
           notification: true,
           mime: 'application/pdf',
           title: fileName,
+          path: downloadPath,
           description: 'Downloading PDF...',
           mediaScannable: true,
         },
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setpdfURL(res.data);
+          setisPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setpdfURL(downloadPath);
+            setisPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      // Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -217,8 +239,7 @@ const ProjectAppliedDetails = () => {
     return (
       <TouchableOpacity
         onPress={async () => {
-          await previewPDF(item?.files, item?.file_name);
-          downloadPDF(item?.files, item?.file_name); // Download after preview
+          await downloadPDF(item?.files, item?.file_name); // Download after preview
         }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
@@ -232,7 +253,7 @@ const ProjectAppliedDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
       // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -240,6 +261,7 @@ const ProjectAppliedDetails = () => {
           'Permission Denied',
           'Storage permission is required to download files.',
         );
+        setIsLoading(false);
         return;
       }
 
@@ -264,14 +286,20 @@ const ProjectAppliedDetails = () => {
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setContractpPdfURL(res.data);
+          setisContractPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setContractpPdfURL(downloadPath);
+            setisContractPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      // Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -279,8 +307,7 @@ const ProjectAppliedDetails = () => {
     return (
       <TouchableOpacity
         onPress={async () => {
-          await previewPDF(item?.files, item?.file_name);
-          DownloadCPdfFunction(item?.files, item?.file_name);
+          await DownloadCPdfFunction(item?.files, item?.file_name);
         }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
@@ -289,12 +316,17 @@ const ProjectAppliedDetails = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Project Applied" edit={edit} setEdit={setEdit} />
+      <CustomHeader name="Applied Project" edit={edit} setEdit={setEdit} />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.cardWrapper}>
+            {isLoading && (
+              <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            )}
             {resImgs?.length > 0 && (
               <Swiper
                 key={resImgs.length} // Ensures remount on data change
@@ -446,6 +478,66 @@ const ProjectAppliedDetails = () => {
           </View>
         </ScrollView>
       </ImageBackground>
+
+      <Modal
+        transparent
+        visible={isPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: pdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent
+        visible={iscontractPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisContractPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: contractPdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -555,5 +647,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+  },
+
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+
+  loading: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });

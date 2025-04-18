@@ -23,7 +23,9 @@ const CreatePassword = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const typeSelector = useSelector(state => state.userTypee.usertype);
-  const mobileNo = route?.params?.mobileNo;
+  const userEmail = route?.params?.email;
+
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -48,8 +50,9 @@ const CreatePassword = () => {
   };
 
   const CreatePasswordAPI = () => {
+    setLoading(true);
     const params = {
-      mobile_no: mobileNo,
+      email: userEmail,
       user_type: typeSelector,
       password: user.password,
       password_confirmation: user.confirmPassword,
@@ -58,16 +61,18 @@ const CreatePassword = () => {
     ApiManager.CreatePassword(params)
       .then(res => {
         if (res?.data?.status === 200) {
-          console.log('createresponse', res?.data);
           Snackbar.show({
             text: res?.data?.message,
             fontFamily: NotoSans_Medium,
             backgroundColor: '#19cf55',
             duration: Snackbar.LENGTH_SHORT,
           });
+          setLoading(false);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err), setLoading(false)
+      });
   };
 
   const validateForm = () => {
@@ -160,7 +165,8 @@ const CreatePassword = () => {
       <CustomButton
         name="CREATE"
         onPress={() => CreateFunction()}
-        // disabled={!isValid}
+        loading={loading}
+        disabled={loading}
       />
     </ImageBackground>
   );

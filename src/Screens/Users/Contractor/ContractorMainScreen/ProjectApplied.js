@@ -105,7 +105,7 @@ const ProjectApplied = () => {
   };
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="Project Applied" />
+      <CustomHeader name="Applied Projects" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>

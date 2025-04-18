@@ -1,4 +1,4 @@
-package com.preworks
+package com.preworknewapp
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

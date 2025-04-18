@@ -21,9 +21,11 @@ const OTPScreen = () => {
 
   const route = useRoute();
   const navigation = useNavigation();
-  const mobileNumber = route.params?.mobile_no;
+  const userEmail = route.params?.Email;
 
   const [otp, setOtp] = useState('');
+
+  const [loading, setLoading] = useState(false);
 
   const [isValid, setIsValid] = useState(false);
   const [timer, setTimer] = useState(59);
@@ -58,8 +60,9 @@ const OTPScreen = () => {
       return; // Stop execution if OTP is invalid
     }
 
+    setLoading(true);
     const params = {
-      mobile_no: mobileNumber,
+      email: userEmail,
       user_type: typeSelector,
       otp: otp,
     };
@@ -73,7 +76,7 @@ const OTPScreen = () => {
           backgroundColor: '#27cc5d',
           duration: Snackbar.LENGTH_SHORT,
         });
-
+        setLoading(false);
         // Navigate based on user type
         if (typeSelector === 'customer') {
           navigation.replace('customerTabs');
@@ -88,6 +91,7 @@ const OTPScreen = () => {
           backgroundColor: '#D1264A',
           duration: Snackbar.LENGTH_SHORT,
         });
+        setLoading(false);
       }
     } catch (err) {
       Snackbar.show({
@@ -95,12 +99,13 @@ const OTPScreen = () => {
         backgroundColor: '#D1264A',
         duration: Snackbar.LENGTH_SHORT,
       });
+      setLoading(false);
     }
   };
 
   const ResendOtpAPI = () => {
     const params = {
-      mobile_no: mobileNumber,
+      email: userEmail,
       user_type: typeSelector,
     };
 
@@ -126,7 +131,7 @@ const OTPScreen = () => {
         <OTPImg height={200} width={200} />
       </View>
 
-      <Text style={styles.txt}>Enter OTP code sent to your number</Text>
+      <Text style={styles.txt}>Enter OTP code sent to your email address</Text>
 
       <View style={{marginVertical: HEIGHT(5)}}>
         <OtpInputs
@@ -154,6 +159,7 @@ const OTPScreen = () => {
         name="VERIFY OTP"
         onPress={() => OTPVerifyAPI()}
         disabled={!isValid}
+        loading={loading}
       />
     </ImageBackground>
   );

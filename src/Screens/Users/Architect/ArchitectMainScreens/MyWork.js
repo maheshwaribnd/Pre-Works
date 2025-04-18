@@ -117,7 +117,7 @@ const MyWork = () => {
 
   return (
     <View style={{flex: 1}}>
-      <CustomHeader name="My Work" />
+      <CustomHeader name="My Portfolio" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>

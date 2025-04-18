@@ -1,8 +1,10 @@
 import {
   Alert,
+  Dimensions,
   FlatList,
   Image,
   ImageBackground,
+  Modal,
   PermissionsAndroid,
   Platform,
   ScrollView,
@@ -35,11 +37,13 @@ import RNFetchBlob from 'react-native-blob-util';
 import Snackbar from 'react-native-snackbar';
 import FileViewer from 'react-native-file-viewer';
 import BidModal from '../../../../Component/BidModal/BidModal';
+import Pdf from 'react-native-pdf';
 
 const OpenPreworkDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const PreworkId = route?.params?.preworkId;
+
   const [data, setData] = useState([]);
   const [cusId, setCusId] = useState('');
   const [resImgs, setResImgs] = useState([]);
@@ -47,6 +51,9 @@ const OpenPreworkDetails = () => {
   const [loader, setLoader] = useState(false);
   const [contractorList, setContractorList] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPdfVisible, setisPdfVisible] = useState(false);
+  const [pdfURL, setpdfURL] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -151,7 +158,7 @@ const OpenPreworkDetails = () => {
 
       // Set path for the temporary PDF
       const {dirs} = RNFetchBlob.fs;
-      const filePath = `${dirs.CacheDir}/${fileName}`;
+      const filePath = `${dirs.DownloadDir}/${fileName}`;
 
       // Download the PDF temporarily
       const response = await RNFetchBlob.config({
@@ -176,7 +183,7 @@ const OpenPreworkDetails = () => {
         Alert.alert('Invalid URL', 'No valid PDF URL provided.');
         return;
       }
-
+      setIsLoading(true);
       // Request storage permission (Android 12 and below)
       const hasPermission = await requestStoragePermission();
       if (!hasPermission) {
@@ -184,6 +191,7 @@ const OpenPreworkDetails = () => {
           'Permission Denied',
           'Storage permission is required to download files.',
         );
+        setIsLoading(false);
         return;
       }
 
@@ -208,14 +216,20 @@ const OpenPreworkDetails = () => {
       })
         .fetch('GET', pdfUrl)
         .then(res => {
-          Alert.alert('Download Complete', `File saved to: ${res.path()}`);
+          setpdfURL(res.data);
+          setisPdfVisible(true);
+          setIsLoading(false);
         })
         .catch(error => {
-          // Alert.alert('Download Failed', 'Error downloading the file.');
+          setTimeout(() => {
+            setpdfURL(downloadPath);
+            setisPdfVisible(true);
+            setIsLoading(false);
+          }, 3000);
         });
     } catch (error) {
       console.error('Download Error:', error);
-      Alert.alert('Error', 'An unexpected error occurred.');
+      setIsLoading(false);
     }
   };
 
@@ -223,8 +237,7 @@ const OpenPreworkDetails = () => {
     return (
       <TouchableOpacity
         onPress={async () => {
-          await previewPDF(item?.files, item?.file_name);
-          DownloadFunction(item?.files, item?.file_name);
+          await DownloadFunction(item?.files, item?.file_name);
         }}>
         <Image source={require('../../../../assets/Icons/pdf.png')} />
       </TouchableOpacity>
@@ -241,11 +254,16 @@ const OpenPreworkDetails = () => {
 
   return (
     <View style={{flex: 1, backgroundColor: COLOR.White}}>
-      <CustomHeader name="Open Pre-Works" />
+      <CustomHeader name="Active Request" />
       <ImageBackground
         source={require('../../../../assets/Imgs/Background.png')}
         style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
+          {isLoading && (
+            <View style={styles.loading}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
           {loader ? (
             <View
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -347,7 +365,7 @@ const OpenPreworkDetails = () => {
                   justifyContent: 'space-between',
                   padding: WIDTH(4),
                 }}>
-                <Text style={styles.sectionTitle}>Delete Prework</Text>
+                <Text style={styles.sectionTitle}>Delete This Request</Text>
                 <TouchableOpacity onPress={() => setShowModal(true)}>
                   <DeleteIcon />
                 </TouchableOpacity>
@@ -412,6 +430,35 @@ const OpenPreworkDetails = () => {
           )}
         </ScrollView>
       </ImageBackground>
+      <Modal
+        transparent
+        visible={isPdfVisible}
+        animationType="fade"
+        onRequestClose={() => setisPdfVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <View style={{flex: 1}}>
+            <Pdf
+              source={{
+                uri: pdfURL,
+                cache: true,
+              }}
+              onLoadComplete={(numberOfPages, filePath) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page, numberOfPages) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={error => {
+                console.log(error);
+              }}
+              onPressLink={uri => {
+                console.log(`Link pressed: ${uri}`);
+              }}
+              style={{flex: 1}}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -535,5 +582,21 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#ddd',
     marginLeft: -20,
+  },
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+  },
+
+  loading: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });
